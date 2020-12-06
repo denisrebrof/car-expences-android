@@ -1,4 +1,4 @@
-package com.upreality.carexpences.expences.model.datasources
+package com.upreality.carexpences.expences.model.dao
 
 import androidx.room.*
 import com.upreality.carexpences.expences.model.data.entities.MaintanceExpence
