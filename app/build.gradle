@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     compileSdkVersion 30
@@ -22,6 +24,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -33,4 +40,27 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    dependencies {
+        def room_version = "2.2.5"
+
+        //Room - local database lib
+        implementation "androidx.room:room-runtime:$room_version"
+        kapt "androidx.room:room-compiler:$room_version"
+        implementation "androidx.room:room-ktx:$room_version"
+        testImplementation "androidx.room:room-testing:$room_version"
+
+        //Cards - UI only
+        implementation "androidx.cardview:cardview:1.0.0"
+
+        //Navigation
+        def nav_version = "2.3.2"
+        implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+        implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+        androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
+
+        //Hilt - DI framework
+        implementation "com.google.dagger:hilt-android:2.28-alpha"
+        kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
+    }
 }
