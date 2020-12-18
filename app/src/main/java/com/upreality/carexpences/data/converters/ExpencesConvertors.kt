@@ -1,8 +1,8 @@
-package com.upreality.carexpences.expences.model.data.converters
+package com.upreality.carexpences.data.converters
 
 import androidx.room.TypeConverter
-import com.upreality.carexpences.expences.model.data.FinesCategories
-import com.upreality.carexpences.expences.model.data.MaintanceType
+import com.upreality.carexpences.domain.entities.FinesCategories
+import com.upreality.carexpences.domain.entities.MaintanceType
 import java.util.*
 
 class DateConverter {

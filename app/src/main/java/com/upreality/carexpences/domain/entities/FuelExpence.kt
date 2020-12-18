@@ -1,9 +1,8 @@
-package com.upreality.carexpences.expences.model.data.entities
+package com.upreality.carexpences.domain.entities
 
 import androidx.room.Entity
 import androidx.room.TypeConverters
-import com.upreality.carexpences.expences.model.data.ExpenceBase
-import com.upreality.carexpences.expences.model.data.converters.DateConverter
+import com.upreality.carexpences.data.converters.DateConverter
 import java.util.*
 
 @Entity(tableName = "fuel_expences")

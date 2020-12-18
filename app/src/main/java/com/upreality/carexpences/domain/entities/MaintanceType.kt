@@ -1,4 +1,4 @@
-package com.upreality.carexpences.expences.model.data
+package com.upreality.carexpences.domain.entities
 
 enum class MaintanceType(val id : Int) {
     Maintenance(0),

@@ -1,4 +1,4 @@
-package com.upreality.carexpences.expences.model.data
+package com.upreality.carexpences.domain.entities
 
 import androidx.room.PrimaryKey
 import java.util.*

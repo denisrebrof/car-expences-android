@@ -1,4 +1,4 @@
-package com.upreality.carexpences.expences.model.data
+package com.upreality.carexpences.domain.entities
 
 enum class FinesCategories(val id: Int) {
     SpeedLimit(0),

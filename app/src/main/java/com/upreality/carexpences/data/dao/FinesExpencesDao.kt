@@ -1,7 +1,7 @@
-package com.upreality.carexpences.expences.model.dao
+package com.upreality.carexpences.data.dao
 
 import androidx.room.*
-import com.upreality.carexpences.expences.model.data.entities.FinesExpence
+import com.upreality.carexpences.domain.entities.FinesExpence
 import io.reactivex.Completable
 import io.reactivex.Flowable
 
