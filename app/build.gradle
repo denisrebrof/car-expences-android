@@ -7,7 +7,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        applicationId "com.upreality.carexpences"
+        applicationId "com.upreality.carexpenses"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
@@ -40,6 +40,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     dependencies {
-        implementation project(":expences")
+        implementation project(":expenses")
     }
 }
