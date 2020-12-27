@@ -9,6 +9,6 @@ import com.upreality.car.expenses.data.converters.FinesTypeConverter
 data class ExpenseFinesDetails(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    @TypeConverters(FinesTypeConverter::class)
+    @field:TypeConverters(FinesTypeConverter::class)
     val type: FinesCategories
 )

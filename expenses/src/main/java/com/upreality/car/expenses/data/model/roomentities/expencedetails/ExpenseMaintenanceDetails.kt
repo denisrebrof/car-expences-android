@@ -9,7 +9,7 @@ import com.upreality.car.expenses.data.converters.MaintenanceTypeConverter
 data class ExpenseMaintenanceDetails(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    @TypeConverters(MaintenanceTypeConverter::class)
+    @field:TypeConverters(MaintenanceTypeConverter::class)
     val type: MaintenanceType,
     val mileage: Float
 )

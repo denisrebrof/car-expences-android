@@ -2,6 +2,7 @@ package com.upreality.carexpences
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.upreality.car.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

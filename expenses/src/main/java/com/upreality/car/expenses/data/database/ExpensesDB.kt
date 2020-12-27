@@ -17,7 +17,6 @@ import com.upreality.car.expenses.data.model.roomentities.expencedetails.Expense
     entities = [Expense::class, ExpenseMaintenanceDetails::class, ExpenseFinesDetails::class, ExpenseFuelDetails::class],
     version = 1
 )
-//@TypeConverters(DateConverter::class, MaintenanceTypeConverter::class, ExpenseTypeConverter::class, FinesTypeConverter::class, MaintenanceTypeConverter::class)
 abstract class ExpensesDB : RoomDatabase() {
     abstract fun getExpensesDAO(): ExpensesDao
 }

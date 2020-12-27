@@ -11,10 +11,10 @@ import java.util.*
 data class Expense(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    @TypeConverters(DateConverter::class)
+    @field:TypeConverters(DateConverter::class)
     val date: Date,
     val cost: Float,
-    @TypeConverters(ExpenseTypeConverter::class)
+    @field:TypeConverters(ExpenseTypeConverter::class)
     val type: ExpenseType,
     val detailsId: Long
 )
