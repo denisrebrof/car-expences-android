@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.model.roomentities.expencedetails
+package com.upreality.car.expenses.data.model
 
 enum class FinesCategories(val id: Int) {
     SpeedLimit(0),

@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.model.roomentities.expencedetails
+package com.upreality.car.expenses.data.model
 
 enum class MaintenanceType(val id : Int) {
     NotDefined(-1),

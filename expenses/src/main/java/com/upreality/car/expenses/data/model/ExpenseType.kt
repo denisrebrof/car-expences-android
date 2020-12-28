@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.model.roomentities
+package com.upreality.car.expenses.data.model
 
 enum class ExpenseType(id: Int) {
     Fines(0),

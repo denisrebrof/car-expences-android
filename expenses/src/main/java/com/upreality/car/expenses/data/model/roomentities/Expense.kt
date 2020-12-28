@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.upreality.car.expenses.data.converters.DateConverter
 import com.upreality.car.expenses.data.converters.ExpenseTypeConverter
+import com.upreality.car.expenses.data.model.ExpenseType
 import java.util.*
 
 @Entity(tableName = "expenses")

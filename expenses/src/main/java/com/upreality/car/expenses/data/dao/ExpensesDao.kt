@@ -1,14 +1,7 @@
 package com.upreality.car.expenses.data.dao
 
 import androidx.room.*
-import com.upreality.car.expenses.data.converters.DateConverter
-import com.upreality.car.expenses.data.converters.ExpenseTypeConverter
-import com.upreality.car.expenses.data.converters.FinesTypeConverter
-import com.upreality.car.expenses.data.converters.MaintenanceTypeConverter
 import com.upreality.car.expenses.data.model.roomentities.Expense
-import com.upreality.car.expenses.data.model.roomentities.expencedetails.MaintenanceType
-import io.reactivex.Flowable
-import org.intellij.lang.annotations.Language
 
 @Dao
 interface ExpensesDao {
