@@ -1,26 +1,26 @@
 package com.upreality.car.expenses.data.dao
 
 import androidx.room.*
-import com.upreality.car.expenses.data.model.roomentities.Expense
+import com.upreality.car.expenses.data.model.entities.ExpenseEntity
+import org.intellij.lang.annotations.Language
 
 @Dao
-interface ExpensesDao {
+abstract class ExpensesDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(expense: Expense): Long
+    abstract fun insert(expense: ExpenseEntity): Long
 
     @Update
-    fun update(expense: Expense)
+    abstract fun update(expense: ExpenseEntity)
 
     @Delete
-    fun delete(expense: Expense)
+    abstract fun delete(expense: ExpenseEntity)
 
+    @Language("RoomSql")
     @Query("SELECT * FROM expenses")
-    fun load(): Array<Expense>
-//
-//    @Language("RoomSql")
-//    @Query("SELECT * FROM expenses")
-//    fun load(type: MaintenanceType = MaintenanceType.NotDefined)
+    abstract fun load(): Array<ExpenseEntity>
 
-//    @Query("SELECT * FROM expenses WHERE id = :exp_id")
-//    suspend fun getById(exp_id: Int): Flowable<Expense>
+    @Language("RoomSql")
+    @Query("SELECT * FROM expenses :filterExpression")
+    abstract fun load(filterExpression: String): Array<ExpenseEntity>
 }

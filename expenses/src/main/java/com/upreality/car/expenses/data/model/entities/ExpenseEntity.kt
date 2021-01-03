@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.model.roomentities
+package com.upreality.car.expenses.data.model.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -9,7 +9,7 @@ import com.upreality.car.expenses.data.model.ExpenseType
 import java.util.*
 
 @Entity(tableName = "expenses")
-data class Expense(
+data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
     @field:TypeConverters(DateConverter::class)
