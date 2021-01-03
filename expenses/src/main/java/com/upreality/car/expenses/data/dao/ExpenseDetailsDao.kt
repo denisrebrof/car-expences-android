@@ -1,5 +1,8 @@
 package com.upreality.car.expenses.data.dao
 
+import com.upreality.car.expenses.data.dao.details.FinesDetailsDao
+import com.upreality.car.expenses.data.dao.details.FuelDetailsDao
+import com.upreality.car.expenses.data.dao.details.MaintenanceDetailsDao
 import com.upreality.car.expenses.data.model.ExpenseType
 import com.upreality.car.expenses.data.model.entities.ExpenseDetails
 import javax.inject.Inject

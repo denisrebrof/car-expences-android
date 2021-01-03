@@ -5,22 +5,22 @@ import com.upreality.car.expenses.data.model.entities.ExpenseEntity
 import org.intellij.lang.annotations.Language
 
 @Dao
-abstract class ExpensesDao {
+interface ExpensesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insert(expense: ExpenseEntity): Long
+    fun insert(expense: ExpenseEntity): Long
 
     @Update
-    abstract fun update(expense: ExpenseEntity)
+    fun update(expense: ExpenseEntity)
 
     @Delete
-    abstract fun delete(expense: ExpenseEntity)
+    fun delete(expense: ExpenseEntity)
 
     @Language("RoomSql")
     @Query("SELECT * FROM expenses")
-    abstract fun load(): Array<ExpenseEntity>
+    fun load(): Array<ExpenseEntity>
 
     @Language("RoomSql")
     @Query("SELECT * FROM expenses :filterExpression")
-    abstract fun load(filterExpression: String): Array<ExpenseEntity>
+    fun load(filterExpression: String): Array<ExpenseEntity>
 }

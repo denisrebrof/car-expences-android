@@ -11,18 +11,18 @@ class ExpensesRepository @Inject constructor(
 ) : IExpensesRepository {
 
     override fun create(expense: Expense) {
-
+        expensesLocalDataSource.create(expense)
     }
 
     override fun get(filter: ExpenseFilter): List<Expense> {
-        return expensesLocalDataSource
+        return expensesLocalDataSource.get(filter)
     }
 
     override fun update(expense: Expense) {
-
+        expensesLocalDataSource.update(expense)
     }
 
     override fun delete(expense: Expense) {
-
+        expensesLocalDataSource.delete(expense)
     }
 }

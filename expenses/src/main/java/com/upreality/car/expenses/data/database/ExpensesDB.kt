@@ -3,9 +3,9 @@ package com.upreality.car.expenses.data.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.upreality.car.expenses.data.dao.ExpensesDao
-import com.upreality.car.expenses.data.dao.FinesDetailsDao
-import com.upreality.car.expenses.data.dao.FuelDetailsDao
-import com.upreality.car.expenses.data.dao.MaintenanceDetailsDao
+import com.upreality.car.expenses.data.dao.details.FinesDetailsDao
+import com.upreality.car.expenses.data.dao.details.FuelDetailsDao
+import com.upreality.car.expenses.data.dao.details.MaintenanceDetailsDao
 import com.upreality.car.expenses.data.model.entities.ExpenseDetails
 import com.upreality.car.expenses.data.model.entities.ExpenseEntity
 
