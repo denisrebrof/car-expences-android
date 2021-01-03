@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.model.filters
+package com.upreality.car.expenses.data.model.queries
 
 import com.upreality.car.expenses.data.converters.ExpenseTypeConverter
 import com.upreality.car.expenses.data.model.ExpenseType

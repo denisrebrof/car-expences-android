@@ -1,9 +1,9 @@
 package com.upreality.car.expenses.data.converters
 
 import com.upreality.car.expenses.data.model.ExpenseType
-import com.upreality.car.expenses.data.model.filters.ExpenseEmptyFilter
-import com.upreality.car.expenses.data.model.filters.ExpenseTypeFilter
-import com.upreality.car.expenses.data.model.filters.IExpenseFilter
+import com.upreality.car.expenses.data.model.queries.ExpenseEmptyFilter
+import com.upreality.car.expenses.data.model.queries.ExpenseTypeFilter
+import com.upreality.car.expenses.data.model.queries.IExpenseFilter
 import com.upreality.car.expenses.domain.ExpenseFilter
 
 class ExpenseFilterConverter {

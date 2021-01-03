@@ -1,12 +1,12 @@
-package com.upreality.carexpences
+package com.upreality.car.expenses.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.upreality.car.R
+import com.upreality.car.expenses.R
 
-class MainActivity : AppCompatActivity() {
+class ExpensesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_expences)
     }
 }

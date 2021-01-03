@@ -1,12 +1,13 @@
 package com.upreality.car.expenses.data.datasources
 
 import android.util.Log
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.upreality.car.expenses.data.converters.ExpenseConverter
 import com.upreality.car.expenses.data.converters.ExpenseFilterConverter
 import com.upreality.car.expenses.data.dao.ExpenseDetailsDao
 import com.upreality.car.expenses.data.dao.ExpensesDao
 import com.upreality.car.expenses.data.model.entities.ExpenseEntity
-import com.upreality.car.expenses.data.model.filters.ExpenseIdFilter
+import com.upreality.car.expenses.data.model.queries.ExpenseIdFilter
 import com.upreality.car.expenses.domain.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import javax.inject.Inject
@@ -28,7 +29,8 @@ class ExpensesLocalDataSource @Inject constructor(
 
     fun get(filter: ExpenseFilter): List<Expense> {
         val roomFilter = filterConverter.convert(filter)
-        val expenseEntities = expensesDao.load(roomFilter.getFilterExpression())
+        val query = SimpleSQLiteQuery(roomFilter.getFilterExpression())
+        val expenseEntities = expensesDao.load(query)
         return expenseEntities.mapNotNull { expenseEntity ->
             val detailsId = expenseEntity.detailsId
             val details = expenseDetailsDao.get(detailsId, expenseEntity.type)
@@ -52,7 +54,8 @@ class ExpensesLocalDataSource @Inject constructor(
 
     private fun getSavedDetailsId(expenseId: Long): Long? {
         val idFilter = ExpenseIdFilter(expenseId).getFilterExpression()
-        val savedExpense = expensesDao.load(idFilter).firstOrNull()
+        val query = SimpleSQLiteQuery(idFilter)
+        val savedExpense = expensesDao.load(query).firstOrNull()
         return savedExpense?.detailsId
     }
 
