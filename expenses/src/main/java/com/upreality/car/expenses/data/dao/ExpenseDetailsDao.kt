@@ -23,9 +23,9 @@ class ExpenseDetailsDao @Inject constructor(
 
     fun update(details: ExpenseDetails) {
         when (details) {
-            is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.update(details)
-            is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.update(details)
-            is ExpenseDetails.ExpenseFinesDetails -> finesDetailsDao.update(details)
+            is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.update(details as ExpenseDetails.ExpenseMaintenanceDetails)
+            is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.update(details as ExpenseDetails.ExpenseFuelDetails)
+            is ExpenseDetails.ExpenseFinesDetails -> finesDetailsDao.update(details as ExpenseDetails.ExpenseFinesDetails)
         }
     }
 

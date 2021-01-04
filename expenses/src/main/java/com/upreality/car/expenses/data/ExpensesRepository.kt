@@ -10,8 +10,8 @@ class ExpensesRepository @Inject constructor(
     private val expensesLocalDataSource: ExpensesLocalDataSource
 ) : IExpensesRepository {
 
-    override fun create(expense: Expense) {
-        expensesLocalDataSource.create(expense)
+    override fun create(expense: Expense): Long {
+        return expensesLocalDataSource.create(expense)
     }
 
     override fun get(filter: ExpenseFilter): List<Expense> {

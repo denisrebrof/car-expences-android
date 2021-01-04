@@ -20,11 +20,19 @@ class ExpensesLocalDataSource @Inject constructor(
     private val converter = ExpenseConverter()
     private val filterConverter = ExpenseFilterConverter()
 
-    fun create(expense: Expense) {
+    fun create(expense: Expense): Long {
         val details = converter.toExpenseDetails(expense, 0)
         val detailsId = expenseDetailsDao.insert(details)
         val expenseType = converter.getExpenseType(expense)
-        expensesDao.insert(ExpenseEntity(0, expense.date, expense.cost, expenseType, detailsId))
+        return expensesDao.insert(
+            ExpenseEntity(
+                0,
+                expense.date,
+                expense.cost,
+                expenseType,
+                detailsId
+            )
+        )
     }
 
     fun get(filter: ExpenseFilter): List<Expense> {
