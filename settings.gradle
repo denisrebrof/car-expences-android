@@ -1,2 +1,3 @@
+include ':expenses'
 include ':app'
 rootProject.name = "CarExpences"
