@@ -16,6 +16,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Android Emulator
+        uses: vgaidarji/android-github-actions-emulator@v1.0.1
+
       # Runs a set of commands using the runners shell
       - name: Run instrumentation tests
         run: ./gradlew --stacktrace connectedAndroidTest
