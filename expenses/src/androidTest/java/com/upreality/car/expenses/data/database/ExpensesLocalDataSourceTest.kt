@@ -75,12 +75,15 @@ class ExpensesLocalDataSourceTest {
     @Throws(Exception::class)
     fun updateExpenseTest() {
         val expense = Expense.Fuel(Date(), 100F, 500F, 1000F)
-        val id = localDataSource.create(expense)
-        expense.id = id
+        val savedExpenseId = localDataSource.create(expense)
+        expense.id = savedExpenseId
+
         val updatedExpense = Expense.Fuel(Date(), 300F, 600F, 1090F)
+        updatedExpense.id = savedExpenseId
         localDataSource.update(updatedExpense)
+
         val filter = ExpenseFilter.Fuel
-        val loadedExpense = localDataSource.get(filter).firstOrNull { it.id == id }
+        val loadedExpense = localDataSource.get(filter).firstOrNull { it.id == savedExpenseId }
         assert(expensesEquals(updatedExpense, loadedExpense!!))
     }
 }

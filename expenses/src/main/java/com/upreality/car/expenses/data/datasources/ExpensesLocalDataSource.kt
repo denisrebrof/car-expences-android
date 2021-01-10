@@ -47,28 +47,34 @@ class ExpensesLocalDataSource @Inject constructor(
     }
 
     fun update(expense: Expense) {
-        val detailsId = getSavedDetailsId(expense.id)
-        if (detailsId == null) {
+        val savedExpense = getSavedExpense(expense.id)
+        if (savedExpense == null) {
             Log.e("Update Error", "Expense due update does not found in room DB!")
             return
         }
 
+        val detailsId = savedExpense.detailsId
         val details = converter.toExpenseDetails(expense, detailsId)
-        expenseDetailsDao.update(details)
+        if (converter.getExpenseType(expense) == savedExpense.type) {
+            expenseDetailsDao.update(details)
+        } else {
+            val savedDetails = expenseDetailsDao.get(detailsId, savedExpense.type)
+            savedDetails?.let { expenseDetailsDao.delete(it) }
+            expenseDetailsDao.insert(details)
+        }
 
         val expenseEntity = converter.toExpenseEntity(expense, detailsId)
         expensesDao.update(expenseEntity)
     }
 
-    private fun getSavedDetailsId(expenseId: Long): Long? {
+    private fun getSavedExpense(expenseId: Long): ExpenseEntity? {
         val idFilter = ExpenseIdFilter(expenseId).getFilterExpression()
         val query = SimpleSQLiteQuery(idFilter)
-        val savedExpense = expensesDao.load(query).firstOrNull()
-        return savedExpense?.detailsId
+        return expensesDao.load(query).firstOrNull()
     }
 
     fun delete(expense: Expense) {
-        val detailsId = getSavedDetailsId(expense.id)
+        val detailsId = getSavedExpense(expense.id)?.detailsId
         if (detailsId == null) {
             Log.e("Delete Error", "Expense due delete does not found in room DB!")
             return
