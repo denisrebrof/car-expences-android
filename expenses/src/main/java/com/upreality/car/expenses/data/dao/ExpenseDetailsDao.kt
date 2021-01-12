@@ -5,6 +5,7 @@ import com.upreality.car.expenses.data.dao.details.FuelDetailsDao
 import com.upreality.car.expenses.data.dao.details.MaintenanceDetailsDao
 import com.upreality.car.expenses.data.model.ExpenseType
 import com.upreality.car.expenses.data.model.entities.ExpenseDetails
+import io.reactivex.Flowable
 import javax.inject.Inject
 
 class ExpenseDetailsDao @Inject constructor(
@@ -23,13 +24,13 @@ class ExpenseDetailsDao @Inject constructor(
 
     fun update(details: ExpenseDetails) {
         when (details) {
-            is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.update(details as ExpenseDetails.ExpenseMaintenanceDetails)
-            is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.update(details as ExpenseDetails.ExpenseFuelDetails)
-            is ExpenseDetails.ExpenseFinesDetails -> finesDetailsDao.update(details as ExpenseDetails.ExpenseFinesDetails)
+            is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.update(details)
+            is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.update(details)
+            is ExpenseDetails.ExpenseFinesDetails -> finesDetailsDao.update(details)
         }
     }
 
-    fun get(detailsId: Long, type: ExpenseType): ExpenseDetails? {
+    fun get(detailsId: Long, type: ExpenseType): Flowable<out ExpenseDetails> {
         return when (type) {
             ExpenseType.Fines -> finesDetailsDao.get(detailsId)
             ExpenseType.Fuel -> fuelDetailsDao.get(detailsId)
