@@ -1,8 +1,8 @@
 package com.upreality.car.expenses.data
 
 import com.upreality.car.expenses.data.datasources.ExpensesLocalDataSource
-import com.upreality.car.expenses.domain.ExpenseFilter
 import com.upreality.car.expenses.domain.IExpensesRepository
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import javax.inject.Inject
 

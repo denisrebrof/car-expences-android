@@ -8,7 +8,7 @@ import com.upreality.car.expenses.data.dao.ExpenseDetailsDao
 import com.upreality.car.expenses.data.dao.ExpensesDao
 import com.upreality.car.expenses.data.model.entities.ExpenseEntity
 import com.upreality.car.expenses.data.model.queries.ExpenseIdFilter
-import com.upreality.car.expenses.domain.ExpenseFilter
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import javax.inject.Inject
 
