@@ -1,8 +1,8 @@
 package com.upreality.car.expenses.domain.model
 
-enum class ExpenseFilter {
-    All,
-    Fines,
-    Maintenance,
-    Fuel
+sealed class ExpenseFilter {
+    object All : ExpenseFilter()
+    object Fines : ExpenseFilter()
+    object Maintenance : ExpenseFilter()
+    object Fuel : ExpenseFilter()
 }

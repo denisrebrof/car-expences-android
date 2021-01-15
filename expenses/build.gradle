@@ -61,6 +61,13 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
     testImplementation "androidx.room:room-testing:$room_version"
 
+    //For test room and Rx
+    androidTestImplementation ("android.arch.core:core-testing:$room_version") {
+        exclude module: 'support-compat'
+        exclude module: 'support-annotations'
+        exclude module: 'support-core-utils'
+    }
+
     //Cards - UI only
     implementation "androidx.cardview:cardview:1.0.0"
 
@@ -71,13 +78,15 @@ dependencies {
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     //Hilt - DI framework
-    implementation "com.google.dagger:hilt-android:2.28-alpha"
-    kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
+    implementation 'com.google.dagger:hilt-android:2.31-alpha'
+    kapt 'com.google.dagger:hilt-android-compiler:2.31-alpha'
 
     //RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
     //RxAndroid
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    //Rx for Room
+    implementation "androidx.room:room-rxjava2:$room_version"
     //ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
 }

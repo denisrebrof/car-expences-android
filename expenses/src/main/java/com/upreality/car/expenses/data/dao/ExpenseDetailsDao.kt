@@ -5,7 +5,8 @@ import com.upreality.car.expenses.data.dao.details.FuelDetailsDao
 import com.upreality.car.expenses.data.dao.details.MaintenanceDetailsDao
 import com.upreality.car.expenses.data.model.ExpenseType
 import com.upreality.car.expenses.data.model.entities.ExpenseDetails
-import io.reactivex.Flowable
+import io.reactivex.Completable
+import io.reactivex.Maybe
 import javax.inject.Inject
 
 class ExpenseDetailsDao @Inject constructor(
@@ -14,7 +15,7 @@ class ExpenseDetailsDao @Inject constructor(
     private val maintenanceDetailsDao: MaintenanceDetailsDao
 ) {
 
-    fun insert(details: ExpenseDetails): Long {
+    fun insert(details: ExpenseDetails): Maybe<Long> {
         return when (details) {
             is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.insert(details)
             is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.insert(details)
@@ -22,15 +23,15 @@ class ExpenseDetailsDao @Inject constructor(
         }
     }
 
-    fun update(details: ExpenseDetails) {
-        when (details) {
+    fun update(details: ExpenseDetails): Completable {
+        return when (details) {
             is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.update(details)
             is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.update(details)
             is ExpenseDetails.ExpenseFinesDetails -> finesDetailsDao.update(details)
         }
     }
 
-    fun get(detailsId: Long, type: ExpenseType): Flowable<out ExpenseDetails> {
+    fun get(detailsId: Long, type: ExpenseType): Maybe<out ExpenseDetails> {
         return when (type) {
             ExpenseType.Fines -> finesDetailsDao.get(detailsId)
             ExpenseType.Fuel -> fuelDetailsDao.get(detailsId)
@@ -38,8 +39,8 @@ class ExpenseDetailsDao @Inject constructor(
         }
     }
 
-    fun delete(details: ExpenseDetails) {
-        when (details) {
+    fun delete(details: ExpenseDetails): Completable {
+        return when (details) {
             is ExpenseDetails.ExpenseMaintenanceDetails -> maintenanceDetailsDao.delete(details)
             is ExpenseDetails.ExpenseFuelDetails -> fuelDetailsDao.delete(details)
             is ExpenseDetails.ExpenseFinesDetails -> finesDetailsDao.delete(details)

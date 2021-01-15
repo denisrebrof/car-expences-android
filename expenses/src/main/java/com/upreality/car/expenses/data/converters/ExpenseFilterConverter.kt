@@ -4,7 +4,7 @@ import com.upreality.car.expenses.data.model.ExpenseType
 import com.upreality.car.expenses.data.model.queries.ExpenseEmptyFilter
 import com.upreality.car.expenses.data.model.queries.ExpenseTypeFilter
 import com.upreality.car.expenses.data.model.queries.IExpenseFilter
-import com.upreality.car.expenses.domain.ExpenseFilter
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 
 class ExpenseFilterConverter {
 
