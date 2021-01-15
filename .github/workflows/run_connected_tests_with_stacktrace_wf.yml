@@ -8,13 +8,16 @@ on:
 jobs:
   # This workflow contains a single job called "run-tests"
   run-tests:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
+
+      - name: Android Emulator
+        uses: vgaidarji/android-github-actions-emulator@v1.0.1
 
       # Runs a set of commands using the runners shell
       - name: Run instrumentation tests

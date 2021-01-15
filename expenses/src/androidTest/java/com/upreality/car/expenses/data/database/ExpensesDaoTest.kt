@@ -1,52 +1,57 @@
 package com.upreality.car.expenses.data.database
 
-import android.content.Context
-import androidx.room.Room
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.upreality.car.expenses.data.dao.ExpensesDao
 import com.upreality.car.expenses.data.model.ExpenseType
 import com.upreality.car.expenses.data.model.entities.ExpenseEntity
 import com.upreality.car.expenses.data.model.queries.ExpenseIdFilter
-import org.junit.After
+import io.reactivex.schedulers.Schedulers
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.io.IOException
 import java.util.*
 
-//TODO: rework using Rules
 @RunWith(AndroidJUnit4::class)
 class ExpensesDaoTest {
+
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
+    //it's just for Junit to execute tasks synchronously
+
+    @get:Rule
+    val databaseRule = ExpensesDatabaseTestRule()
+
     private lateinit var expensesDao: ExpensesDao
-    private lateinit var db: ExpensesDB
 
     @Before
-    fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        db = Room.inMemoryDatabaseBuilder(
-            context, ExpensesDB::class.java
-        ).build()
-        expensesDao = db.getExpensesDAO()
-    }
-
-    @After
-    @Throws(IOException::class)
-    fun closeDb() {
-        db.close()
+    fun setUp() {
+        expensesDao = databaseRule.db.getExpensesDAO()
     }
 
     @Test
     @Throws(Exception::class)
     fun writeAndReadExpenseEntityTest() {
         val expense = ExpenseEntity(0, Date(), 100F, ExpenseType.Fuel, 200)
-        val id = expensesDao.insert(expense)
-        val idFilter = ExpenseIdFilter(id).getFilterExpression()
-        val readExpenseResult = expensesDao.load(SimpleSQLiteQuery(idFilter))
-        val res = readExpenseResult.firstOrNull()
-        assert(res != null)
-        assert(expenseEntityDataEquals(res!!, expense))
+
+        val insertedElementMaybe = expensesDao.insert(expense)
+            .subscribeOn(Schedulers.trampoline())
+            .observeOn(Schedulers.trampoline())
+            .flatMap {
+                val idFilter = ExpenseIdFilter(it).getFilterExpression()
+                expensesDao.load(SimpleSQLiteQuery(idFilter)).firstElement()
+            }.map {
+                it.firstOrNull()
+            }
+
+        val testObserver = insertedElementMaybe.test()
+        testObserver.assertNoErrors()
+        testObserver.assertComplete()
+        testObserver.assertValue { expenseEntityDataEquals(it, expense) }
+
+        testObserver.dispose()
     }
 
     private fun expenseEntityDataEquals(f: ExpenseEntity, s: ExpenseEntity): Boolean {
@@ -60,11 +65,11 @@ class ExpensesDaoTest {
     @Throws(Exception::class)
     fun updateExpenseEntityTest() {
         val expense = ExpenseEntity(0, Date(), 100F, ExpenseType.Fuel, 200)
-        val id = expensesDao.insert(expense)
+        val id = expensesDao.insert(expense).blockingGet()
         val expenseUpdated = ExpenseEntity(id, Date(), 200F, ExpenseType.Maintenance, 300)
-        expensesDao.update(expenseUpdated)
+        expensesDao.update(expenseUpdated).blockingAwait()
         val idFilter = ExpenseIdFilter(id).getFilterExpression()
-        val readExpenseResult = expensesDao.load(SimpleSQLiteQuery(idFilter))
+        val readExpenseResult = expensesDao.load(SimpleSQLiteQuery(idFilter)).blockingFirst()
         val res = readExpenseResult.firstOrNull()
         assert(res != null)
         assert(expenseEntityDataEquals(res!!, expenseUpdated))

@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.di
 
-import com.upreality.car.expenses.data.ExpensesRepository
+import com.upreality.car.expenses.data.ExpensesRepositoryImpl
 import com.upreality.car.expenses.domain.IExpensesRepository
 import dagger.Binds
 import dagger.Module
@@ -12,6 +12,6 @@ import dagger.hilt.android.components.ApplicationComponent
 abstract class ExpensesRepositoryModule {
     @Binds
     abstract fun provideRepository(
-        repoImpl: ExpensesRepository
+        repoImpl: ExpensesRepositoryImpl
     ): IExpensesRepository
 }
