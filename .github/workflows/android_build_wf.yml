@@ -29,3 +29,11 @@ jobs:
       with:
         name: app-release.apk
         path: app/build/outputs/apk/release/app-release-unsigned.apk
+
+    - name: send build message 
+      uses: appleboy/telegram-action@master 
+      with: 
+        to: ${{ secrets.TELEGRAM_TOKEN }} 
+        token: ${{ secrets.TELEGRAM_BUILD_CHAT_ID }} 
+        message: New Build Created! 
+        document: app/build/outputs/apk/release/app-release-unsigned.apk
