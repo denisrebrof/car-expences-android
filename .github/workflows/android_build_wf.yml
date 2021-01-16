@@ -33,7 +33,7 @@ jobs:
     - name: send build message 
       uses: appleboy/telegram-action@master 
       with: 
-        to: ${{ secrets.TELEGRAM_TOKEN }} 
-        token: ${{ secrets.TELEGRAM_BUILD_CHAT_ID }} 
+        to: ${{ secrets.TELEGRAM_BUILD_CHAT_ID }} 
+        token: ${{ secrets.TELEGRAM_TOKEN }} 
         message: New Build Created! 
         document: app/build/outputs/apk/release/app-release-unsigned.apk
