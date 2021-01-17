@@ -87,6 +87,9 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     //Rx for Room
     implementation "androidx.room:room-rxjava2:$room_version"
+    //Auto disposer - to prevent manual dispose handling
+    implementation 'io.sellmair:disposer:2.0.0'
+
     //ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
 }

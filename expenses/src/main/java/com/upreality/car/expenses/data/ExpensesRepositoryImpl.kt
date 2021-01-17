@@ -13,7 +13,12 @@ class ExpensesRepositoryImpl @Inject constructor(
     private val expensesLocalDataSource: ExpensesLocalDataSource
 ) : IExpensesRepository {
 
+    companion object {
+        const val NEW_INSTANCE_ID = 0L
+    }
+
     override fun create(expense: Expense): Maybe<Long> {
+        expense.id = NEW_INSTANCE_ID
         return expensesLocalDataSource.create(expense)
     }
 

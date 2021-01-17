@@ -7,7 +7,7 @@ import java.util.*
 sealed class Expense(val date: Date, val cost: Float) {
 
     companion object {
-        const val DEFAULT_ID = -1L
+        const val DEFAULT_ID = 0L
     }
 
     var id = DEFAULT_ID
