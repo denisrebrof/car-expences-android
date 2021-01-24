@@ -1,18 +1,10 @@
 package com.upreality.car.cars.domain.model
 
+import com.upreality.car.brending.domain.model.CarMark
+
 data class Car(
-    var id: Long = 0L,
-    var name: String
-) {
-
-    companion object{
-        const val DEFAULT_CAR_ID = -10L
-    }
-
-    fun getDefaultCar(): Car {
-        return Car(
-            id = DEFAULT_CAR_ID,
-            name = "Default Car"
-        )
-    }
-}
+    val id: Long,
+    val name: String,
+    val mileage: Int,
+    val mark: CarMark
+)

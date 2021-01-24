@@ -2,18 +2,13 @@ package com.upreality.car.expenses.presentation
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textview.MaterialTextView
-import com.upreality.car.expenses.R
+import com.upreality.car.expenses.databinding.ActivityExpencesBinding
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.android.schedulers.AndroidSchedulers.*
-import io.reactivex.disposables.Disposable
+import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
@@ -26,15 +21,17 @@ class ExpensesActivity : AppCompatActivity() {
     @Inject
     lateinit var repository: IExpensesRepository
 
+    private lateinit var binding: ActivityExpencesBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_expences)
+        binding = ActivityExpencesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
     }
 
     override fun onStart() {
         super.onStart()
-        val btn = findViewById<Button>(R.id.create_expense_button)
-        btn.setOnClickListener { executeCreation() }
+        binding.createExpenseButton.setOnClickListener { executeCreation() }
     }
 
     private fun executeCreation() {
@@ -48,8 +45,7 @@ class ExpensesActivity : AppCompatActivity() {
     }
 
     private fun setText(text: String) {
-        val textView = findViewById<MaterialTextView>(R.id.text)
-        textView.text = text
+        binding.text.text = text
         Log.d("DB", "Create expense result: $text")
     }
 }

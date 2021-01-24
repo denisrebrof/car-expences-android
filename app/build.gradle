@@ -55,7 +55,8 @@ dependencies {
 
     dependencies {
         implementation project(":expenses")
-        implementation project(":cars")
         androidTestImplementation project(":expenses")
+        implementation project(":cars")
+        androidTestImplementation project(":cars")
     }
 }

@@ -17,6 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:elevation="10dp"
         android:id="@+id/create_expense_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

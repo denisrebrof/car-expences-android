@@ -12,7 +12,6 @@ import java.util.*
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    val carId: Long,
     @field:TypeConverters(DateConverter::class)
     val date: Date,
     val cost: Float,
