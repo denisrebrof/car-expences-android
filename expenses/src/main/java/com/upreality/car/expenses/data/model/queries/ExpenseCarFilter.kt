@@ -1,7 +1,5 @@
 package com.upreality.car.expenses.data.model.queries
 
-import com.upreality.car.cars.domain.model.Car
-
-class ExpenseCarFilter(val car: Car) : ExpenseColumnFilter("car_id") {
-    override val filter = car.id.toString()
+class ExpenseCarFilter(val car_id: Long) : ExpenseColumnFilter("car_id") {
+    override val filter = car_id.toString()
 }

@@ -1,8 +1,8 @@
-package com.upreality.car.expenses.data.di
+package com.upreality.car.cars.data.di
 
 import android.content.Context
 import androidx.room.Room
-import com.upreality.car.expenses.data.database.ExpensesDB
+import com.upreality.car.cars.data.database.CarsDB
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,11 +11,11 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ExpensesDatabaseModule {
+object CarsDBModule {
     @Provides
     fun provideDatabase(
         @ApplicationContext app: Context
-    ): ExpensesDB {
-        return Room.databaseBuilder(app, ExpensesDB::class.java, "expenses_db").build()
+    ): CarsDB {
+        return Room.databaseBuilder(app, CarsDB::class.java, "cars_db").build()
     }
 }

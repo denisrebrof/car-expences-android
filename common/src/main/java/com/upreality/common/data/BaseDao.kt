@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.dao
+package com.upreality.common.data
 
 import androidx.room.Delete
 import androidx.room.Insert

@@ -103,4 +103,5 @@ dependencies {
 
     implementation project(":expenses")
     implementation project(":brending")
+    implementation project(':common')
 }

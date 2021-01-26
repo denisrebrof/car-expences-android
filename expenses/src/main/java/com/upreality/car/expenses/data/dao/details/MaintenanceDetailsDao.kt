@@ -2,9 +2,8 @@ package com.upreality.car.expenses.data.dao.details
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.upreality.car.expenses.data.dao.BaseDao
+import com.upreality.common.data.BaseDao
 import com.upreality.car.expenses.data.model.entities.ExpenseDetails
-import io.reactivex.Flowable
 import io.reactivex.Maybe
 
 @Dao
