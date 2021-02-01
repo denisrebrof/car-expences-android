@@ -10,5 +10,6 @@ interface ICarsRepository {
     fun create(car: Car): Maybe<Long>
     fun updateCar(car: Car): Completable
     fun deleteCar(car: Car): Completable
+    //TODO: no car case processing
     fun getCar(carId: Long): Flowable<Car>
 }

@@ -103,5 +103,6 @@ dependencies {
 
     implementation project(":expenses")
     implementation project(":brending")
+    androidTestImplementation project(":brending")
     implementation project(':common')
 }
