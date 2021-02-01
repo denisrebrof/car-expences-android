@@ -1,5 +1,7 @@
 package com.upreality.car.expenses.data.model.queries
 
-object ExpenseEmptyFilter : IExpenseFilter {
+import com.upreality.common.data.IDatabaseFilter
+
+object ExpenseEmptyFilter : IDatabaseFilter {
     override fun getFilterExpression() = "SELECT * FROM expenses"
 }

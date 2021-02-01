@@ -10,6 +10,7 @@ class CarMarksRepoStub @Inject constructor() : ICarMarkRepository {
     override fun getMark(markId: Long): CarMark {
         val stubBrend = CarBrend("DefBrend", R.color.design_default_color_secondary)
         val stubMark = CarMark(
+            0,
             "Def Mark",
             stubBrend
         )

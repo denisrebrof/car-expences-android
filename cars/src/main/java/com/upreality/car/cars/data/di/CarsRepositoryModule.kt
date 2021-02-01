@@ -1,6 +1,6 @@
 package com.upreality.car.cars.data.di
 
-import com.upreality.car.cars.data.model.CarsRepositoryImpl
+import com.upreality.car.cars.data.CarsRepositoryImpl
 import com.upreality.car.cars.domain.ICarsRepository
 import dagger.Binds
 import dagger.Module

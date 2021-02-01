@@ -1,28 +1,44 @@
 package com.upreality.car.cars.data.datasoures
 
-import com.upreality.car.cars.data.dao.CarsDao
+import androidx.sqlite.db.SimpleSQLiteQuery
+import com.upreality.car.brending.domain.ICarMarkRepository
+import com.upreality.car.cars.data.converters.CarConverter
+import com.upreality.car.cars.data.dao.CarEntitiesDao
 import com.upreality.car.cars.domain.model.Car
+import com.upreality.common.data.IDatabaseFilter
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import javax.inject.Inject
 
 class CarsLocalDataSource @Inject constructor(
-    private val carsDao: CarsDao
+    private val carEntitiesDao: CarEntitiesDao,
+    private val marksRepository: ICarMarkRepository
 ) {
-    fun getCars(): Flowable<List<Car>> {
-        carsDao.
+    fun getCars(filter: IDatabaseFilter): Flowable<List<Car>> {
+        val query = SimpleSQLiteQuery(filter.getFilterExpression())
+        return carEntitiesDao
+            .load(query)
+            .map { carEntities ->
+                carEntities.map { carEntity ->
+                    val mark = marksRepository.getMark(carEntity.markId)
+                    CarConverter.fromCarEntity(carEntity, mark)
+                }
+            }
     }
 
     fun create(car: Car): Maybe<Long> {
-        TODO("Not yet implemented")
+        val entity = CarConverter.toCarEntity(car)
+        return carEntitiesDao.insert(entity)
     }
 
     fun updateCar(car: Car): Completable {
-        TODO("Not yet implemented")
+        val entity = CarConverter.toCarEntity(car)
+        return carEntitiesDao.update(entity)
     }
 
     fun deleteCar(car: Car): Completable {
-        TODO("Not yet implemented")
+        val entity = CarConverter.toCarEntity(car)
+        return carEntitiesDao.delete(entity)
     }
 }
