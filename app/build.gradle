@@ -17,9 +17,27 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        config {
+            keyAlias 'keystore'
+            keyPassword 'ekabz0ks'
+            storeFile file('C:\\Users\\User\\Desktop\\Car Expenses\\carExpensesKeystore.jks')
+            storePassword 'ekabz0ks'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            debuggable true
+            signingConfig signingConfigs.config
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+            debuggable true
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -58,5 +76,7 @@ dependencies {
         androidTestImplementation project(":expenses")
         implementation project(":cars")
         androidTestImplementation project(":cars")
+
+        implementation project(":auth")
     }
 }
