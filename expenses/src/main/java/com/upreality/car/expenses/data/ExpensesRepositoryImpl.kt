@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data
 
-import com.upreality.car.expenses.data.datasources.ExpensesLocalDataSource
+import com.upreality.car.expenses.data.local.ExpensesLocalDataSource
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense

@@ -7,7 +7,7 @@ import com.upreality.car.cars.data.CarsRepositoryImpl
 import com.upreality.car.cars.data.datasoures.CarsLocalDataSource
 import com.upreality.car.cars.domain.ICarsRepository
 import com.upreality.car.cars.domain.model.Car
-import com.upreality.car.expenses.data.model.queries.ExpenseIdFilter
+import com.upreality.car.expenses.data.local.expenses.model.queries.ExpenseIdFilter
 import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule

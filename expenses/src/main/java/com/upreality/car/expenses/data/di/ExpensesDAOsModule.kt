@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.di
 
-import com.upreality.car.expenses.data.database.ExpensesDB
+import com.upreality.car.expenses.data.local.database.ExpensesDB
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
