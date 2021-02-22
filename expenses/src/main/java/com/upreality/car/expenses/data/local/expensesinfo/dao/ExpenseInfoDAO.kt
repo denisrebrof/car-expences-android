@@ -4,9 +4,8 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseDetails
 import com.upreality.car.expenses.data.local.expensesinfo.entities.ExpenseInfo
-import com.upreality.common.data.RoomBaseDao
+import com.upreality.car.common.data.RoomBaseDao
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 
@@ -16,5 +15,5 @@ interface ExpenseInfoDAO : RoomBaseDao<ExpenseInfo> {
     fun load(query: SupportSQLiteQuery): Flowable<List<ExpenseInfo>>
 
     @Query("SELECT * FROM expense_info WHERE id = :id")
-    fun get(id: Long): Maybe<ExpenseDetails.ExpenseMaintenanceDetails>
+    fun get(id: Long): Maybe<ExpenseInfo>
 }

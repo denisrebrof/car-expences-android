@@ -1,6 +1,6 @@
 package com.upreality.car.cars.data.model.filters
 
-import com.upreality.common.data.IDatabaseFilter
+import com.upreality.car.common.data.IDatabaseFilter
 
 object AllCarsFilter : IDatabaseFilter {
     override fun getFilterExpression(): String {

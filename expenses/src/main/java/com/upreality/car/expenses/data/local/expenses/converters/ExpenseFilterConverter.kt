@@ -3,7 +3,7 @@ package com.upreality.car.expenses.data.local.expenses.converters
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.local.expenses.model.queries.ExpenseEmptyFilter
 import com.upreality.car.expenses.data.local.expenses.model.queries.ExpenseTypeFilter
-import com.upreality.common.data.IDatabaseFilter
+import com.upreality.car.common.data.IDatabaseFilter
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 
 class ExpenseFilterConverter {

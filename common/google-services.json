@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:405077401282:android:876836e97c4d33bf46a55b",
         "android_client_info": {
-          "package_name": "com.upreality.common"
+          "package_name": "com.upreality.car.common"
         }
       },
       "oauth_client": [

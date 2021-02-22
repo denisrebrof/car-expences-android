@@ -17,27 +17,27 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-//    signingConfigs {
-//        config {
-//            keyAlias 'keystore'
-//            keyPassword 'ekabz0ks'
-//            storeFile file('C:\\Users\\User\\Desktop\\Car Expenses\\carExpensesKeystore.jks')
-//            storePassword 'ekabz0ks'
-//        }
-//    }
+    signingConfigs {
+        config {
+            keyAlias 'keystore'
+            keyPassword 'ekabz0ks'
+            storeFile file('C:\\Users\\User\\Desktop\\Car Expenses\\carExpensesKeystore.jks')
+            storePassword 'ekabz0ks'
+        }
+    }
 
     buildTypes {
         release {
             minifyEnabled false
             debuggable true
-//            signingConfig signingConfigs.config
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         debug {
             minifyEnabled false
             debuggable true
-//            signingConfig signingConfigs.config
+            signingConfig signingConfigs.config
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -63,6 +63,13 @@ dependencies {
     //Hilt - DI framework
     implementation rootProject.ext.hilt_android
     kapt rootProject.ext.hilt_android_compiler_kapt
+
+    //Room - local database lib
+    implementation rootProject.ext.room_runtime
+    kapt rootProject.ext.room_compiler_kapt
+    kaptAndroidTest rootProject.ext.room_compiler_kapt_android_test
+    implementation rootProject.ext.room_ktx
+    testImplementation rootProject.ext.room_testing
 
     dependencies {
         implementation project(":expenses")
