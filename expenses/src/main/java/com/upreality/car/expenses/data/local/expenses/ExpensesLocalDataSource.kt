@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.local
+package com.upreality.car.expenses.data.local.expenses
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.upreality.car.expenses.data.local.expenses.converters.ExpenseConverter

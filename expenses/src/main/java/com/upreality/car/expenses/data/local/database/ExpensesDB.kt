@@ -9,7 +9,7 @@ import com.upreality.car.expenses.data.local.expenses.dao.details.MaintenanceDet
 import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseDetails
 import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseEntity
 import com.upreality.car.expenses.data.local.expensesinfo.dao.ExpenseInfoDAO
-import com.upreality.car.expenses.data.local.expensesinfo.entities.ExpenseInfo
+import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 
 @Database(
     entities = [
