@@ -1,9 +1,9 @@
 package com.upreality.car.expenses.data.local.expensesinfo.model.queries
 
-class ExpenseInfoIdFilter(
+class ExpenseInfoLocalIdFilter(
     val id: Long
 ) : IExpenseInfoFilter {
     override fun getFilterExpression(): String {
-        return "SELECT * FROM expense_info WHERE id LIKE $id"
+        return "SELECT * FROM expense_info WHERE local_id LIKE $id"
     }
 }

@@ -15,7 +15,7 @@ object RemoteExpenseConverter {
         }
     }
 
-    fun toExpenseEntity(domainModel: Expense, detailsId: Long): ExpenseEntityFirestore {
+    fun toExpenseEntity(domainModel: Expense, detailsId: String): ExpenseEntityFirestore {
         val date = DateConverter.toTime(domainModel.date)
         val type = getExpenseType(domainModel)
         return ExpenseEntityFirestore(

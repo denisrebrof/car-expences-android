@@ -9,7 +9,7 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import javax.inject.Inject
 
-class ExpenseInfoLocalDataSource @Inject constructor(
+class ExpensesInfoLocalDataSource @Inject constructor(
     private val expenseInfoDAO: ExpenseInfoDAO
 ) {
     fun create(info: ExpenseInfo): Maybe<Long> {

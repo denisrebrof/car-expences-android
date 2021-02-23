@@ -5,5 +5,5 @@ data class ExpenseEntityFirestore(
     val date: Long,
     val cost: Float,
     val type: Int,
-    val detailsId: Long
+    val detailsId: String
 )
