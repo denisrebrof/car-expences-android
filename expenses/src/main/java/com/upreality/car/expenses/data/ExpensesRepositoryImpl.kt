@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data
 
+import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
@@ -15,6 +16,7 @@ import io.reactivex.Maybe
 import javax.inject.Inject
 
 class ExpensesRepositoryImpl @Inject constructor(
+    private val timeDataSource: TimeDataSource,
     private val expensesLocalDataSource: ExpensesLocalDataSource,
     private val expensesRemoteDataSource: ExpensesRemoteDataSource,
     private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
@@ -27,9 +29,12 @@ class ExpensesRepositoryImpl @Inject constructor(
     override fun create(expense: Expense): Maybe<Long> {
         expense.id = NEW_INSTANCE_ID
         val createLocal = expensesLocalDataSource.create(expense)
-        return createLocal.flatMap { localExpenseId ->
-            val expenseInfo = ExpenseInfo(NEW_INSTANCE_ID, localExpenseId)
-            expensesInfoLocalDataSource.create(expenseInfo).map { localExpenseId }
+        val timestampMaybe = timeDataSource.getTime()
+        return timestampMaybe.flatMap { timestamp ->
+            createLocal.flatMap { localExpenseId ->
+                val expenseInfo = ExpenseInfo(NEW_INSTANCE_ID, localExpenseId, timestamp)
+                expensesInfoLocalDataSource.create(expenseInfo).map { localExpenseId }
+            }
         }
     }
 
@@ -43,19 +48,9 @@ class ExpensesRepositoryImpl @Inject constructor(
         val expenseInfoMaybe = expensesInfoLocalDataSource.get(expenseInfoSelector).firstElement()
         val updateExpenseInfo = expenseInfoMaybe
             .map(List<ExpenseInfo>::firstOrNull)
-            .map(this::updateExpenseInfo)
+            .flatMap(this::updateExpenseInfo)
             .flatMapCompletable(expensesInfoLocalDataSource::update)
         return updateLocal.andThen(updateExpenseInfo)
-    }
-
-    private fun updateExpenseInfo(info: ExpenseInfo): ExpenseInfo {
-        return ExpenseInfo(
-            info.id,
-            info.localId,
-            info.remoteId,
-            ExpenseRemoteState.Updated,
-            info.remoteVersion
-        )
     }
 
     override fun delete(expense: Expense): Completable {
@@ -64,18 +59,32 @@ class ExpensesRepositoryImpl @Inject constructor(
         val expenseInfoMaybe = expensesInfoLocalDataSource.get(expenseInfoSelector).firstElement()
         val updateExpenseInfo = expenseInfoMaybe
             .map(List<ExpenseInfo>::firstOrNull)
-            .map(this::deleteExpenseInfo)
+            .flatMap(this::deleteExpenseInfo)
             .flatMapCompletable(expensesInfoLocalDataSource::update)
         return deleteLocal.andThen(updateExpenseInfo)
     }
 
-    private fun deleteExpenseInfo(info: ExpenseInfo): ExpenseInfo {
-        return ExpenseInfo(
-            info.id,
-            info.localId,
-            info.remoteId,
-            ExpenseRemoteState.Deleted,
-            info.remoteVersion
-        )
+    private fun updateExpenseInfo(info: ExpenseInfo): Maybe<ExpenseInfo> {
+        return updateExpenseInfoState(info, ExpenseRemoteState.Updated)
+    }
+
+    private fun deleteExpenseInfo(info: ExpenseInfo): Maybe<ExpenseInfo> {
+        return updateExpenseInfoState(info, ExpenseRemoteState.Deleted)
+    }
+
+    private fun updateExpenseInfoState(
+        info: ExpenseInfo,
+        newState: ExpenseRemoteState
+    ): Maybe<ExpenseInfo> {
+        return timeDataSource.getTime().map { timestamp ->
+            ExpenseInfo(
+                info.id,
+                info.localId,
+                timestamp,
+                info.remoteId,
+                newState,
+                info.remoteVersion
+            )
+        }
     }
 }

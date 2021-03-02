@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.local.expenses.model.queries
 
-import com.upreality.car.common.data.IDatabaseFilter
+import com.upreality.car.common.data.database.IDatabaseFilter
 
 abstract class ExpenseColumnFilter(private val column: String) : IDatabaseFilter {
 

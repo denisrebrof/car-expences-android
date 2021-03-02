@@ -1,8 +1,9 @@
 package com.upreality.car.expenses.data.local.expenses.model.queries
 
-import com.upreality.car.common.data.IDatabaseFilter
+import com.upreality.car.common.data.database.IDatabaseFilter
 
-abstract class ExpensePaginatedFilter(private val cursor: Long, private val length: Int) : IDatabaseFilter {
+abstract class ExpensePaginatedFilter(private val cursor: Long, private val length: Int) :
+    IDatabaseFilter {
 
     abstract val orderColumn: String
     abstract val sortAscending: Boolean

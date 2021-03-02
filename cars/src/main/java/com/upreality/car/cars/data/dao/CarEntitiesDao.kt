@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.upreality.car.cars.data.model.entities.CarEntity
-import com.upreality.car.common.data.RoomBaseDao
+import com.upreality.car.common.data.database.RoomBaseDao
 import io.reactivex.Flowable
 
 @Dao

@@ -2,10 +2,7 @@ package com.upreality.car.expenses.data.remote
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.google.firebase.database.*
-import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseDetails
-import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseEntity
 import com.upreality.car.expenses.data.local.expensesinfo.dao.ExpenseInfoDAO
-import com.upreality.car.expenses.data.local.expensesinfo.model.converters.ExpenseRemoteStateConverter
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoIdFilter
 import com.upreality.car.expenses.data.remote.firestore.converters.RemoteExpenseConverter
@@ -37,7 +34,7 @@ class ExpensesRemoteDataSource @Inject constructor(
         private const val EXPENSES_TABLE_NAME = "expenses"
     }
 
-    fun delete(expense: ): Completable {
+    fun delete(expense: Expense): Completable {
         return getRemoteInstance(expense).flatMapCompletable { remoteExpense ->
             val deleteExpense = remoteExpensesDAO.delete(remoteExpense)
             val details = toExpenseDetails(expense, remoteExpense.detailsId)
@@ -69,7 +66,7 @@ class ExpensesRemoteDataSource @Inject constructor(
             remoteExpensesDAO
                 .get(selector)
                 .firstElement()
-                .map { it.first() }
+                .map(List<ExpenseEntityFirestore>::first)
         }
     }
 

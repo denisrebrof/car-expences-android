@@ -1,10 +1,9 @@
 package com.upreality.car.expenses.data.local.expensesinfo.model.entities
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
+import androidx.room.*
 import com.upreality.car.expenses.data.local.expensesinfo.model.converters.ExpenseRemoteStateConverter
+import com.upreality.car.expenses.data.shared.model.DateConverter
+import java.util.*
 
 @Entity(tableName = "expense_info")
 data class ExpenseInfo(
@@ -12,6 +11,9 @@ data class ExpenseInfo(
     val id: Long,
     @ColumnInfo(name = "local_id")
     val localId: Long,
+    @ColumnInfo(name = "timestamp")
+    @TypeConverters(DateConverter::class)
+    val timestamp: Date,
     @ColumnInfo(name = "remote_id")
     val remoteId: String = String(),
     @field:TypeConverters(ExpenseRemoteStateConverter::class)

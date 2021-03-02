@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data
 
+import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
@@ -12,6 +13,7 @@ import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
 class ExpensesSyncService @Inject constructor(
+    private val timeDataSource: TimeDataSource,
     private val expensesRemoteDataSource: ExpensesRemoteDataSource,
     private val expensesLocalDataSource: ExpensesLocalDataSource,
     private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource,
@@ -29,7 +31,7 @@ class ExpensesSyncService @Inject constructor(
         expensesRemoteDataSource.get(ExpenseRemoteFilter.Created).flatMapSingle {
             Flowable.fromIterable(it).flatMapMaybe { expense ->
                 expensesLocalDataSource.create(expense).flatMap { localId ->
-                    val createdExpenseInfo = ExpenseInfo(0L, localId)
+                    val createdExpenseInfo = ExpenseInfo(0L, localId, )
                     expensesInfoLocalDataSource.create()
                 }
             }.toList()

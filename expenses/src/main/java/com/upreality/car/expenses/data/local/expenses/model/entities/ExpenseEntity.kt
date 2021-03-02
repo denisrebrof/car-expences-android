@@ -3,8 +3,8 @@ package com.upreality.car.expenses.data.local.expenses.model.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import com.upreality.car.expenses.data.local.expenses.converters.DateConverter
 import com.upreality.car.expenses.data.local.expenses.converters.ExpenseTypeConverter
+import com.upreality.car.expenses.data.shared.model.DateConverter
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import java.util.*
 

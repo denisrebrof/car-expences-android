@@ -8,14 +8,6 @@ import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.MaintenanceType.*
 import java.util.*
 
-class DateConverter {
-    @TypeConverter
-    fun toTimestamp(date: Date) = date.time
-
-    @TypeConverter
-    fun fromTimestamp(time: Long) = Date(time)
-}
-
 class MaintenanceTypeConverter {
     @TypeConverter
     fun toId(type: MaintenanceType) = when (type) {
