@@ -54,15 +54,15 @@ dependencies {
     implementation rootProject.ext.kotlin_stdlib
     implementation rootProject.ext.core_ktx
     implementation rootProject.ext.appcompat
-    implementation rootProject.ext.material
+    implementation 'com.google.android.material:material:1.3.0'
     implementation rootProject.ext.constraintlayout
-    testImplementation rootProject.ext.junit_test
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core
 
     //Hilt - DI framework
-    implementation rootProject.ext.hilt_android
-    kapt rootProject.ext.hilt_android_compiler_kapt
+    implementation 'com.google.dagger:hilt-android:2.33-beta'
+    kapt 'com.google.dagger:hilt-android-compiler:2.33-beta'
 
     //Room - local database lib
     implementation rootProject.ext.room_runtime

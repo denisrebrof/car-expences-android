@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = "1.4.21"
+    ext.kotlin_version = '1.4.31'
     repositories {
         google()
         jcenter()
@@ -46,7 +46,7 @@ ext {
     core_testing = "android.arch.core:core-testing:$room_version"
 
     //Navigation
-    def nav_version = "2.3.2"
+    def nav_version = '2.3.3'
     navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$nav_version"
     navigation_ui_ktx = "androidx.navigation:navigation-ui-ktx:$nav_version"
     navigation_testing = "androidx.navigation:navigation-testing:$nav_version"
