@@ -1,34 +1,35 @@
 package com.upreality.car.expenses.data.local.expenses.converters
 
+import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseDetails
 import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseEntity
 import com.upreality.car.expenses.domain.model.expence.Expense
 
-class ExpenseConverter {
+object RoomExpenseEntitiesConverter {
 
-    fun getExpenseType(domainModel: Expense): ExpenseType {
+    fun getExpenseType(domainModel: ExpenseRoom): ExpenseType {
         return when (domainModel) {
-            is Expense.Fuel -> ExpenseType.Fuel
-            is Expense.Fine -> ExpenseType.Fines
-            is Expense.Maintenance -> ExpenseType.Maintenance
+            is ExpenseRoom.Fuel -> ExpenseType.Fuel
+            is ExpenseRoom.Fine -> ExpenseType.Fines
+            is ExpenseRoom.Maintenance -> ExpenseType.Maintenance
         }
     }
 
-    fun toExpenseEntity(domainModel: Expense, detailsId: Long): ExpenseEntity {
+    fun toExpenseEntity(dataModel: ExpenseRoom, detailsId: Long): ExpenseEntity {
         return ExpenseEntity(
-            domainModel.id,
-            domainModel.date,
-            domainModel.cost,
-            getExpenseType(domainModel),
+            dataModel.id,
+            dataModel.date,
+            dataModel.cost,
+            getExpenseType(dataModel),
             detailsId
         )
     }
 
-    fun toExpenseDetails(domainModel: Expense, id: Long): ExpenseDetails {
-        return when (getExpenseType(domainModel)) {
+    fun toExpenseDetails(dataModel: ExpenseRoom, id: Long): ExpenseDetails {
+        return when (getExpenseType(dataModel)) {
             ExpenseType.Fuel -> {
-                val fuelExpense = domainModel as Expense.Fuel
+                val fuelExpense = dataModel as ExpenseRoom.Fuel
                 ExpenseDetails.ExpenseFuelDetails(
                     id,
                     fuelExpense.liters,
@@ -36,11 +37,11 @@ class ExpenseConverter {
                 )
             }
             ExpenseType.Fines -> {
-                val finesExpense = domainModel as Expense.Fine
+                val finesExpense = dataModel as ExpenseRoom.Fine
                 ExpenseDetails.ExpenseFinesDetails(id, finesExpense.type)
             }
             ExpenseType.Maintenance -> {
-                val finesExpense = domainModel as Expense.Maintenance
+                val finesExpense = dataModel as ExpenseRoom.Maintenance
                 ExpenseDetails.ExpenseMaintenanceDetails(
                     id,
                     finesExpense.type,
@@ -50,19 +51,19 @@ class ExpenseConverter {
         }
     }
 
-    fun toExpense(entity: ExpenseEntity, expenseDetails: ExpenseDetails): Expense {
+    fun toExpense(entity: ExpenseEntity, expenseDetails: ExpenseDetails): ExpenseRoom {
         return when (entity.type) {
             ExpenseType.Fines -> {
                 val details = expenseDetails as ExpenseDetails.ExpenseFinesDetails
-                Expense.Fine(entity.date, entity.cost, details.type)
+                ExpenseRoom.Fine(entity.date, entity.cost, details.type)
             }
             ExpenseType.Fuel -> {
                 val details = expenseDetails as ExpenseDetails.ExpenseFuelDetails
-                Expense.Fuel(entity.date, entity.cost, details.liters, details.mileage)
+                ExpenseRoom.Fuel(entity.date, entity.cost, details.liters, details.mileage)
             }
             ExpenseType.Maintenance -> {
                 val details = expenseDetails as ExpenseDetails.ExpenseMaintenanceDetails
-                Expense.Maintenance(entity.date, entity.cost, details.type, details.mileage)
+                ExpenseRoom.Maintenance(entity.date, entity.cost, details.type, details.mileage)
             }
         }.apply {
             id = entity.id

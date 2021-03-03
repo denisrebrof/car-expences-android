@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.upreality.car.expenses.data.local.expenses.dao.ExpensesDao
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseEntity
-import com.upreality.car.expenses.data.local.expenses.model.queries.ExpenseIdFilter
+import com.upreality.car.expenses.data.local.expenses.model.filters.ExpenseIdFilter
 import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule

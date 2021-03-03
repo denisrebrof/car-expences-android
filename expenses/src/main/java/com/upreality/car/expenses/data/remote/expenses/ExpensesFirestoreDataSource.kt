@@ -1,8 +1,8 @@
 package com.upreality.car.expenses.data.remote.expenses
 
 import com.google.firebase.database.*
-import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
-import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter.toExpenseDetails
+import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
+import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter.toExpenseDetails
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseDetailsFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpensesFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
@@ -60,7 +60,7 @@ class ExpensesFirestoreDataSource @Inject constructor(
                 .map(List<ExpenseDetailsFirestore>::firstOrNull)
 
             val expenseMaybe = detailsMaybe.map { remoteDetails ->
-                RemoteExpenseConverter.toExpense(remoteEntity, remoteDetails)
+                RemoteExpenseEntityConverter.toExpense(remoteEntity, remoteDetails)
             }
             expenseMaybe
         }.toList()
@@ -70,7 +70,7 @@ class ExpensesFirestoreDataSource @Inject constructor(
         val details = toExpenseDetails(expense, String())
         val createDetailsMaybe = expenseDetailsDAO.create(details)
         return createDetailsMaybe.flatMap { detailsId ->
-            val expenseEntity = RemoteExpenseConverter.toExpenseEntity(expense, detailsId)
+            val expenseEntity = RemoteExpenseEntityConverter.toExpenseEntity(expense, detailsId)
             expensesDAO.create(expenseEntity)
         }
     }

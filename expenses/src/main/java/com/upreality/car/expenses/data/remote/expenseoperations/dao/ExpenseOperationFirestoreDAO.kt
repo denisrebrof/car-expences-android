@@ -38,7 +38,7 @@ class ExpenseOperationFirestoreDAO @Inject constructor(
         }
     }
 
-    fun create(expense: ExpenseEntityFirestore): Maybe<String> {
+    fun create(expense: ExpenseOperationFirestore): Maybe<String> {
         val docRef = operationsList.document()
         val setValueCompletable = RxFirestore.setDocument(docRef, expense)
         val resultMaybe = Maybe.just(docRef.id)

@@ -2,6 +2,8 @@ package com.upreality.car.expenses.data
 
 import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
+import com.upreality.car.expenses.data.local.expenses.converters.RoomExpenseConverter
+import com.upreality.car.expenses.data.local.expenses.converters.RoomExpenseFilterConverter
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
@@ -26,7 +28,8 @@ class ExpensesRepositoryImpl @Inject constructor(
 
     override fun create(expense: Expense): Maybe<Long> {
         expense.id = NEW_INSTANCE_ID
-        val createLocal = expensesLocalDataSource.create(expense)
+        val localModel = RoomExpenseConverter.fromExpense(expense)
+        val createLocal = expensesLocalDataSource.create(localModel)
         val timestampMaybe = timeDataSource.getTime()
         return timestampMaybe.flatMap { timestamp ->
             createLocal.flatMap { localExpenseId ->
@@ -37,11 +40,15 @@ class ExpensesRepositoryImpl @Inject constructor(
     }
 
     override fun get(filter: ExpenseFilter): Flowable<List<Expense>> {
-        return expensesLocalDataSource.get(filter)
+        val localFilter = RoomExpenseFilterConverter.convert(filter)
+        return expensesLocalDataSource.get(localFilter).map { localExpenses ->
+            localExpenses.map(RoomExpenseConverter::toExpense)
+        }
     }
 
     override fun update(expense: Expense): Completable {
-        val updateLocal = expensesLocalDataSource.update(expense)
+        val localModel = RoomExpenseConverter.fromExpense(expense)
+        val updateLocal = expensesLocalDataSource.update(localModel)
         val expenseInfoSelector = ExpenseInfoLocalIdFilter(expense.id)
         val expenseInfoMaybe = expensesInfoLocalDataSource.get(expenseInfoSelector).firstElement()
         val updateExpenseInfo = expenseInfoMaybe
@@ -52,7 +59,8 @@ class ExpensesRepositoryImpl @Inject constructor(
     }
 
     override fun delete(expense: Expense): Completable {
-        val deleteLocal = expensesLocalDataSource.delete(expense)
+        val localModel = RoomExpenseConverter.fromExpense(expense)
+        val deleteLocal = expensesLocalDataSource.delete(localModel)
         val expenseInfoSelector = ExpenseInfoLocalIdFilter(expense.id)
         val expenseInfoMaybe = expensesInfoLocalDataSource.get(expenseInfoSelector).firstElement()
         val updateExpenseInfo = expenseInfoMaybe

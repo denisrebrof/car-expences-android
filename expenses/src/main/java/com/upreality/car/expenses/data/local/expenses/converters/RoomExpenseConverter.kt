@@ -1,23 +1,23 @@
-package com.upreality.car.expenses.data.remote.expenses.converters
+package com.upreality.car.expenses.data.local.expenses.converters
 
-import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
+import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.domain.model.expence.Expense
 
-object RemoteExpenseConverter {
-    fun toExpense(dataModel: ExpenseFirestore): Expense {
+object RoomExpenseConverter {
+    fun toExpense(dataModel: ExpenseRoom): Expense {
         return when (dataModel) {
-            is ExpenseFirestore.Fine -> Expense.Fine(
+            is ExpenseRoom.Fine -> Expense.Fine(
                 dataModel.date,
                 dataModel.cost,
                 dataModel.type
             )
-            is ExpenseFirestore.Fuel -> Expense.Fuel(
+            is ExpenseRoom.Fuel -> Expense.Fuel(
                 dataModel.date,
                 dataModel.cost,
                 dataModel.liters,
                 dataModel.mileage,
             )
-            is ExpenseFirestore.Maintenance -> Expense.Maintenance(
+            is ExpenseRoom.Maintenance -> Expense.Maintenance(
                 dataModel.date,
                 dataModel.cost,
                 dataModel.type,
@@ -26,20 +26,20 @@ object RemoteExpenseConverter {
         }
     }
 
-    fun fromExpense(domainModel: Expense): ExpenseFirestore {
+    fun fromExpense(domainModel: Expense): ExpenseRoom {
         return when (domainModel) {
-            is Expense.Fine -> ExpenseFirestore.Fine(
+            is Expense.Fine -> ExpenseRoom.Fine(
                 domainModel.date,
                 domainModel.cost,
                 domainModel.type
             )
-            is Expense.Fuel -> ExpenseFirestore.Fuel(
+            is Expense.Fuel -> ExpenseRoom.Fuel(
                 domainModel.date,
                 domainModel.cost,
                 domainModel.liters,
                 domainModel.mileage,
             )
-            is Expense.Maintenance -> ExpenseFirestore.Maintenance(
+            is Expense.Maintenance -> ExpenseRoom.Maintenance(
                 domainModel.date,
                 domainModel.cost,
                 domainModel.type,
