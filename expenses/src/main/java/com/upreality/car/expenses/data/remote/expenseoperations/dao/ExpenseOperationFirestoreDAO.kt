@@ -1,9 +1,9 @@
-package com.upreality.car.expenses.data.remote.firestore.dao
+package com.upreality.car.expenses.data.remote.expenseoperations.dao
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.upreality.car.expenses.data.remote.firestore.model.entities.ExpenseEntityFirestore
-import com.upreality.car.expenses.data.remote.firestore.model.entities.ExpenseOperationFirestore
-import com.upreality.car.expenses.data.remote.firestore.model.filters.ExpenseOperationFilter
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
+import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestore
+import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseOperationFilter
 import durdinapps.rxfirebase2.RxFirestore
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -56,6 +56,6 @@ class ExpenseOperationFirestoreDAO @Inject constructor(
 
     private fun getCollectionFromTime(time: Long): Flowable<List<ExpenseOperationFirestore>> {
         val fromTimeQuery = operationsList.whereGreaterThan(ExpenseOperationFirestore::timestamp.name, time)
-        return RxFirestore.observeQueryRef(operationsList, ExpenseOperationFirestore::class.java)
+        return RxFirestore.observeQueryRef(fromTimeQuery, ExpenseOperationFirestore::class.java)
     }
 }

@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.remote.firestore.model.entities
+package com.upreality.car.expenses.data.remote.expenses.model.entities
 
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType

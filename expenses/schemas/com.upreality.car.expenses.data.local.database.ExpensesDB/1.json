@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "8c53e73adc5941112d814a3a53c64ba6",
+    "identityHash": "b120343e86e78316904a2fab5914ffec",
     "entities": [
       {
         "tableName": "expenses",
@@ -140,7 +140,7 @@
       },
       {
         "tableName": "expense_info",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `localId` INTEGER NOT NULL, `remoteId` TEXT NOT NULL, `state` INTEGER NOT NULL, `localVersion` INTEGER NOT NULL, `remoteVersion` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `local_id` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `remote_id` TEXT NOT NULL, `state` INTEGER NOT NULL, `remote_version` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -150,13 +150,19 @@
           },
           {
             "fieldPath": "localId",
-            "columnName": "localId",
+            "columnName": "local_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "remoteId",
-            "columnName": "remoteId",
+            "columnName": "remote_id",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -167,14 +173,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "localVersion",
-            "columnName": "localVersion",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "remoteVersion",
-            "columnName": "remoteVersion",
+            "columnName": "remote_version",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -192,7 +192,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8c53e73adc5941112d814a3a53c64ba6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b120343e86e78316904a2fab5914ffec')"
     ]
   }
 }

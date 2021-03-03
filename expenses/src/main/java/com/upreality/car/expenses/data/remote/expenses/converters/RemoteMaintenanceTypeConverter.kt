@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.remote.firestore.converters
+package com.upreality.car.expenses.data.remote.expenses.converters
 
 import com.upreality.car.expenses.domain.model.MaintenanceType
 

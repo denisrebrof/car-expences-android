@@ -1,6 +1,6 @@
-package com.upreality.car.expenses.data.remote.firestore.model.converters
+package com.upreality.car.expenses.data.remote.expenseoperations.converters
 
-import com.upreality.car.expenses.data.remote.firestore.model.entities.ExpenseOperationFirestoreType
+import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestoreType
 
 class ExpenseOperationFirestoreTypeConverter {
     fun toId(type: ExpenseOperationFirestoreType) = when (type) {

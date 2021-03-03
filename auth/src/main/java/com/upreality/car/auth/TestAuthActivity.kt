@@ -12,6 +12,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.tasks.Task
 import com.upreality.car.auth.databinding.ActivityTestAuthBinding
 
+@Suppress("DEPRECATION")
 class TestAuthActivity : AppCompatActivity() {
 
     companion object {

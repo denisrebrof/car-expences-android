@@ -1,10 +1,10 @@
-package com.upreality.car.expenses.data.remote.firestore.dao
+package com.upreality.car.expenses.data.remote.expenses.dao
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.upreality.car.expenses.data.remote.firestore.model.entities.ExpenseDetailsFirestore
-import com.upreality.car.expenses.data.remote.firestore.model.filters.ExpenseDetailsRemoteFilter
-import com.upreality.car.expenses.data.remote.firestore.model.filters.ExpenseDetailsRemoteFilter.All
-import com.upreality.car.expenses.data.remote.firestore.model.filters.ExpenseDetailsRemoteFilter.Id
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter.All
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter.Id
 import durdinapps.rxfirebase2.RxFirestore
 import durdinapps.rxfirebase2.RxFirestore.observeDocumentRef
 import durdinapps.rxfirebase2.RxFirestore.observeQueryRef

@@ -4,9 +4,8 @@ import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
-import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseRemoteState
+import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
-import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSource
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
@@ -18,7 +17,6 @@ import javax.inject.Inject
 class ExpensesRepositoryImpl @Inject constructor(
     private val timeDataSource: TimeDataSource,
     private val expensesLocalDataSource: ExpensesLocalDataSource,
-    private val expensesRemoteDataSource: ExpensesRemoteDataSource,
     private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
 ) : IExpensesRepository {
 
@@ -65,16 +63,16 @@ class ExpensesRepositoryImpl @Inject constructor(
     }
 
     private fun updateExpenseInfo(info: ExpenseInfo): Maybe<ExpenseInfo> {
-        return updateExpenseInfoState(info, ExpenseRemoteState.Updated)
+        return updateExpenseInfoState(info, ExpenseInfoSyncState.Updated)
     }
 
     private fun deleteExpenseInfo(info: ExpenseInfo): Maybe<ExpenseInfo> {
-        return updateExpenseInfoState(info, ExpenseRemoteState.Deleted)
+        return updateExpenseInfoState(info, ExpenseInfoSyncState.Deleted)
     }
 
     private fun updateExpenseInfoState(
         info: ExpenseInfo,
-        newState: ExpenseRemoteState
+        newState: ExpenseInfoSyncState
     ): Maybe<ExpenseInfo> {
         return timeDataSource.getTime().map { timestamp ->
             ExpenseInfo(

@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.remote.firestore.model.filters
+package com.upreality.car.expenses.data.remote.expenseoperations.model.filters
 
 sealed class ExpenseOperationFilter {
     object All: ExpenseOperationFilter()

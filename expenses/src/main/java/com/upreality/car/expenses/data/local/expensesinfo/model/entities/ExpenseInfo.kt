@@ -12,12 +12,13 @@ data class ExpenseInfo(
     @ColumnInfo(name = "local_id")
     val localId: Long,
     @ColumnInfo(name = "timestamp")
-    @TypeConverters(DateConverter::class)
+    @field:TypeConverters(DateConverter::class)
     val timestamp: Date,
     @ColumnInfo(name = "remote_id")
     val remoteId: String = String(),
+    @ColumnInfo(name = "state")
     @field:TypeConverters(ExpenseRemoteStateConverter::class)
-    val state: ExpenseRemoteState = ExpenseRemoteState.Created,
+    val state: ExpenseInfoSyncState = ExpenseInfoSyncState.Created,
     @ColumnInfo(name = "remote_version")
     val remoteVersion: Long = 0
 )

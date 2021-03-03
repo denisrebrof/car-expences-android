@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data.remote.firestore.model.entities
+package com.upreality.car.expenses.data.remote.expenses.model.entities
 
 data class ExpenseEntityFirestore(
     val id: String,

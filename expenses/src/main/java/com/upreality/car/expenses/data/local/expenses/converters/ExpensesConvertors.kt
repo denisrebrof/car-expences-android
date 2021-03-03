@@ -6,7 +6,6 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.FinesCategories.*
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.MaintenanceType.*
-import java.util.*
 
 class MaintenanceTypeConverter {
     @TypeConverter

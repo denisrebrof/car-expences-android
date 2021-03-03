@@ -98,5 +98,5 @@ dependencies {
     implementation rootProject.ext.firestore_database
     implementation rootProject.ext.rx2firebase
 
-    implementation project(':common')
+    api project(':common')
 }
