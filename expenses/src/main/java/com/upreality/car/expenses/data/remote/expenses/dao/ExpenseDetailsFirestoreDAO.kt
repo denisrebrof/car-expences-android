@@ -2,9 +2,9 @@ package com.upreality.car.expenses.data.remote.expenses.dao
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter.All
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter.Id
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsFirestoreFilter
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsFirestoreFilter.All
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsFirestoreFilter.Id
 import durdinapps.rxfirebase2.RxFirestore
 import durdinapps.rxfirebase2.RxFirestore.observeDocumentRef
 import durdinapps.rxfirebase2.RxFirestore.observeQueryRef
@@ -33,7 +33,7 @@ class ExpenseDetailsFirestoreDAO @Inject constructor(
         return RxFirestore.setDocument(docRef, details)
     }
 
-    fun get(filter: ExpenseDetailsRemoteFilter): Flowable<List<ExpenseDetailsFirestore>> {
+    fun get(filter: ExpenseDetailsFirestoreFilter): Flowable<List<ExpenseDetailsFirestore>> {
         return when (filter) {
             is All -> observeQueryRef(expenseDetailsCollection, ExpenseDetailsFirestore::class.java)
             is Id -> {

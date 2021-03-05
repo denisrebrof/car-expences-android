@@ -4,11 +4,11 @@ import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestore
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestoreType
-import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
+import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestoreType.*
+import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseOperationFilter
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpensesFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseFirestoreFilter
 import com.upreality.car.expenses.data.shared.model.DateConverter
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -20,38 +20,54 @@ class ExpensesRemoteDataSource @Inject constructor(
     private val expensesFirestoreDAO: ExpensesFirestoreDAO,
     private val expenseOperationFirestoreDAO: ExpenseOperationFirestoreDAO
 ) {
-    fun delete(expense: ExpenseFirestore): Completable {
-        return timeDataSource.getTime().map(DateConverter::toTimestamp).flatMapCompletable { time ->
-            val deleteOperation = ExpenseOperationFirestore(
-                "",
-                expense.id,
-                ExpenseOperationFirestoreType.Deleted,
-                time
-                )
-            val addDeleteOperation = expenseOperationFirestoreDAO.create(deleteOperation)
-            expensesFirestoreDAO.delete(expense).andThen(addDeleteOperation)
-        }
-    }
 
-    fun update(expense: ExpenseFirestore): Completable {
-        return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
-            val updateExpense = expenseEntityDAO.update(remoteExpense)
-            val details =
-                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
-            val updateDetails = expenseDetailsDAO.update(details)
-            updateExpense.andThen(updateDetails)
+    fun create(expense: ExpenseFirestore): Maybe<String> {
+        val createExpense = expensesFirestoreDAO.create(expense)
+        return createExpense.flatMap { expenseId ->
+            val tempMaybe = Maybe.just(expenseId)
+            saveOperation(expenseId, Created).andThen(tempMaybe)
         }
-    }
-
-    private fun getRemoteInstance(expenseId: String): Maybe<ExpenseEntityFirestore> {
-        val selector = ExpenseRemoteFilter.Id(expenseId)
-        return expenseEntityDAO
-            .get(selector)
-            .firstElement()
-            .map(List<ExpenseEntityFirestore>::first)
     }
 
     fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseFirestore>> {
-        return expenseEntityDAO.get(filter).flatMapSingle(this::convertToFirestoreExpenses)
+        return when (filter) {
+            is ExpenseRemoteFilter.All -> expensesFirestoreDAO.get(ExpenseFirestoreFilter.All)
+            is ExpenseRemoteFilter.FromTime -> getOperationsList(filter.time, filter.type)
+        }
+    }
+
+    private fun getOperationsList(
+        fromTime: Long,
+        type: ExpenseOperationFirestoreType
+    ): Flowable<List<ExpenseOperationFirestore>> {
+        return expenseOperationFirestoreDAO
+            .get(ExpenseOperationFilter.FromTime(fromTime))
+            .map { list -> list
+                .filter { it.type == type }
+                .sortedByDescending { it.timestamp }
+                .distinctBy { it.expenseId }
+                .reversed()
+            }
+    }
+
+    fun update(expense: ExpenseFirestore): Completable {
+        val saveUpdateOperation = saveOperation(expense.id, Updated)
+        return expensesFirestoreDAO.update(expense).andThen(saveUpdateOperation)
+    }
+
+    fun delete(expense: ExpenseFirestore): Completable {
+        val saveDeleteOperation = saveOperation(expense.id, Deleted)
+        return expensesFirestoreDAO.delete(expense).andThen(saveDeleteOperation)
+    }
+
+    private fun saveOperation(
+        targetExpenseId: String,
+        type: ExpenseOperationFirestoreType
+    ): Completable {
+        val currentTimeMaybe = timeDataSource.getTime().map(DateConverter::toTimestamp)
+        return currentTimeMaybe.flatMapCompletable { time ->
+            val updateOperation = ExpenseOperationFirestore("", targetExpenseId, type, time)
+            expenseOperationFirestoreDAO.create(updateOperation).ignoreElement()
+        }
     }
 }

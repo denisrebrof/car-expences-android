@@ -6,8 +6,8 @@ import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseE
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsFirestoreFilter
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseFirestoreFilter
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -38,20 +38,20 @@ class ExpensesFirestoreDAO @Inject constructor(
     }
 
     private fun getRemoteInstance(expenseId: String): Maybe<ExpenseEntityFirestore> {
-        val selector = ExpenseRemoteFilter.Id(expenseId)
+        val selector = ExpenseFirestoreFilter.Id(expenseId)
         return expenseEntityDAO
             .get(selector)
             .firstElement()
             .map(List<ExpenseEntityFirestore>::first)
     }
 
-    fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseFirestore>> {
+    fun get(filter: ExpenseFirestoreFilter): Flowable<List<ExpenseFirestore>> {
         return expenseEntityDAO.get(filter).flatMapSingle(this::convertToFirestoreExpenses)
     }
 
     private fun convertToFirestoreExpenses(entities: List<ExpenseEntityFirestore>): Single<List<ExpenseFirestore>> {
         return Flowable.fromIterable(entities).flatMapMaybe { remoteEntity ->
-            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId)
+            val detailsSelector = ExpenseDetailsFirestoreFilter.Id(remoteEntity.detailsId)
             val detailsMaybe = expenseDetailsDAO
                 .get(detailsSelector)
                 .firstElement()

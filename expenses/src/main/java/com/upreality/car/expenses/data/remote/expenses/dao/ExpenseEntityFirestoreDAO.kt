@@ -2,7 +2,7 @@ package com.upreality.car.expenses.data.remote.expenses.dao
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseFirestoreFilter
 import durdinapps.rxfirebase2.RxFirestore
 import durdinapps.rxfirebase2.RxFirestore.observeQueryRef
 import io.reactivex.Completable
@@ -30,10 +30,10 @@ class ExpenseEntityFirestoreDAO @Inject constructor(
         return RxFirestore.setDocument(docRef, expense)
     }
 
-    fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseEntityFirestore>> {
+    fun get(filter: ExpenseFirestoreFilter): Flowable<List<ExpenseEntityFirestore>> {
         return when (filter) {
-            ExpenseRemoteFilter.All -> getCollectionFlow()
-            is ExpenseRemoteFilter.Id -> getDocumentFlow(filter.id).map { listOf(it) }
+            ExpenseFirestoreFilter.All -> getCollectionFlow()
+            is ExpenseFirestoreFilter.Id -> getDocumentFlow(filter.id).map { listOf(it) }
         }
     }
 
