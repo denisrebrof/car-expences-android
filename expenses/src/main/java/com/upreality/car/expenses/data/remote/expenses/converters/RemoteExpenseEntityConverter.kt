@@ -1,24 +1,24 @@
 package com.upreality.car.expenses.data.remote.expenses.converters
 
-import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseRemoteDetailsEntity
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseRemoteEntity
 
 object RemoteExpenseEntityConverter {
 
-    private fun getExpenseType(remoteModel: ExpenseFirestore): ExpenseType {
+    private fun getExpenseType(remoteModel: ExpenseRemote): ExpenseType {
         return when (remoteModel) {
-            is ExpenseFirestore.Fuel -> ExpenseType.Fuel
-            is ExpenseFirestore.Fine -> ExpenseType.Fines
-            is ExpenseFirestore.Maintenance -> ExpenseType.Maintenance
+            is ExpenseRemote.Fuel -> ExpenseType.Fuel
+            is ExpenseRemote.Fine -> ExpenseType.Fines
+            is ExpenseRemote.Maintenance -> ExpenseType.Maintenance
         }
     }
 
-    fun toExpenseEntity(remoteModel: ExpenseFirestore, detailsId: String): ExpenseEntityFirestore {
+    fun toExpenseEntity(remoteModel: ExpenseRemote, detailsId: String): ExpenseRemoteEntity {
         val date = DateConverter.toTime(remoteModel.date)
         val type = getExpenseType(remoteModel)
-        return ExpenseEntityFirestore(
+        return ExpenseRemoteEntity(
             String(), // empty
             date,
             remoteModel.cost,
@@ -27,23 +27,23 @@ object RemoteExpenseEntityConverter {
         )
     }
 
-    fun toExpenseDetails(remoteModel: ExpenseFirestore, id: String): ExpenseDetailsFirestore {
+    fun toExpenseDetails(remoteModel: ExpenseRemote, id: String): ExpenseRemoteDetailsEntity {
         return when (getExpenseType(remoteModel)) {
             ExpenseType.Fuel -> {
-                val fuelExpense = remoteModel as ExpenseFirestore.Fuel
-                ExpenseDetailsFirestore.ExpenseFuelDetails(
+                val fuelExpense = remoteModel as ExpenseRemote.Fuel
+                ExpenseRemoteDetailsEntity.ExpenseFuelDetails(
                     id,
                     fuelExpense.liters,
                     fuelExpense.mileage
                 )
             }
             ExpenseType.Fines -> {
-                val finesExpense = remoteModel as ExpenseFirestore.Fine
-                ExpenseDetailsFirestore.ExpenseFinesDetails(id, finesExpense.type)
+                val finesExpense = remoteModel as ExpenseRemote.Fine
+                ExpenseRemoteDetailsEntity.ExpenseFinesDetails(id, finesExpense.type)
             }
             ExpenseType.Maintenance -> {
-                val finesExpense = remoteModel as ExpenseFirestore.Maintenance
-                ExpenseDetailsFirestore.ExpenseMaintenanceDetails(
+                val finesExpense = remoteModel as ExpenseRemote.Maintenance
+                ExpenseRemoteDetailsEntity.ExpenseMaintenanceDetails(
                     id,
                     finesExpense.type,
                     finesExpense.mileage
@@ -53,23 +53,23 @@ object RemoteExpenseEntityConverter {
     }
 
     fun toExpense(
-        entity: ExpenseEntityFirestore,
-        expenseDetails: ExpenseDetailsFirestore
-    ): ExpenseFirestore {
+        entity: ExpenseRemoteEntity,
+        expenseDetails: ExpenseRemoteDetailsEntity
+    ): ExpenseRemote {
         val type = RemoteExpenseTypeConverter.toExpenseType(entity.type)
         val date = DateConverter.toDate(entity.date)
         return when (type) {
             ExpenseType.Fines -> {
-                val details = expenseDetails as ExpenseDetailsFirestore.ExpenseFinesDetails
-                ExpenseFirestore.Fine(date, entity.cost, details.type)
+                val details = expenseDetails as ExpenseRemoteDetailsEntity.ExpenseFinesDetails
+                ExpenseRemote.Fine(date, entity.cost, details.type)
             }
             ExpenseType.Fuel -> {
-                val details = expenseDetails as ExpenseDetailsFirestore.ExpenseFuelDetails
-                ExpenseFirestore.Fuel(date, entity.cost, details.liters, details.mileage)
+                val details = expenseDetails as ExpenseRemoteDetailsEntity.ExpenseFuelDetails
+                ExpenseRemote.Fuel(date, entity.cost, details.liters, details.mileage)
             }
             ExpenseType.Maintenance -> {
-                val details = expenseDetails as ExpenseDetailsFirestore.ExpenseMaintenanceDetails
-                ExpenseFirestore.Maintenance(date, entity.cost, details.type, details.mileage)
+                val details = expenseDetails as ExpenseRemoteDetailsEntity.ExpenseMaintenanceDetails
+                ExpenseRemote.Maintenance(date, entity.cost, details.type, details.mileage)
             }
         }
         //missed id

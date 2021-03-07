@@ -7,7 +7,7 @@ import com.upreality.car.cars.data.CarsRepositoryImpl
 import com.upreality.car.cars.data.datasoures.CarsLocalDataSource
 import com.upreality.car.cars.domain.ICarsRepository
 import com.upreality.car.cars.domain.model.Car
-import com.upreality.car.expenses.data.local.expenses.model.filters.ExpenseIdFilter
+import com.upreality.car.expenses.data.local.expenses.model.filters.ExpenseLocalIdFilter
 import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule
@@ -47,7 +47,7 @@ class CarsRepositoryTest {
             .subscribeOn(Schedulers.trampoline())
             .observeOn(Schedulers.trampoline())
             .flatMap {
-                val idFilter = ExpenseIdFilter(it).getFilterExpression()
+                val idFilter = ExpenseLocalIdFilter(it).getFilterExpression()
                 carsRepository.getCar(carId).firstElement()
             }
 
