@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.di
 
-import com.upreality.car.expenses.data.ExpensesRepositoryImpl
+import com.upreality.car.expenses.data.repository.ExpensesRepositoryImpl
 import com.upreality.car.expenses.domain.IExpensesRepository
 import dagger.Binds
 import dagger.Module

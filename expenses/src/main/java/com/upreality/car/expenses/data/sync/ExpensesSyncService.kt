@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data
+package com.upreality.car.expenses.data.sync
 
 import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
@@ -15,6 +15,7 @@ import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.E
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpensesFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.shared.model.DateConverter
+import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -106,6 +107,10 @@ class ExpensesSyncService @Inject constructor(
                     }
             }
         }.subscribe()
+    }
+
+    override fun createSyncLoop(): Disposable {
+        TODO("Not yet implemented")
     }
 
 

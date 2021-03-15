@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.data
+package com.upreality.car.expenses.data.repository
 
 import com.upreality.car.common.data.time.TimeDataSource
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource

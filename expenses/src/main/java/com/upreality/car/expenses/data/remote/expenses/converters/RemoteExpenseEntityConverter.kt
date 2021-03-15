@@ -1,21 +1,21 @@
 package com.upreality.car.expenses.data.remote.expenses.converters
 
-import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
 
 object RemoteExpenseEntityConverter {
 
-    private fun getExpenseType(remoteModel: ExpenseFirestore): ExpenseType {
+    private fun getExpenseType(remoteModel: ExpenseRemote): ExpenseType {
         return when (remoteModel) {
-            is ExpenseFirestore.Fuel -> ExpenseType.Fuel
-            is ExpenseFirestore.Fine -> ExpenseType.Fines
-            is ExpenseFirestore.Maintenance -> ExpenseType.Maintenance
+            is ExpenseRemote.Fuel -> ExpenseType.Fuel
+            is ExpenseRemote.Fine -> ExpenseType.Fines
+            is ExpenseRemote.Maintenance -> ExpenseType.Maintenance
         }
     }
 
-    fun toExpenseEntity(remoteModel: ExpenseFirestore, detailsId: String): ExpenseEntityFirestore {
+    fun toExpenseEntity(remoteModel: ExpenseRemote, detailsId: String): ExpenseEntityFirestore {
         val date = DateConverter.toTime(remoteModel.date)
         val type = getExpenseType(remoteModel)
         return ExpenseEntityFirestore(
@@ -27,10 +27,10 @@ object RemoteExpenseEntityConverter {
         )
     }
 
-    fun toExpenseDetails(remoteModel: ExpenseFirestore, id: String): ExpenseDetailsFirestore {
+    fun toExpenseDetails(remoteModel: ExpenseRemote, id: String): ExpenseDetailsFirestore {
         return when (getExpenseType(remoteModel)) {
             ExpenseType.Fuel -> {
-                val fuelExpense = remoteModel as ExpenseFirestore.Fuel
+                val fuelExpense = remoteModel as ExpenseRemote.Fuel
                 ExpenseDetailsFirestore.ExpenseFuelDetails(
                     id,
                     fuelExpense.liters,
@@ -38,11 +38,11 @@ object RemoteExpenseEntityConverter {
                 )
             }
             ExpenseType.Fines -> {
-                val finesExpense = remoteModel as ExpenseFirestore.Fine
+                val finesExpense = remoteModel as ExpenseRemote.Fine
                 ExpenseDetailsFirestore.ExpenseFinesDetails(id, finesExpense.type)
             }
             ExpenseType.Maintenance -> {
-                val finesExpense = remoteModel as ExpenseFirestore.Maintenance
+                val finesExpense = remoteModel as ExpenseRemote.Maintenance
                 ExpenseDetailsFirestore.ExpenseMaintenanceDetails(
                     id,
                     finesExpense.type,
@@ -55,21 +55,21 @@ object RemoteExpenseEntityConverter {
     fun toExpense(
         entity: ExpenseEntityFirestore,
         expenseDetails: ExpenseDetailsFirestore
-    ): ExpenseFirestore {
+    ): ExpenseRemote {
         val type = RemoteExpenseTypeConverter.toExpenseType(entity.type)
         val date = DateConverter.toDate(entity.date)
         return when (type) {
             ExpenseType.Fines -> {
                 val details = expenseDetails as ExpenseDetailsFirestore.ExpenseFinesDetails
-                ExpenseFirestore.Fine(date, entity.cost, details.type)
+                ExpenseRemote.Fine(date, entity.cost, details.type)
             }
             ExpenseType.Fuel -> {
                 val details = expenseDetails as ExpenseDetailsFirestore.ExpenseFuelDetails
-                ExpenseFirestore.Fuel(date, entity.cost, details.liters, details.mileage)
+                ExpenseRemote.Fuel(date, entity.cost, details.liters, details.mileage)
             }
             ExpenseType.Maintenance -> {
                 val details = expenseDetails as ExpenseDetailsFirestore.ExpenseMaintenanceDetails
-                ExpenseFirestore.Maintenance(date, entity.cost, details.type, details.mileage)
+                ExpenseRemote.Maintenance(date, entity.cost, details.type, details.mileage)
             }
         }
         //missed id

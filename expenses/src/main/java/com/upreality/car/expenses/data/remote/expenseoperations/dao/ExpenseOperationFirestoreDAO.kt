@@ -1,7 +1,6 @@
 package com.upreality.car.expenses.data.remote.expenseoperations.dao
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestore
 import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseOperationFilter
 import durdinapps.rxfirebase2.RxFirestore

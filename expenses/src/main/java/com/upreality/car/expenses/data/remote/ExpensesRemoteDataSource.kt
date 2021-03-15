@@ -6,7 +6,7 @@ import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.E
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestoreType
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpensesFirestoreDAO
-import com.upreality.car.expenses.data.remote.expenses.model.ExpenseFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import com.upreality.car.expenses.data.shared.model.DateConverter
@@ -17,10 +17,10 @@ import javax.inject.Inject
 
 class ExpensesRemoteDataSource @Inject constructor(
     private val timeDataSource: TimeDataSource,
-    private val expensesFirestoreDAO: ExpensesFirestoreDAO,
+    private val expenseEntityDAO: ExpensesFirestoreDAO,
     private val expenseOperationFirestoreDAO: ExpenseOperationFirestoreDAO
 ) {
-    fun delete(expense: ExpenseFirestore): Completable {
+    fun delete(expense: ExpenseRemote): Completable {
         return timeDataSource.getTime().map(DateConverter::toTimestamp).flatMapCompletable { time ->
             val deleteOperation = ExpenseOperationFirestore(
                 "",
@@ -33,7 +33,7 @@ class ExpensesRemoteDataSource @Inject constructor(
         }
     }
 
-    fun update(expense: ExpenseFirestore): Completable {
+    fun update(expense: ExpenseRemote): Completable {
         return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
             val updateExpense = expenseEntityDAO.update(remoteExpense)
             val details =
@@ -51,7 +51,7 @@ class ExpensesRemoteDataSource @Inject constructor(
             .map(List<ExpenseEntityFirestore>::first)
     }
 
-    fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseFirestore>> {
+    fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseRemote>> {
         return expenseEntityDAO.get(filter).flatMapSingle(this::convertToFirestoreExpenses)
     }
 }
