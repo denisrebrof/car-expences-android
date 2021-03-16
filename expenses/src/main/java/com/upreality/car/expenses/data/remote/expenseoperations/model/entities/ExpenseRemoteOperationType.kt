@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.remote.expenseoperations.model.entities
 
-enum class ExpenseOperationFirestoreType {
+enum class ExpenseRemoteOperationType {
     Created,
     Updated,
     Deleted

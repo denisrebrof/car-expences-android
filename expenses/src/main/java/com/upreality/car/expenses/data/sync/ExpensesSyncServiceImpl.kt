@@ -2,7 +2,7 @@ package com.upreality.car.expenses.data.sync
 
 import android.util.Log
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
-import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestoreType
+import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseRemoteOperationType
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.shared.model.DateConverter
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
@@ -31,9 +31,9 @@ class ExpensesSyncServiceImpl @Inject constructor(
             val syncFromRemote = Flowable.fromIterable(updatedRemote)
                 .flatMapCompletable { updatedExpense ->
                     when (updatedExpense.operationType) {
-                        ExpenseOperationFirestoreType.Created -> createLocal(updatedExpense)
-                        ExpenseOperationFirestoreType.Updated -> updateLocal(updatedExpense)
-                        ExpenseOperationFirestoreType.Deleted -> deleteLocal(updatedExpense)
+                        ExpenseRemoteOperationType.Created -> createLocal(updatedExpense)
+                        ExpenseRemoteOperationType.Updated -> updateLocal(updatedExpense)
+                        ExpenseRemoteOperationType.Deleted -> deleteLocal(updatedExpense)
                     }
                 }
 
@@ -60,7 +60,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedExpense.expense)
         val remoteSyncModel = ExpenseRemoteSyncModel(
             remoteModel,
-            ExpenseOperationFirestoreType.Created
+            ExpenseRemoteOperationType.Created
         )
         return remoteDataSource
             .create(remoteSyncModel)
@@ -71,7 +71,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedExpense.expense)
         val remoteSyncModel = ExpenseRemoteSyncModel(
             remoteModel,
-            ExpenseOperationFirestoreType.Updated
+            ExpenseRemoteOperationType.Updated
         )
         return remoteDataSource
             .update(remoteSyncModel)
@@ -83,7 +83,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedExpense.expense)
         val remoteSyncModel = ExpenseRemoteSyncModel(
             remoteModel,
-            ExpenseOperationFirestoreType.Deleted
+            ExpenseRemoteOperationType.Deleted
         )
         return remoteDataSource
             .delete(remoteSyncModel)

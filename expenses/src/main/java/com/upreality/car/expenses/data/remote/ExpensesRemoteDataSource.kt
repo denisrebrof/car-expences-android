@@ -1,35 +1,31 @@
 package com.upreality.car.expenses.data.remote
 
-import com.upreality.car.common.data.time.TimeDataSource
-import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationFirestoreDAO
-import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestore
-import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseOperationFirestoreType
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
-import com.upreality.car.expenses.data.remote.expenses.dao.ExpensesFirestoreDAO
+import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseDetailsFirestoreDAO
+import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseEntityFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
-import com.upreality.car.expenses.data.shared.model.DateConverter
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
+import io.reactivex.Single
 import javax.inject.Inject
 
 class ExpensesRemoteDataSource @Inject constructor(
-    private val timeDataSource: TimeDataSource,
-    private val expenseEntityDAO: ExpensesFirestoreDAO,
-    private val expenseOperationFirestoreDAO: ExpenseOperationFirestoreDAO
+    private val expenseEntityDAO: ExpenseEntityFirestoreDAO,
+    private val expenseDetailsDAO: ExpenseDetailsFirestoreDAO
 ) {
+
     fun delete(expense: ExpenseRemote): Completable {
-        return timeDataSource.getTime().map(DateConverter::toTimestamp).flatMapCompletable { time ->
-            val deleteOperation = ExpenseOperationFirestore(
-                "",
-                expense.id,
-                ExpenseOperationFirestoreType.Deleted,
-                time
-                )
-            val addDeleteOperation = expenseOperationFirestoreDAO.create(deleteOperation)
-            expensesFirestoreDAO.delete(expense).andThen(addDeleteOperation)
+        return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
+            val deleteExpense = expenseEntityDAO.delete(remoteExpense)
+            val details =
+                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
+            val deleteDetails = expenseDetailsDAO.delete(details)
+            deleteExpense.andThen(deleteDetails)
         }
     }
 
@@ -53,5 +49,29 @@ class ExpensesRemoteDataSource @Inject constructor(
 
     fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseRemote>> {
         return expenseEntityDAO.get(filter).flatMapSingle(this::convertToFirestoreExpenses)
+    }
+
+    private fun convertToFirestoreExpenses(entities: List<ExpenseEntityFirestore>): Single<List<ExpenseRemote>> {
+        return Flowable.fromIterable(entities).flatMapMaybe { remoteEntity ->
+            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId)
+            val detailsMaybe = expenseDetailsDAO
+                .get(detailsSelector)
+                .firstElement()
+                .map(List<ExpenseDetailsFirestore>::firstOrNull)
+
+            val expenseMaybe = detailsMaybe.map { remoteDetails ->
+                RemoteExpenseEntityConverter.toExpense(remoteEntity, remoteDetails)
+            }
+            expenseMaybe
+        }.toList()
+    }
+
+    fun create(expense: ExpenseRemote): Maybe<String> {
+        val details = RemoteExpenseEntityConverter.toExpenseDetails(expense, String())
+        val createDetailsMaybe = expenseDetailsDAO.create(details)
+        return createDetailsMaybe.flatMap { detailsId ->
+            val expenseEntity = RemoteExpenseEntityConverter.toExpenseEntity(expense, detailsId)
+            expenseEntityDAO.create(expenseEntity)
+        }
     }
 }
