@@ -3,7 +3,7 @@ package com.upreality.car.expenses.data.shared.model
 import androidx.room.TypeConverter
 import java.util.*
 
-object DateConverter {
+class DateConverter {
     @TypeConverter
     fun toTimestamp(date: Date) = date.time
 

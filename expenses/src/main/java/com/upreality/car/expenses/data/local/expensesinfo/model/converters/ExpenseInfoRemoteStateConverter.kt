@@ -3,7 +3,7 @@ package com.upreality.car.expenses.data.local.expensesinfo.model.converters
 import androidx.room.TypeConverter
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
 
-object ExpenseInfoRemoteStateConverter {
+class ExpenseInfoRemoteStateConverter {
     @TypeConverter
     fun toId(state: ExpenseInfoSyncState) = state.id
 

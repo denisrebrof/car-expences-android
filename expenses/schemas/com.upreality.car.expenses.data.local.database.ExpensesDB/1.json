@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b120343e86e78316904a2fab5914ffec",
+    "identityHash": "0359f609568601f3b2ba93e8fcd859d7",
     "entities": [
       {
         "tableName": "expenses",
@@ -140,7 +140,7 @@
       },
       {
         "tableName": "expense_info",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `local_id` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `remote_id` TEXT NOT NULL, `state` INTEGER NOT NULL, `remote_version` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `local_id` INTEGER NOT NULL, `remote_id` TEXT NOT NULL, `state` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -155,12 +155,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "remoteId",
             "columnName": "remote_id",
             "affinity": "TEXT",
@@ -169,12 +163,6 @@
           {
             "fieldPath": "state",
             "columnName": "state",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "remoteVersion",
-            "columnName": "remote_version",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -192,7 +180,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b120343e86e78316904a2fab5914ffec')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0359f609568601f3b2ba93e8fcd859d7')"
     ]
   }
 }
