@@ -27,7 +27,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override fun create(expense: ExpenseRemote): Maybe<String> {
+    override fun create(expense: ExpenseRemote): Maybe<Long> {
         TODO("Not yet implemented")
     }
 }

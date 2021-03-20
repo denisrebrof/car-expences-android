@@ -10,5 +10,5 @@ interface IExpensesSyncRemoteDataSource {
     fun get(filter: ExpenseRemoteSyncFilter): Flowable<List<ExpenseRemoteSyncModel>>
     fun update(expense: ExpenseRemote): Maybe<Long>
     fun delete(expense: ExpenseRemote): Maybe<Long>
-    fun create(expense: ExpenseRemote): Maybe<String>
+    fun create(expense: ExpenseRemote): Maybe<Long>
 }

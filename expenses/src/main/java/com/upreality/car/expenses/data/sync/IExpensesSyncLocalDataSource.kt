@@ -1,14 +1,13 @@
 package com.upreality.car.expenses.data.sync
 
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
-import com.upreality.car.expenses.data.sync.model.ExpensesLocalSyncFilter
+import com.upreality.car.expenses.domain.model.expence.Expense
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Maybe
 
 interface IExpensesSyncLocalDataSource {
-    fun get(filter: ExpensesLocalSyncFilter): Flowable<List<ExpenseLocalSyncModel>>
-    fun update(expense: ExpenseLocalSyncModel): Completable
-    fun delete(expense: ExpenseLocalSyncModel): Completable
-    fun create(expense: ExpenseLocalSyncModel): Maybe<Long>
+    fun getUpdates(): Flowable<List<ExpenseLocalSyncModel>>
+    fun update(expense: Expense): Completable
+    fun delete(expense: Expense): Completable
+    fun create(expense: Expense): Completable
 }
