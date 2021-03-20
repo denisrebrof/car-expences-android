@@ -20,10 +20,10 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     private val operationsDAO: ExpenseOperationRemoteDAO,
 ) : IExpensesSyncRemoteDataSource {
 
-    val dateConverter = DateConverter()
+    private val dateConverter = DateConverter()
 
-    override fun getModified(timestamp: Long): Flowable<List<ExpenseRemoteSyncOperationModel>> {
-        val filter = ExpenseRemoteOperationFilter.FromTime(timestamp)
+    override fun getModified(fromTime: Long): Flowable<List<ExpenseRemoteSyncOperationModel>> {
+        val filter = ExpenseRemoteOperationFilter.FromTime(fromTime)
         return operationsDAO.get(filter).flatMapMaybe { operations ->
             Flowable.fromIterable(operations).flatMapMaybe { operation ->
                 val timestamp = dateConverter.toTimestamp(operation.timestamp!!)

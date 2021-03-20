@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.upreality.car.expenses.databinding.ActivityExpencesBinding
 import com.upreality.car.expenses.domain.IExpensesRepository
+import com.upreality.car.expenses.domain.IExpensesSyncService
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,6 +22,9 @@ class ExpensesActivity : AppCompatActivity() {
     @Inject
     lateinit var repository: IExpensesRepository
 
+    @Inject
+    lateinit var sync: IExpensesSyncService
+
     private lateinit var binding: ActivityExpencesBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +36,7 @@ class ExpensesActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.createExpenseButton.setOnClickListener { executeCreation() }
+        sync.createSyncLoop().disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun executeCreation() {

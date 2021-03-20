@@ -95,7 +95,7 @@ dependencies {
     implementation rootProject.ext.view_binding_delegate
 
     //Firebase
-    implementation rootProject.ext.firestore_database
+    api rootProject.ext.firestore_database
     implementation rootProject.ext.rx2firebase
 
     api project(':common')
