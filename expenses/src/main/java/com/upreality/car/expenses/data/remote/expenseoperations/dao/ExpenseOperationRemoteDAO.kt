@@ -9,7 +9,7 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import javax.inject.Inject
 
-class ExpenseOperationFirestoreDAO @Inject constructor(
+class ExpenseOperationRemoteDAO @Inject constructor(
     remoteStorage: FirebaseFirestore
 ) {
 

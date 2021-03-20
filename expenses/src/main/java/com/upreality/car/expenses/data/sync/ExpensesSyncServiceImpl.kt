@@ -4,11 +4,12 @@ import android.util.Log
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseRemoteOperationType
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
+import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.shared.model.DateConverter
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
+import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncFilter
 import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncModel
 import com.upreality.car.expenses.data.sync.model.ExpensesLocalSyncFilter
-import com.upreality.car.expenses.data.sync.model.ExpensesRemoteSyncFilter
 import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -23,6 +24,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
 ) : IExpensesSyncService {
 
     override fun createSyncLoop(): Disposable {
+
         return Flowable.combineLatest(
             getUpdatedRemoteExpensesFlow(),
             getUpdatedLocalExpensesFlow(),
@@ -58,41 +60,29 @@ class ExpensesSyncServiceImpl @Inject constructor(
 
     private fun createRemote(updatedExpense: ExpenseLocalSyncModel): Completable {
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedExpense.expense)
-        val remoteSyncModel = ExpenseRemoteSyncModel(
-            remoteModel,
-            ExpenseRemoteOperationType.Created
-        )
         return remoteDataSource
-            .create(remoteSyncModel)
+            .create(remoteModel)
             .flatMapCompletable(this::updateTimestampByRemote)
     }
 
     private fun updateRemote(updatedExpense: ExpenseLocalSyncModel): Completable {
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedExpense.expense)
-        val remoteSyncModel = ExpenseRemoteSyncModel(
-            remoteModel,
-            ExpenseRemoteOperationType.Updated
-        )
         return remoteDataSource
-            .update(remoteSyncModel)
+            .update(remoteModel)
             .map(DateConverter::fromTimestamp)
             .flatMapCompletable(this::updateTimestamp)
     }
 
     private fun deleteRemote(updatedExpense: ExpenseLocalSyncModel): Completable {
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedExpense.expense)
-        val remoteSyncModel = ExpenseRemoteSyncModel(
-            remoteModel,
-            ExpenseRemoteOperationType.Deleted
-        )
         return remoteDataSource
-            .delete(remoteSyncModel)
+            .delete(remoteModel)
             .map(DateConverter::fromTimestamp)
             .flatMapCompletable(this::updateTimestamp)
     }
 
     private fun updateTimestampByRemote(remoteId: String): Completable {
-        val filter = ExpensesRemoteSyncFilter.Id(remoteId)
+        val filter = ExpenseRemoteSyncFilter.Id(remoteId)
         return remoteDataSource.get(filter)
             .firstElement()
             .map(List<ExpenseRemoteSyncModel>::firstOrNull)
@@ -104,7 +94,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseRemoteSyncModel>> {
         return syncTimestampProvider.get()
             .map(DateConverter::fromTimestamp)
-            .map(ExpensesRemoteSyncFilter::FromTime)
+            .map(ExpenseRemoteSyncFilter::FromTime)
             .switchMap(remoteDataSource::get)
             .onBackpressureLatest()
             .map { it.sortedBy(ExpenseRemoteSyncModel::timestamp) }

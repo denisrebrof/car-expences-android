@@ -9,7 +9,7 @@ import javax.inject.Provider;
     "unchecked",
     "rawtypes"
 })
-public final class ExpenseOperationFirestoreDAO_Factory implements Factory<ExpenseOperationFirestoreDAO> {
+public final class ExpenseOperationFirestoreDAO_Factory implements Factory<ExpenseOperationRemoteDAO> {
   private final Provider<FirebaseFirestore> remoteStorageProvider;
 
   public ExpenseOperationFirestoreDAO_Factory(Provider<FirebaseFirestore> remoteStorageProvider) {
@@ -17,7 +17,7 @@ public final class ExpenseOperationFirestoreDAO_Factory implements Factory<Expen
   }
 
   @Override
-  public ExpenseOperationFirestoreDAO get() {
+  public ExpenseOperationRemoteDAO get() {
     return newInstance(remoteStorageProvider.get());
   }
 
@@ -26,7 +26,7 @@ public final class ExpenseOperationFirestoreDAO_Factory implements Factory<Expen
     return new ExpenseOperationFirestoreDAO_Factory(remoteStorageProvider);
   }
 
-  public static ExpenseOperationFirestoreDAO newInstance(FirebaseFirestore remoteStorage) {
-    return new ExpenseOperationFirestoreDAO(remoteStorage);
+  public static ExpenseOperationRemoteDAO newInstance(FirebaseFirestore remoteStorage) {
+    return new ExpenseOperationRemoteDAO(remoteStorage);
   }
 }

@@ -1,14 +1,14 @@
 package com.upreality.car.expenses.data.sync
 
+import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
+import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncFilter
 import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncModel
-import com.upreality.car.expenses.data.sync.model.ExpensesRemoteSyncFilter
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 
 interface IExpensesSyncRemoteDataSource {
-    fun get(filter: ExpensesRemoteSyncFilter): Flowable<List<ExpenseRemoteSyncModel>>
-    fun update(expense: ExpenseRemoteSyncModel): Maybe<Long>
-    fun delete(expense: ExpenseRemoteSyncModel): Maybe<Long>
-    fun create(expense: ExpenseRemoteSyncModel): Maybe<String>
+    fun get(filter: ExpenseRemoteSyncFilter): Flowable<List<ExpenseRemoteSyncModel>>
+    fun update(expense: ExpenseRemote): Maybe<Long>
+    fun delete(expense: ExpenseRemote): Maybe<Long>
+    fun create(expense: ExpenseRemote): Maybe<String>
 }
