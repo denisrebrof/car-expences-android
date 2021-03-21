@@ -17,7 +17,7 @@ import io.reactivex.Maybe
 import javax.inject.Inject
 
 class ExpensesRepositoryImpl @Inject constructor(
-    private val expensesLocalDataSource: ExpensesLocalDataSource
+    private val expensesLocalDataSource: IExpensesLocalDataSource
 ) : IExpensesRepository {
 
     companion object {

@@ -8,7 +8,9 @@ import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncOperationMode
 import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.processors.BehaviorProcessor
 import javax.inject.Inject
 
 class ExpensesSyncServiceImpl @Inject constructor(
@@ -17,12 +19,27 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
+    private val triggerProc = BehaviorProcessor.createDefault(Unit)
+
     override fun createSyncLoop(): Disposable {
 
-        return Flowable.combineLatest(
-            getUpdatedRemoteExpensesFlow(),
+        val composite = CompositeDisposable()
+
+        val logLocalChangeDisp = localDataSource.getUpdates().retry().subscribe {
+            Log.d("SYNC", "Updated local list")
+        }
+
+        val logRemChangeDisp =
+            getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseRemoteSyncOperationModel>())
+                .retry().subscribe {
+                Log.d("SYNC", "Updated REMOTE list")
+            }
+
+        val sync = Flowable.combineLatest(
+            triggerProc,
+            getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseRemoteSyncOperationModel>()),
             localDataSource.getUpdates(),
-            { remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
+            { _, remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
         ).onBackpressureLatest().flatMapCompletable { (updatedRemote, updatesLocal) ->
             val syncFromRemote = Flowable
                 .fromIterable(updatedRemote)
@@ -36,13 +53,20 @@ class ExpensesSyncServiceImpl @Inject constructor(
             syncFromRemote.andThen(syncFromLocal)
         }.doOnError {
             Log.e("Sync", "Error during sync occurs: $it")
-        }.subscribe()
+        }.retry().subscribe()
+
+        composite.addAll(logLocalChangeDisp, logRemChangeDisp, sync)
+
+        return composite
+    }
+
+    override fun triggerSync() {
+        triggerProc.onNext(Unit)
     }
 
     private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseRemoteSyncOperationModel>> {
         return syncTimestampProvider.get()
             .switchMap(remoteDataSource::getModified)
-            .onBackpressureLatest()
             .map { it.sortedBy(ExpenseRemoteSyncOperationModel::tstamp) }
     }
 

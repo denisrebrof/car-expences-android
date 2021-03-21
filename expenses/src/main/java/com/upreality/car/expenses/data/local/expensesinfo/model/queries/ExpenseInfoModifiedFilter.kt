@@ -9,7 +9,7 @@ object ExpenseInfoModifiedFilter : IExpenseInfoFilter {
             ExpenseInfoSyncState.Updated,
             ExpenseInfoSyncState.Deleted
         )
-        val sqlRange = modifiedStates.map { it.id }.joinToString(prefix = "(", postfix = ")")
-        return "SELECT * FROM expense_info WHERE state in $sqlRange"
+        val sqlRange = modifiedStates.map { it.id }.joinToString(separator = "|")
+        return "SELECT * FROM expense_info WHERE state LIKE $sqlRange"
     }
 }

@@ -4,4 +4,5 @@ import io.reactivex.disposables.Disposable
 
 interface IExpensesSyncService {
     fun createSyncLoop(): Disposable
+    fun triggerSync()
 }

@@ -9,6 +9,7 @@ import com.upreality.car.expenses.data.local.expenses.dao.ExpensesDao
 import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.data.local.expenses.model.entities.ExpenseEntity
 import com.upreality.car.expenses.data.local.expenses.model.filters.ExpenseIdFilter
+import com.upreality.car.expenses.data.repository.IExpensesLocalDataSource
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -17,9 +18,9 @@ import javax.inject.Inject
 class ExpensesLocalDataSource @Inject constructor(
     private val expensesDao: ExpensesDao,
     private val expenseDetailsDao: ExpenseDetailsDao
-) {
+): IExpensesLocalDataSource {
 
-    fun create(expense: ExpenseRoom): Maybe<Long> {
+    override fun create(expense: ExpenseRoom): Maybe<Long> {
         val details = RoomExpenseEntitiesConverter.toExpenseDetails(expense, 0)
         return expenseDetailsDao.insert(details).flatMap { detailsId ->
             val expenseEntity = RoomExpenseEntitiesConverter.toExpenseEntity(expense, detailsId)
@@ -27,7 +28,7 @@ class ExpensesLocalDataSource @Inject constructor(
         }
     }
 
-    fun get(filter: IDatabaseFilter): Flowable<List<ExpenseRoom>> {
+    override fun get(filter: IDatabaseFilter): Flowable<List<ExpenseRoom>> {
         val query = SimpleSQLiteQuery(filter.getFilterExpression())
         val expenseEntitiesFlow = expensesDao.load(query)
 
@@ -39,7 +40,7 @@ class ExpensesLocalDataSource @Inject constructor(
         }
     }
 
-    fun update(expense: ExpenseRoom): Completable {
+    override fun update(expense: ExpenseRoom): Completable {
         val savedExpenseMaybe = getSavedExpenseEntity(expense.id)
         return savedExpenseMaybe.flatMapCompletable { entity ->
             val detailsId = entity.detailsId
@@ -63,7 +64,7 @@ class ExpensesLocalDataSource @Inject constructor(
         }
     }
 
-    fun delete(expense: ExpenseRoom): Completable {
+    override fun delete(expense: ExpenseRoom): Completable {
         return getSavedExpenseEntity(expense.id).flatMapCompletable {
             val detailsId = it.detailsId
             val details = RoomExpenseEntitiesConverter.toExpenseDetails(expense, detailsId)

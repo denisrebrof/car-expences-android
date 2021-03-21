@@ -1,10 +1,11 @@
 package com.upreality.car.expenses.data.remote
 
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
+import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseTypeConverter
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseDetailsFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseEntityFirestoreDAO
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
-import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
@@ -48,16 +49,17 @@ class ExpensesRemoteDataSource @Inject constructor(
     }
 
     fun get(filter: ExpenseRemoteFilter): Flowable<List<ExpenseRemote>> {
-        return expenseEntityDAO.get(filter).flatMapSingle(this::convertToFirestoreExpenses)
+        return expenseEntityDAO.get(filter).flatMapSingle(this::convertToRemoteExpenses)
     }
 
-    private fun convertToFirestoreExpenses(entities: List<ExpenseEntityFirestore>): Single<List<ExpenseRemote>> {
+    private fun convertToRemoteExpenses(entities: List<ExpenseEntityFirestore>): Single<List<ExpenseRemote>> {
         return Flowable.fromIterable(entities).flatMapMaybe { remoteEntity ->
-            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId)
+            val type = RemoteExpenseTypeConverter.toExpenseType(remoteEntity.type)
+            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId,type)
             val detailsMaybe = expenseDetailsDAO
                 .get(detailsSelector)
                 .firstElement()
-                .map(List<ExpenseDetailsFirestore>::firstOrNull)
+                .map(List<ExpenseDetailsRemote>::firstOrNull)
 
             val expenseMaybe = detailsMaybe.map { remoteDetails ->
                 RemoteExpenseEntityConverter.toExpense(remoteEntity, remoteDetails)

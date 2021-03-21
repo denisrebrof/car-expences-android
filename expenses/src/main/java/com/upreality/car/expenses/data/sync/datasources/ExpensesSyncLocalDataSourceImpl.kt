@@ -8,10 +8,7 @@ import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataS
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState.*
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoModifiedFilter
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoRemoteIdFilter
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoStateFilter
+import com.upreality.car.expenses.data.local.expensesinfo.model.queries.*
 import com.upreality.car.expenses.data.sync.IExpensesSyncLocalDataSource
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
 import com.upreality.car.expenses.domain.model.expence.Expense
@@ -27,7 +24,8 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
 
     override fun getUpdates(): Flowable<List<ExpenseLocalSyncModel>> {
         return expensesInfoLocalDataSource
-            .get(ExpenseInfoModifiedFilter)
+            .get(ExpenseInfoAllFilter)
+            .map { list -> list.filter { it.state != Persists } }
             .flatMapMaybe(this::getSyncModelsMaybe)
     }
 
