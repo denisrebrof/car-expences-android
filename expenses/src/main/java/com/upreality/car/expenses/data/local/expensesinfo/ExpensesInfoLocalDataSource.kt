@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.local.expensesinfo
 
+import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.upreality.car.expenses.data.local.expensesinfo.dao.ExpenseInfoDAO
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
@@ -18,7 +19,9 @@ class ExpensesInfoLocalDataSource @Inject constructor(
 
     fun get(filter: IExpenseInfoFilter): Flowable<List<ExpenseInfo>> {
         val query = SimpleSQLiteQuery(filter.getFilterExpression())
-        return expenseInfoDAO.load(query)
+        return expenseInfoDAO.load(query).doOnNext {
+            Log.d("SYNC","Sync on ExpensesInfoLocalDataSource")
+        }
     }
 
     fun update(info: ExpenseInfo): Completable {

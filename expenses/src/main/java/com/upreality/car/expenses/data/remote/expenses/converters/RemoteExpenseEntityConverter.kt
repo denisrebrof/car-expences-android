@@ -3,7 +3,7 @@ package com.upreality.car.expenses.data.remote.expenses.converters
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
-import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityFirestore
+import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityRemote
 
 object RemoteExpenseEntityConverter {
 
@@ -15,10 +15,10 @@ object RemoteExpenseEntityConverter {
         }
     }
 
-    fun toExpenseEntity(remoteModel: ExpenseRemote, detailsId: String): ExpenseEntityFirestore {
+    fun toExpenseEntity(remoteModel: ExpenseRemote, detailsId: String): ExpenseEntityRemote {
         val date = DateConverter.toTime(remoteModel.date)
         val type = getExpenseType(remoteModel)
-        return ExpenseEntityFirestore(
+        return ExpenseEntityRemote(
             String(), // empty
             date,
             remoteModel.cost,
@@ -53,7 +53,7 @@ object RemoteExpenseEntityConverter {
     }
 
     fun toExpense(
-        entity: ExpenseEntityFirestore,
+        entity: ExpenseEntityRemote,
         expenseDetails: ExpenseDetailsRemote
     ): ExpenseRemote {
         val type = RemoteExpenseTypeConverter.toExpenseType(entity.type)
