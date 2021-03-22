@@ -62,7 +62,7 @@ class ExpensesRemoteDataSource @Inject constructor(
                 .map(List<ExpenseDetailsRemote>::firstOrNull)
 
             val expenseMaybe = detailsMaybe.map { remoteDetails ->
-                RemoteExpenseEntityConverter.toExpense(remoteEntity, remoteDetails)
+                RemoteExpenseEntityConverter.toExpenseRemote(remoteEntity, remoteDetails)
             }
             expenseMaybe
         }.toList()

@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.sync.datasources
 
+import android.util.Log
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
 import com.upreality.car.expenses.data.local.expenses.converters.RoomExpenseConverter
 import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
@@ -25,6 +26,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         return expensesInfoLocalDataSource
             .get(ExpenseInfoAllFilter)
             .map { list -> list.filter { it.state != Persists } }
+            .filter { list -> list.isNotEmpty() }
             .flatMapMaybe(this::getSyncModelsMaybe)
     }
 
@@ -38,7 +40,9 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             val updatedInfo = info.copy(state = Persists)
             val updateInfo = expensesInfoLocalDataSource.update(updatedInfo)
             updateExpense.andThen(updateInfo)
-        }.onErrorResumeNext { //info not found, so create new
+        }.onErrorResumeNext {
+            val errtxt = it.toString()
+            Log.d("Error:", "$it")
             val createInfo = { localId: Long ->
                 ExpenseInfo(0, localId, remoteId, Persists)
                     .let(expensesInfoLocalDataSource::create)

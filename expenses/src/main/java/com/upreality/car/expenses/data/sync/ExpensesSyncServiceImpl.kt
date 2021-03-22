@@ -40,7 +40,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
         val sync = Flowable.combineLatest(
             triggerProc,
             getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseSyncRemoteModel>()),
-            localDataSource.getUpdates(),
+            localDataSource.getUpdates().startWith(listOf<ExpenseLocalSyncModel>()),
             { _, remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
         )
             .subscribeOn(Schedulers.io())

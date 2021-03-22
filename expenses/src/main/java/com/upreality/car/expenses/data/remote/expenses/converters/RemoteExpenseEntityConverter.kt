@@ -52,7 +52,7 @@ object RemoteExpenseEntityConverter {
         }
     }
 
-    fun toExpense(
+    fun toExpenseRemote(
         entity: ExpenseEntityRemote,
         expenseDetails: ExpenseDetailsRemote
     ): ExpenseRemote {
@@ -71,8 +71,7 @@ object RemoteExpenseEntityConverter {
                 val details = expenseDetails as ExpenseDetailsRemote.ExpenseMaintenanceDetails
                 ExpenseRemote.Maintenance(date, entity.cost, details.type, details.mileage)
             }
-        }
-        //missed id
+        }.apply { id = entity.id }
     }
 }
 

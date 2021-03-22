@@ -5,13 +5,11 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoAllFilter
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoModifiedFilter
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSource
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
-import com.upreality.car.expenses.data.sync.datasources.ExpensesSyncRemoteDataSourceImpl
 import com.upreality.car.expenses.databinding.ActivityExpencesBinding
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.IExpensesSyncService
