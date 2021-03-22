@@ -42,9 +42,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             expense.id = info.localId
             val updatedExpense = RoomExpenseConverter.fromExpense(expense)
             val updateExpense = expensesLocalDataSource.update(updatedExpense)
-            val updateInfo = updatedInfo
-                .map { info -> info.copy(state = Persists) }
-                .flatMapCompletable(expensesInfoLocalDataSource::update)
+            val updateInfo = info.copy(state = Persists).let(expensesInfoLocalDataSource::update)
             updateExpense.andThen(updateInfo)
         }
     }
