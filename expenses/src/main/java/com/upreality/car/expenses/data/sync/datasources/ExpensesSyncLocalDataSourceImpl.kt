@@ -28,27 +28,6 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             .flatMapMaybe(this::getSyncModelsMaybe)
     }
 
-    override fun create(expense: Expense, remoteId: String): Completable {
-        val createdExpense = RoomExpenseConverter.fromExpense(expense)
-        return expensesLocalDataSource.create(createdExpense).flatMapCompletable {
-            val createdInfo = ExpenseInfo(0, it, remoteId)
-            expensesInfoLocalDataSource.create(createdInfo).ignoreElement()
-        }
-    }
-
-    override fun update(expense: Expense, remoteId: String): Completable {
-        val updatedInfo = getExpenseInfoByRemoteId(remoteId)
-        return updatedInfo.flatMapCompletable { info ->
-            expense.id = info.localId
-            val updatedExpense = RoomExpenseConverter.fromExpense(expense)
-            val updateExpense = expensesLocalDataSource.update(updatedExpense)
-            val updateInfo = updatedInfo
-                .map { info -> info.copy(state = Persists) }
-                .flatMapCompletable(expensesInfoLocalDataSource::update)
-            updateExpense.andThen(updateInfo)
-        }
-    }
-
     override fun createOrUpdate(expense: Expense, remoteId: String): Completable {
         val infoMaybe = getExpenseInfoByRemoteId(remoteId)
         val updatedExpense = RoomExpenseConverter.fromExpense(expense)
