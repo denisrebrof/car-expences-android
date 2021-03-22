@@ -4,7 +4,7 @@ import android.util.Log
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
-import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncOperationModel
+import com.upreality.car.expenses.data.sync.model.ExpenseSyncRemoteModel
 import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -30,8 +30,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
             Log.d("SYNC", "Updated local list")
         }
 
-        val logRemChangeDisp =
-            getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseRemoteSyncOperationModel>())
+        val logRemChangeDisp = getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseSyncRemoteModel>())
                 .doOnError {
                     Log.e("Sync", "Error during getUpdatedRemoteExpensesFlow occurs: $it")
                 }.retry().subscribe {
@@ -40,7 +39,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
 
         val sync = Flowable.combineLatest(
             triggerProc,
-            getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseRemoteSyncOperationModel>()),
+            getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseSyncRemoteModel>()),
             localDataSource.getUpdates(),
             { _, remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
         )
@@ -72,28 +71,24 @@ class ExpensesSyncServiceImpl @Inject constructor(
         triggerProc.onNext(Unit)
     }
 
-    private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseRemoteSyncOperationModel>> {
+    private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseSyncRemoteModel>> {
         return syncTimestampProvider.get()
             .doOnNext {
                 Log.d("TS", "next: $it")
             }
             .switchMap(remoteDataSource::getModified)
-            .map { it.sortedBy(ExpenseRemoteSyncOperationModel::tstamp) }
+            .map { it.sortedBy(ExpenseSyncRemoteModel::timestamp) }
     }
 
-    private fun syncLocalFromRemote(updateOperation: ExpenseRemoteSyncOperationModel): Completable {
-        val updateLocalInstanceMaybe = when (updateOperation) {
-            is ExpenseRemoteSyncOperationModel.Create -> localDataSource.create(
-                RemoteExpenseConverter.toExpense(updateOperation.remoteModel),
-                updateOperation.remoteModel.id
-            )
-            is ExpenseRemoteSyncOperationModel.Update -> localDataSource.update(
-                RemoteExpenseConverter.toExpense(updateOperation.remoteModel),
-                updateOperation.remoteModel.id
-            )
-            is ExpenseRemoteSyncOperationModel.Delete -> localDataSource.delete(updateOperation.remoteModelId)
+    private fun syncLocalFromRemote(syncRemoteModel: ExpenseSyncRemoteModel): Completable {
+        val updateLocalInstanceMaybe = when (syncRemoteModel.deleted) {
+            true -> localDataSource.delete(syncRemoteModel.remoteModel.id)
+            else -> {
+                val expense = RemoteExpenseConverter.toExpense(syncRemoteModel.remoteModel)
+                localDataSource.createOrUpdate(expense, syncRemoteModel.remoteModel.id)
+            }
         }
-        val updateTimestampCompletable = syncTimestampProvider.set(updateOperation.tstamp)
+        val updateTimestampCompletable = syncTimestampProvider.set(syncRemoteModel.timestamp)
         return updateLocalInstanceMaybe.andThen(updateTimestampCompletable)
     }
 

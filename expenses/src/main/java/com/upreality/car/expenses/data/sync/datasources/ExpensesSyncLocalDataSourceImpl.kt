@@ -49,6 +49,28 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         }
     }
 
+    override fun createOrUpdate(expense: Expense, remoteId: String): Completable {
+        val infoMaybe = getExpenseInfoByRemoteId(remoteId)
+        val updatedExpense = RoomExpenseConverter.fromExpense(expense)
+
+        return infoMaybe.flatMapCompletable { info ->
+            expense.id = info.localId
+            val updateExpense = expensesLocalDataSource.update(updatedExpense)
+            val updatedInfo = info.copy(state = Persists)
+            val updateInfo = expensesInfoLocalDataSource.update(updatedInfo)
+            updateExpense.andThen(updateInfo)
+        }.onErrorResumeNext { //info not found, so create new
+            val createInfo = { localId: Long ->
+                ExpenseInfo(0, localId, remoteId, Persists)
+                    .let(expensesInfoLocalDataSource::create)
+                    .ignoreElement()
+            }
+            expensesLocalDataSource
+                .create(updatedExpense)
+                .flatMapCompletable(createInfo)
+        }
+    }
+
     override fun delete(remoteId: String): Completable {
         val deletedExpenseInfo = getExpenseInfoByRemoteId(remoteId)
         return deletedExpenseInfo.flatMapCompletable { info ->
