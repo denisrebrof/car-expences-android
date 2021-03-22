@@ -1,15 +1,23 @@
 package com.upreality.car.expenses.data.sync.datasources
 
+import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
+import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
+import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
+import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoIdFilter
+import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSource
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseRemoteOperation
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseRemoteOperationType
 import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
+import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import com.upreality.car.expenses.data.shared.model.DateConverter
 import com.upreality.car.expenses.data.sync.IExpensesSyncRemoteDataSource
 import com.upreality.car.expenses.data.sync.model.ExpenseRemoteSyncOperationModel
+import com.upreality.car.expenses.domain.model.expence.Expense
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import java.util.*
@@ -18,6 +26,7 @@ import javax.inject.Inject
 class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     private val remoteDataSource: ExpensesRemoteDataSource,
     private val operationsDAO: ExpenseOperationRemoteDAO,
+    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
 ) : IExpensesSyncRemoteDataSource {
 
     private val dateConverter = DateConverter()
@@ -73,9 +82,21 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
         return remoteDataSource.delete(expense).andThen(addOperation)
     }
 
-    override fun create(expense: ExpenseRemote): Maybe<Long> {
-        return remoteDataSource.create(expense).flatMap { id ->
-            createOperation(id, ExpenseRemoteOperationType.Created)
-        }
+    override fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long> {
+        return remoteDataSource.create(remoteExpense)
+            .flatMap { id ->
+                val operationTimestampMaybe =
+                    createOperation(id, ExpenseRemoteOperationType.Created)
+                setRemoteId(localId, id).andThen(operationTimestampMaybe)
+            }
+    }
+
+    private fun setRemoteId(localId: Long, remoteId: String): Completable {
+        val filter = ExpenseInfoLocalIdFilter(localId)
+        return expensesInfoLocalDataSource.get(filter)
+            .map(List<ExpenseInfo>::firstOrNull)
+            .firstElement()
+            .map { it.copy(remoteId = remoteId, state = ExpenseInfoSyncState.Persists) }
+            .flatMapCompletable(expensesInfoLocalDataSource::update)
     }
 }

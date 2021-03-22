@@ -7,7 +7,7 @@ import io.reactivex.Flowable
 
 interface IExpensesSyncLocalDataSource {
     fun getUpdates(): Flowable<List<ExpenseLocalSyncModel>>
-    fun update(expense: Expense): Completable
-    fun delete(id: String): Completable
     fun create(expense: Expense, remoteId: String): Completable
+    fun update(expense: Expense, remoteId: String): Completable
+    fun delete(remoteId: String): Completable
 }

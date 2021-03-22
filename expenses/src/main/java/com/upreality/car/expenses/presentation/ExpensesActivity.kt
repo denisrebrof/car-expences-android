@@ -7,8 +7,11 @@ import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataS
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoAllFilter
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoModifiedFilter
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSource
+import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
+import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
+import com.upreality.car.expenses.data.sync.datasources.ExpensesSyncRemoteDataSourceImpl
 import com.upreality.car.expenses.databinding.ActivityExpencesBinding
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.IExpensesSyncService
@@ -36,6 +39,9 @@ class ExpensesActivity : AppCompatActivity() {
     lateinit var remDS: ExpensesRemoteDataSource
 
     @Inject
+    lateinit var remOpDAO: ExpenseOperationRemoteDAO
+
+    @Inject
     lateinit var eiLocalDS: ExpensesInfoLocalDataSource
 
     private lateinit var binding: ActivityExpencesBinding
@@ -57,6 +63,7 @@ class ExpensesActivity : AppCompatActivity() {
             .observeOn(mainThread())
             .subscribe(this::setText)
             .disposeBy(lifecycle.disposers.onStop)
+
         remDS.get(ExpenseRemoteFilter.All)
             .map(List<ExpenseRemote>::size)
             .map(Int::toString)
@@ -66,6 +73,13 @@ class ExpensesActivity : AppCompatActivity() {
 
         eiLocalDS.get(ExpenseInfoAllFilter).subscribe {
             Log.d("SYNC", "infos mdifies")
+        }.disposeBy(lifecycle.disposers.onStop)
+
+        val filter = ExpenseRemoteOperationFilter.FromTime(0)
+        remOpDAO.get(filter)
+            .observeOn(mainThread())
+            .subscribe {
+                binding.textOp.text = "Oper Size from zero: ${it.size}"
         }.disposeBy(lifecycle.disposers.onStop)
     }
 

@@ -9,5 +9,5 @@ interface IExpensesSyncRemoteDataSource {
     fun getModified(fromTime: Long): Flowable<List<ExpenseRemoteSyncOperationModel>>
     fun update(expense: ExpenseRemote): Maybe<Long>
     fun delete(expense: ExpenseRemote): Maybe<Long>
-    fun create(expense: ExpenseRemote): Maybe<Long>
+    fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long>
 }

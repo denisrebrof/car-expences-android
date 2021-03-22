@@ -3,6 +3,7 @@ package com.upreality.car.expenses.data.remote.expenseoperations.dao
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenseoperations.model.entities.ExpenseRemoteOperation
 import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
+import com.upreality.car.expenses.data.remote.expenses.converters.DateConverter
 import durdinapps.rxfirebase2.RxFirestore
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -54,7 +55,8 @@ class ExpenseOperationRemoteDAO @Inject constructor(
     }
 
     private fun getCollectionFromTime(time: Long): Flowable<List<ExpenseRemoteOperation>> {
-        val fromTimeQuery = operationsList.whereGreaterThan(ExpenseRemoteOperation::timestamp.name, time)
+        val date = DateConverter.toDate(time)
+        val fromTimeQuery = operationsList.whereGreaterThan(ExpenseRemoteOperation::timestamp.name, date)
         return RxFirestore.observeQueryRef(fromTimeQuery, ExpenseRemoteOperation::class.java)
     }
 }

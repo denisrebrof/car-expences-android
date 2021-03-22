@@ -6,7 +6,6 @@ import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.data.local.expenses.model.filters.ExpenseIdFilter
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
-import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState.*
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.*
 import com.upreality.car.expenses.data.sync.IExpensesSyncLocalDataSource
@@ -29,6 +28,36 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             .flatMapMaybe(this::getSyncModelsMaybe)
     }
 
+    override fun create(expense: Expense, remoteId: String): Completable {
+        val createdExpense = RoomExpenseConverter.fromExpense(expense)
+        return expensesLocalDataSource.create(createdExpense).flatMapCompletable {
+            val createdInfo = ExpenseInfo(0, it, remoteId)
+            expensesInfoLocalDataSource.create(createdInfo).ignoreElement()
+        }
+    }
+
+    override fun update(expense: Expense, remoteId: String): Completable {
+        val updatedInfo = getExpenseInfoByRemoteId(remoteId)
+        return updatedInfo.flatMapCompletable { info ->
+            expense.id = info.localId
+            val updatedExpense = RoomExpenseConverter.fromExpense(expense)
+            val updateExpense = expensesLocalDataSource.update(updatedExpense)
+            val updateInfo = updatedInfo
+                .map { info -> info.copy(state = Persists) }
+                .flatMapCompletable(expensesInfoLocalDataSource::update)
+            updateExpense.andThen(updateInfo)
+        }
+    }
+
+    override fun delete(remoteId: String): Completable {
+        val deletedExpenseInfo = getExpenseInfoByRemoteId(remoteId)
+        return deletedExpenseInfo.flatMapCompletable { info ->
+            getLocalExpense(info)
+                .flatMapCompletable(expensesLocalDataSource::delete)
+                .andThen { expensesInfoLocalDataSource.delete(info) }
+        }
+    }
+
     private fun getSyncModelsMaybe(infos: List<ExpenseInfo>): Maybe<List<ExpenseLocalSyncModel>> {
         return Flowable.fromIterable(infos).flatMapMaybe { modifiedInfo ->
             getLocalExpense(modifiedInfo)
@@ -37,32 +66,8 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         }.toList().toMaybe()
     }
 
-    override fun update(expense: Expense): Completable {
-        val updatedExpense = RoomExpenseConverter.fromExpense(expense)
-        val updateExpense = expensesLocalDataSource.update(updatedExpense)
-
-        val updateInfo = getExpenseInfo(expense)
-            .map { info -> info.copy(state = Persists) }
-            .flatMapCompletable(expensesInfoLocalDataSource::update)
-
-        return updateExpense.andThen(updateInfo)
-    }
-
-    override fun delete(id: String): Completable {
-        val deletedExpenseInfo = expensesInfoLocalDataSource
-            .get(ExpenseInfoRemoteIdFilter(id))
-            .firstElement()
-            .map(List<ExpenseInfo>::firstOrNull)
-
-        return deletedExpenseInfo.flatMapCompletable { info ->
-            getLocalExpense(info)
-                .flatMapCompletable(expensesLocalDataSource::delete)
-                .andThen { expensesInfoLocalDataSource.delete(info) }
-        }
-    }
-
-    private fun getExpenseInfo(expense: Expense): Maybe<ExpenseInfo> {
-        val filter = ExpenseInfoLocalIdFilter(expense.id)
+    private fun getExpenseInfoByRemoteId(expenseId: String): Maybe<ExpenseInfo> {
+        val filter = ExpenseInfoRemoteIdFilter(expenseId)
         return expensesInfoLocalDataSource
             .get(filter)
             .firstElement()
@@ -74,13 +79,5 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             .get(ExpenseIdFilter(info.localId))
             .firstElement()
             .map(List<ExpenseRoom>::firstOrNull)
-    }
-
-    override fun create(expense: Expense, remoteId: String): Completable {
-        val createdExpense = RoomExpenseConverter.fromExpense(expense)
-        return expensesLocalDataSource.create(createdExpense).flatMapCompletable {
-            val createdInfo = ExpenseInfo(0, it, remoteId)
-            expensesInfoLocalDataSource.create(createdInfo).ignoreElement()
-        }
     }
 }

@@ -23,7 +23,7 @@ object RoomExpenseConverter {
                 dataModel.type,
                 dataModel.mileage,
             )
-        }
+        }.apply { id = dataModel.id }
     }
 
     fun fromExpense(domainModel: Expense): ExpenseRoom {
@@ -45,6 +45,6 @@ object RoomExpenseConverter {
                 domainModel.type,
                 domainModel.mileage,
             )
-        }
+        }.apply { id = domainModel.id }
     }
 }
