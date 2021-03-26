@@ -1,6 +1,5 @@
 package com.upreality.car.expenses.data.remote.expenses.dao
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
@@ -36,21 +35,15 @@ class ExpenseDetailsFirestoreDAO @Inject constructor(
     }
 
     fun get(filter: ExpenseDetailsRemoteFilter): Flowable<List<ExpenseDetailsRemote>> {
-        val type = (filter as? ExpenseDetailsRemoteFilter.Id)?.type
-        val deserialiseType = when(type){
+        val type = (filter as? Id)?.type
+        val deserialiseType = when (type) {
             ExpenseType.Fines -> ExpenseDetailsRemote.ExpenseFinesDetails::class.java
             ExpenseType.Fuel -> ExpenseDetailsRemote.ExpenseFuelDetails::class.java
             ExpenseType.Maintenance -> ExpenseDetailsRemote.ExpenseMaintenanceDetails::class.java
             null -> ExpenseDetailsRemote::class.java
         }
         return when (filter) {
-            is All -> observeQueryRef(expenseDetailsCollection, ExpenseDetailsRemote::class.java).doOnNext {
-                Log.d("","")
-            }.doOnError {
-                Log.d("","")
-            }.doOnComplete {
-                Log.d("","")
-            }
+            is All -> observeQueryRef(expenseDetailsCollection, ExpenseDetailsRemote::class.java)
             is Id -> {
                 val doc = expenseDetailsCollection.document(filter.id)
                 observeDocumentRef(doc, deserialiseType).map { listOf(it) }

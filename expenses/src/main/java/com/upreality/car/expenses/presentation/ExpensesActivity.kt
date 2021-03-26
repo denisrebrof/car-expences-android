@@ -53,7 +53,6 @@ class ExpensesActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.createExpenseButton.setOnClickListener { executeCreation() }
-        binding.syncExpensesButton.setOnClickListener { sync.triggerSync() }
         sync.createSyncLoop().disposeBy(lifecycle.disposers.onStop)
         repository.get(ExpenseFilter.All)
             .map(List<Expense>::size)

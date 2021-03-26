@@ -20,23 +20,9 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
-    private val triggerProc = BehaviorProcessor.createDefault(Unit)
-
     override fun createSyncLoop(): Disposable {
 
         val composite = CompositeDisposable()
-
-        val logLocalChangeDisp = localDataSource.getUpdates().retry().subscribe {
-            Log.d("SYNC", "Updated local list")
-        }
-
-        val logRemChangeDisp =
-            getUpdatedRemoteExpensesFlow()
-                .doOnError {
-                    Log.e("Sync", "Error during getUpdatedRemoteExpensesFlow occurs: $it")
-                }.retry().subscribe {
-                    Log.d("SYNC", "Updated REMOTE list")
-                }
 
         val syncFromRemote = getUpdatedRemoteExpensesFlow().subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
@@ -49,10 +35,9 @@ class ExpensesSyncServiceImpl @Inject constructor(
             }.retry().subscribe()
 
         val syncFromLocalAfterRemote = Flowable.combineLatest(
-            triggerProc,
             getUpdatedRemoteExpensesFlow(),
             localDataSource.getUpdates(),
-            { _, remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
+            { remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
         ).subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .onBackpressureLatest().flatMapCompletable { (updatesRemote, updatesLocal) ->
@@ -67,20 +52,13 @@ class ExpensesSyncServiceImpl @Inject constructor(
                 Log.e("Sync", "Error during L sync occurs: $it")
             }.retry().subscribe()
 
-        composite.addAll(logLocalChangeDisp, logRemChangeDisp, syncFromRemote, syncFromLocalAfterRemote)
+        composite.addAll(syncFromRemote, syncFromLocalAfterRemote)
 
         return composite
     }
 
-    override fun triggerSync() {
-        triggerProc.onNext(Unit)
-    }
-
     private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseSyncRemoteModel>> {
         return syncTimestampProvider.get()
-            .doOnNext {
-                Log.d("TS", "next: $it")
-            }
             .switchMap(remoteDataSource::getModified)
             .map { it.sortedBy(ExpenseSyncRemoteModel::timestamp) }
     }
@@ -108,11 +86,6 @@ class ExpensesSyncServiceImpl @Inject constructor(
             ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(remoteModel)
             else -> return Completable.complete() //TODO: review
         }
-        return syncOperation
-            .ignoreElement()
-//            .flatMapCompletable { ts ->
-//                Log.d("TS", "set: $ts")
-//                syncTimestampProvider.set(ts)
-//            }
+        return syncOperation.ignoreElement()
     }
 }

@@ -62,7 +62,6 @@ class ExpenseStateRemoteDAO @Inject constructor(
         return RxFirestore.observeQueryRef(fromTimeQuery).map { snapshot ->
             snapshot.documents.map { document -> document.toObject(ExpenseRemoteState::class.java)!! }
         }
-//        return RxFirestore.observeQueryRef(fromTimeQuery, ExpenseRemoteState::class.java)
     }
 
     private fun getDocumentByRemoteId(id: String): Flowable<List<ExpenseRemoteState>> {

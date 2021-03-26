@@ -19,9 +19,7 @@ class ExpensesInfoLocalDataSource @Inject constructor(
 
     fun get(filter: IExpenseInfoFilter): Flowable<List<ExpenseInfo>> {
         val query = SimpleSQLiteQuery(filter.getFilterExpression())
-        return expenseInfoDAO.load(query).doOnNext {
-            Log.d("SYNC","Sync on ExpensesInfoLocalDataSource")
-        }
+        return expenseInfoDAO.load(query)
     }
 
     fun update(info: ExpenseInfo): Completable {
