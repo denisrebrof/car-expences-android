@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.remote.expenses.dao
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
@@ -45,7 +46,11 @@ class ExpenseEntityFirestoreDAO @Inject constructor(
     }
 
     private fun getCollectionFlow(): Flowable<List<ExpenseEntityRemote>> {
-        return observeQueryRef(expensesCollection, ExpenseEntityRemote::class.java)
+        return observeQueryRef(expensesCollection, ExpenseEntityRemote::class.java).doOnNext {
+            Log.d("","")
+        }.doOnError {
+            Log.d("","")
+        }
     }
 
     private fun getDocumentFlow(id: String): Flowable<ExpenseEntityRemote> {

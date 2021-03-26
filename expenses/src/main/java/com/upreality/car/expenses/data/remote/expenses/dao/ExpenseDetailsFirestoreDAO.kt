@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.remote.expenses.dao
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
@@ -43,7 +44,13 @@ class ExpenseDetailsFirestoreDAO @Inject constructor(
             null -> ExpenseDetailsRemote::class.java
         }
         return when (filter) {
-            is All -> observeQueryRef(expenseDetailsCollection, ExpenseDetailsRemote::class.java)
+            is All -> observeQueryRef(expenseDetailsCollection, ExpenseDetailsRemote::class.java).doOnNext {
+                Log.d("","")
+            }.doOnError {
+                Log.d("","")
+            }.doOnComplete {
+                Log.d("","")
+            }
             is Id -> {
                 val doc = expenseDetailsCollection.document(filter.id)
                 observeDocumentRef(doc, deserialiseType).map { listOf(it) }

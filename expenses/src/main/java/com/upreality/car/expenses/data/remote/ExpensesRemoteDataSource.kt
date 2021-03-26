@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.remote
 
+import android.util.Log
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseTypeConverter
 import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseDetailsFirestoreDAO
@@ -44,6 +45,11 @@ class ExpensesRemoteDataSource @Inject constructor(
         val selector = ExpenseRemoteFilter.Id(expenseId)
         return expenseEntityDAO
             .get(selector)
+            .doOnNext {
+                Log.d("","")
+            }.doOnError {
+                Log.d("","")
+            }
             .firstElement()
             .map(List<ExpenseEntityRemote>::first)
     }

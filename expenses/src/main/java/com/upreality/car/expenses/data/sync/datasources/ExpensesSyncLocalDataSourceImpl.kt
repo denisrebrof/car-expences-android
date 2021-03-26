@@ -26,7 +26,6 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         return expensesInfoLocalDataSource
             .get(ExpenseInfoAllFilter)
             .map { list -> list.filter { it.state != Persists } }
-            .filter { list -> list.isNotEmpty() }
             .flatMapMaybe(this::getSyncModelsMaybe)
     }
 

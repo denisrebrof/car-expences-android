@@ -30,39 +30,44 @@ class ExpensesSyncServiceImpl @Inject constructor(
             Log.d("SYNC", "Updated local list")
         }
 
-        val logRemChangeDisp = getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseSyncRemoteModel>())
+        val logRemChangeDisp =
+            getUpdatedRemoteExpensesFlow()
                 .doOnError {
                     Log.e("Sync", "Error during getUpdatedRemoteExpensesFlow occurs: $it")
                 }.retry().subscribe {
                     Log.d("SYNC", "Updated REMOTE list")
                 }
 
-        val sync = Flowable.combineLatest(
-            triggerProc,
-            getUpdatedRemoteExpensesFlow().startWith(listOf<ExpenseSyncRemoteModel>()),
-            localDataSource.getUpdates().startWith(listOf<ExpenseLocalSyncModel>()),
-            { _, remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
-        )
-            .subscribeOn(Schedulers.io())
+        val syncFromRemote = getUpdatedRemoteExpensesFlow().subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .onBackpressureLatest().flatMapCompletable { (updatedRemote, updatesLocal) ->
-                val syncFromRemote = Flowable
+            .onBackpressureLatest().flatMapCompletable { updatedRemote ->
+                Flowable
                     .fromIterable(updatedRemote)
                     .flatMapCompletable(this::syncLocalFromRemote)
+            }.doOnError {
+                Log.e("Sync", "Error during R sync occurs: $it")
+            }.retry().subscribe()
+
+        val syncFromLocalAfterRemote = Flowable.combineLatest(
+            triggerProc,
+            getUpdatedRemoteExpensesFlow(),
+            localDataSource.getUpdates(),
+            { _, remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
+        ).subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .onBackpressureLatest().flatMapCompletable { (updatesRemote, updatesLocal) ->
 
                 val syncFromLocal = Flowable
                     .fromIterable(updatesLocal)
                     .filter { it.state != ExpenseInfoSyncState.Persists }
                     .flatMapCompletable(this::syncRemoteFromLocal)
 
-                syncFromRemote.andThen(syncFromLocal).doOnComplete {
-                    Log.d("Sync", "Synced: updRemote: $updatedRemote updatesLocal: $updatesLocal")
-                }
+                if (updatesRemote.isEmpty()) syncFromLocal else Completable.complete()
             }.doOnError {
-                Log.e("Sync", "Error during sync occurs: $it")
+                Log.e("Sync", "Error during L sync occurs: $it")
             }.retry().subscribe()
 
-        composite.addAll(logLocalChangeDisp, logRemChangeDisp, sync)
+        composite.addAll(logLocalChangeDisp, logRemChangeDisp, syncFromRemote, syncFromLocalAfterRemote)
 
         return composite
     }

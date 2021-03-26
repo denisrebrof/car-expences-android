@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.remote.expensestate.dao
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.converters.DateConverter
 import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteState
@@ -58,7 +59,10 @@ class ExpenseStateRemoteDAO @Inject constructor(
     private fun getCollectionFromTime(time: Long): Flowable<List<ExpenseRemoteState>> {
         val date = DateConverter.toDate(time)
         val fromTimeQuery = statesList.whereGreaterThan(ExpenseRemoteState::timestamp.name, date)
-        return RxFirestore.observeQueryRef(fromTimeQuery, ExpenseRemoteState::class.java)
+        return RxFirestore.observeQueryRef(fromTimeQuery).map { snapshot ->
+            snapshot.documents.map { document -> document.toObject(ExpenseRemoteState::class.java)!! }
+        }
+//        return RxFirestore.observeQueryRef(fromTimeQuery, ExpenseRemoteState::class.java)
     }
 
     private fun getDocumentByRemoteId(id: String): Flowable<List<ExpenseRemoteState>> {
