@@ -3,8 +3,8 @@ package com.upreality.car.expenses.data.remote
 import android.util.Log
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseEntityConverter
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseTypeConverter
-import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseDetailsFirestoreDAO
-import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseEntityFirestoreDAO
+import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseDetailsRemoteDAO
+import com.upreality.car.expenses.data.remote.expenses.dao.ExpenseEntityRemoteDAO
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityRemote
@@ -17,15 +17,14 @@ import io.reactivex.Single
 import javax.inject.Inject
 
 class ExpensesRemoteDataSource @Inject constructor(
-    private val expenseEntityDAO: ExpenseEntityFirestoreDAO,
-    private val expenseDetailsDAO: ExpenseDetailsFirestoreDAO
+    private val expenseEntityDAO: ExpenseEntityRemoteDAO,
+    private val expenseDetailsDAO: ExpenseDetailsRemoteDAO
 ) {
 
     fun delete(expense: ExpenseRemote): Completable {
         return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
             val deleteExpense = expenseEntityDAO.delete(remoteExpense)
-            val details =
-                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
+            val details = RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
             val deleteDetails = expenseDetailsDAO.delete(details)
             deleteExpense.andThen(deleteDetails)
         }
@@ -45,11 +44,6 @@ class ExpensesRemoteDataSource @Inject constructor(
         val selector = ExpenseRemoteFilter.Id(expenseId)
         return expenseEntityDAO
             .get(selector)
-            .doOnNext {
-                Log.d("","")
-            }.doOnError {
-                Log.d("","")
-            }
             .firstElement()
             .map(List<ExpenseEntityRemote>::first)
     }

@@ -1,6 +1,7 @@
 package com.upreality.car.expenses.data.remote.expensestate.dao
 
 import android.util.Log
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.converters.DateConverter
 import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteState
@@ -12,10 +13,10 @@ import io.reactivex.Maybe
 import javax.inject.Inject
 
 class ExpenseStateRemoteDAO @Inject constructor(
-    remoteStorage: FirebaseFirestore
+    userDocument: DocumentReference
 ) {
 
-    private val statesList = remoteStorage.collection(EXPENSE_STATES_TABLE_NAME)
+    private val statesList = userDocument.collection(EXPENSE_STATES_TABLE_NAME)
 
     companion object {
         private const val EXPENSE_STATES_TABLE_NAME = "expense_states"
@@ -35,7 +36,9 @@ class ExpenseStateRemoteDAO @Inject constructor(
         return when (filter) {
             ExpenseRemoteStateFilter.All -> getCollectionFlow()
             is ExpenseRemoteStateFilter.Id -> getDocumentFlow(filter.id).map { listOf(it) }
-            is ExpenseRemoteStateFilter.FromTime -> getCollectionFromTime(filter.time)
+            is ExpenseRemoteStateFilter.FromTime -> getCollectionFromTime(filter.time).doOnNext {
+                Log.d("","States list changed: ${it.size}")
+            }
             is ExpenseRemoteStateFilter.ByRemoteId -> getDocumentByRemoteId(filter.remoteId)
         }
     }
@@ -48,12 +51,16 @@ class ExpenseStateRemoteDAO @Inject constructor(
     }
 
     private fun getCollectionFlow(): Flowable<List<ExpenseRemoteState>> {
-        return RxFirestore.observeQueryRef(statesList, ExpenseRemoteState::class.java)
+        return RxFirestore.observeQueryRef(statesList).map { snapshot ->
+            snapshot.documents.map { document -> document.toObject(ExpenseRemoteState::class.java)!! }
+        }
     }
 
     private fun getDocumentFlow(id: String): Flowable<ExpenseRemoteState> {
         val doc = statesList.document(id)
-        return RxFirestore.observeDocumentRef(doc, ExpenseRemoteState::class.java)
+        return RxFirestore.observeDocumentRef(doc).map { snapshot ->
+            snapshot.toObject(ExpenseRemoteState::class.java)
+        }
     }
 
     private fun getCollectionFromTime(time: Long): Flowable<List<ExpenseRemoteState>> {
@@ -66,6 +73,8 @@ class ExpenseStateRemoteDAO @Inject constructor(
 
     private fun getDocumentByRemoteId(id: String): Flowable<List<ExpenseRemoteState>> {
         val byIdQuery = statesList.whereEqualTo(ExpenseRemoteState::remoteId.name, id)
-        return RxFirestore.observeQueryRef(byIdQuery, ExpenseRemoteState::class.java)
+        return RxFirestore.observeQueryRef(byIdQuery).map { snapshot ->
+            snapshot.documents.map { document -> document.toObject(ExpenseRemoteState::class.java)!! }
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.data.remote.expenses.dao
 
 import android.util.Log
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.DocumentReference
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseEntityRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import durdinapps.rxfirebase2.RxFirestore
@@ -11,11 +11,11 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import javax.inject.Inject
 
-class ExpenseEntityFirestoreDAO @Inject constructor(
-    remoteStorage: FirebaseFirestore
+class ExpenseEntityRemoteDAO @Inject constructor(
+    userDocument: DocumentReference
 ) {
 
-    private val expensesCollection = remoteStorage.collection(EXPENSES_TABLE_NAME)
+    private val expensesCollection = userDocument.collection(EXPENSES_TABLE_NAME)
 
     companion object {
         private const val EXPENSES_TABLE_NAME = "expenses"
@@ -46,7 +46,9 @@ class ExpenseEntityFirestoreDAO @Inject constructor(
     }
 
     private fun getCollectionFlow(): Flowable<List<ExpenseEntityRemote>> {
-        return observeQueryRef(expensesCollection, ExpenseEntityRemote::class.java).doOnNext {
+        return observeQueryRef(expensesCollection).map { snapshot ->
+            snapshot.documents.map { document -> document.toObject(ExpenseEntityRemote::class.java)!! }
+        }.doOnNext {
             Log.d("","")
         }.doOnError {
             Log.d("","")
@@ -55,6 +57,10 @@ class ExpenseEntityFirestoreDAO @Inject constructor(
 
     private fun getDocumentFlow(id: String): Flowable<ExpenseEntityRemote> {
         val doc = expensesCollection.document(id)
-        return RxFirestore.observeDocumentRef(doc, ExpenseEntityRemote::class.java)
+        return RxFirestore.observeDocumentRef(doc).map { snapshot ->
+            snapshot.toObject(ExpenseEntityRemote::class.java)!!
+        }.doOnError {
+            Log.e("Error", "Mapper error: $it")
+        }
     }
 }

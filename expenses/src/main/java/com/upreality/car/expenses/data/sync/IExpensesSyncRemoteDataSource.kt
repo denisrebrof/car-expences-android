@@ -8,6 +8,6 @@ import io.reactivex.Maybe
 interface IExpensesSyncRemoteDataSource {
     fun getModified(fromTime: Long): Flowable<List<ExpenseSyncRemoteModel>>
     fun update(expense: ExpenseRemote): Maybe<Long>
-    fun delete(expense: ExpenseRemote): Maybe<Long>
+    fun delete(localId: Long): Maybe<Long>
     fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long>
 }

@@ -45,7 +45,17 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text"
         android:layout_marginTop="20dp"
-        android:text="Create Expense"
-        />
+        android:text="Create Expense" />
+
+    <Button
+        android:elevation="10dp"
+        android:id="@+id/delete_expenses_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="@id/create_expense_button"
+        app:layout_constraintRight_toRightOf="@id/create_expense_button"
+        app:layout_constraintTop_toBottomOf="@id/create_expense_button"
+        android:layout_marginTop="20dp"
+        android:text="Delete All" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

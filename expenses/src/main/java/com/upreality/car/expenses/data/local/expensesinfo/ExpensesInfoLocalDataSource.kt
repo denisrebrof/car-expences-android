@@ -1,6 +1,5 @@
 package com.upreality.car.expenses.data.local.expensesinfo
 
-import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.upreality.car.expenses.data.local.expensesinfo.dao.ExpenseInfoDAO
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo

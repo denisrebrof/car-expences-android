@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.sync.datasources
 
+import android.util.Log
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
@@ -31,8 +32,8 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
         val filter = ExpenseRemoteStateFilter.FromTime(fromTime)
         return statesDAO.get(filter)
             .map { list -> list.sortedBy(ExpenseRemoteState::timestamp) }
-            .flatMapMaybe { states ->
-                Flowable.fromIterable(states).flatMapMaybe { state ->
+            .concatMapMaybe { states ->
+                Flowable.fromIterable(states).concatMapMaybe { state ->
                     getExpense(state.remoteId).map { expense ->
                         val date = dateConverter.toTimestamp(state.timestamp ?: Date())
                         ExpenseSyncRemoteModel(expense, date, state.deleted)
@@ -42,8 +43,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     }
 
     override fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long> {
-        return remoteDataSource.create(remoteExpense)
-            .flatMap { id ->
+        return remoteDataSource.create(remoteExpense).flatMap { id ->
                 val createdStateTimestampMaybe = createState(id)
                 setRemoteId(localId, id).andThen(createdStateTimestampMaybe)
             }
@@ -54,9 +54,29 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
         return remoteDataSource.update(expense).andThen(updatedState)
     }
 
-    override fun delete(expense: ExpenseRemote): Maybe<Long> {
-        val updatedState = updateState(expense, true)
-        return remoteDataSource.delete(expense).andThen(updatedState)
+    override fun delete(localId: Long): Maybe<Long> {
+        val infoFilter = ExpenseInfoLocalIdFilter(localId)
+        val infoMaybe = expensesInfoLocalDataSource
+            .get(infoFilter)
+            .firstElement()
+            .map(List<ExpenseInfo>::firstOrNull)
+
+        val getRemote = infoMaybe
+            .map(ExpenseInfo::remoteId)
+            .flatMap(this::getExpense)
+
+        val updateInfo = infoMaybe
+            .map { it.copy(state = ExpenseInfoSyncState.Persists) }
+            .flatMapCompletable(expensesInfoLocalDataSource::update)
+
+        return getRemote.flatMap { expense ->
+            val updatedState = updateState(expense, true)
+            remoteDataSource
+                .delete(expense)
+                .andThen(updateInfo)
+                .andThen(updatedState)
+                .doOnSuccess { Log.d("Delete","Success!!") }
+        }.onErrorResumeNext(updateInfo.andThen(Maybe.just(0L)))
     }
 
     private fun getExpense(remoteId: String): Maybe<ExpenseRemote> {

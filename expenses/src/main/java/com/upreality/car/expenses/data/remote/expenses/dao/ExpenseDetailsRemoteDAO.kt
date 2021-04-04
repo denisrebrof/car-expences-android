@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.remote.expenses.dao
 
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
@@ -14,11 +15,11 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import javax.inject.Inject
 
-class ExpenseDetailsFirestoreDAO @Inject constructor(
-    remoteStorage: FirebaseFirestore
+class ExpenseDetailsRemoteDAO @Inject constructor(
+    userDocument: DocumentReference
 ) {
 
-    private val expenseDetailsCollection = remoteStorage.collection(EXPENSE_DETAILS_COLLECTION)
+    private val expenseDetailsCollection = userDocument.collection(EXPENSE_DETAILS_COLLECTION)
 
     companion object {
         private const val EXPENSE_DETAILS_COLLECTION = "expense_details"
@@ -35,18 +36,16 @@ class ExpenseDetailsFirestoreDAO @Inject constructor(
     }
 
     fun get(filter: ExpenseDetailsRemoteFilter): Flowable<List<ExpenseDetailsRemote>> {
-        val type = (filter as? Id)?.type
-        val deserialiseType = when (type) {
-            ExpenseType.Fines -> ExpenseDetailsRemote.ExpenseFinesDetails::class.java
-            ExpenseType.Fuel -> ExpenseDetailsRemote.ExpenseFuelDetails::class.java
-            ExpenseType.Maintenance -> ExpenseDetailsRemote.ExpenseMaintenanceDetails::class.java
-            null -> ExpenseDetailsRemote::class.java
-        }
         return when (filter) {
             is All -> observeQueryRef(expenseDetailsCollection, ExpenseDetailsRemote::class.java)
             is Id -> {
+                val deserializeType = when (filter.type) {
+                    ExpenseType.Fines -> ExpenseDetailsRemote.ExpenseFinesDetails::class.java
+                    ExpenseType.Fuel -> ExpenseDetailsRemote.ExpenseFuelDetails::class.java
+                    ExpenseType.Maintenance -> ExpenseDetailsRemote.ExpenseMaintenanceDetails::class.java
+                }
                 val doc = expenseDetailsCollection.document(filter.id)
-                observeDocumentRef(doc, deserialiseType).map { listOf(it) }
+                observeDocumentRef(doc, deserializeType).map { listOf(it) }
             }
         }
     }

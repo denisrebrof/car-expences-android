@@ -17,6 +17,7 @@ import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
@@ -44,6 +45,8 @@ class ExpensesActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityExpencesBinding
 
+    private var cost = 100f
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExpencesBinding.inflate(layoutInflater)
@@ -53,6 +56,7 @@ class ExpensesActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         binding.createExpenseButton.setOnClickListener { executeCreation() }
+        binding.deleteExpensesButton.setOnClickListener { executeDelete() }
         sync.createSyncLoop().disposeBy(lifecycle.disposers.onStop)
         repository.get(ExpenseFilter.All)
             .map(List<Expense>::size)
@@ -68,20 +72,27 @@ class ExpensesActivity : AppCompatActivity() {
             .subscribe(this::setText2)
             .disposeBy(lifecycle.disposers.onStop)
 
-        eiLocalDS.get(ExpenseInfoAllFilter).subscribe {
-            Log.d("SYNC", "infos mdifies")
-        }.disposeBy(lifecycle.disposers.onStop)
-
         val filter = ExpenseRemoteOperationFilter.FromTime(0)
         remOpDAO.get(filter)
             .observeOn(mainThread())
             .subscribe {
                 binding.textOp.text = "Oper Size from zero: ${it.size}"
-        }.disposeBy(lifecycle.disposers.onStop)
+            }.disposeBy(lifecycle.disposers.onStop)
+    }
+
+    private fun executeDelete() {
+        repository.get(ExpenseFilter.All)
+            .firstElement()
+            .map{ list -> listOf(list.first()) }
+            .flattenAsFlowable { it }
+            .flatMapCompletable(repository::delete)
+            .subscribe()
+            .disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun executeCreation() {
-        val expense = Expense.Maintenance(Date(), 100F, MaintenanceType.Other, 2F)
+        val expense = Expense.Maintenance(Date(), cost, MaintenanceType.Other, 2F)
+        cost+=1
         repository.create(expense)
             .subscribeOn(Schedulers.io())
             .subscribe()
@@ -90,7 +101,6 @@ class ExpensesActivity : AppCompatActivity() {
 
     private fun setText(text: String) {
         binding.text.text = text
-        Log.d("DB", "Create expense result: $text")
     }
 
     private fun setText2(text: String) {

@@ -42,6 +42,7 @@ class ExpensesLocalDSSyncDecorator @Inject constructor(
     private fun updateInfo(expense: ExpenseRoom, state: ExpenseInfoSyncState): Completable {
         return infoDS
             .get(ExpenseInfoLocalIdFilter(expense.id))
+            .firstElement()
             .map(List<ExpenseInfo>::firstOrNull)
             .map { it.copy(state = state) }
             .flatMapCompletable(infoDS::update)

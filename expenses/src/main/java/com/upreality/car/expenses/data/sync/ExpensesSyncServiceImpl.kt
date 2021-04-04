@@ -26,10 +26,11 @@ class ExpensesSyncServiceImpl @Inject constructor(
 
         val syncFromRemote = getUpdatedRemoteExpensesFlow().subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .onBackpressureLatest().flatMapCompletable { updatedRemote ->
+            .onBackpressureLatest().concatMapCompletable { updatedRemote ->
+                Log.d("","Remote list changes: ${updatedRemote.size}")
                 Flowable
                     .fromIterable(updatedRemote)
-                    .flatMapCompletable(this::syncLocalFromRemote)
+                    .concatMapCompletable(this::syncLocalFromRemote)
             }.doOnError {
                 Log.e("Sync", "Error during R sync occurs: $it")
             }.retry().subscribe()
@@ -40,12 +41,12 @@ class ExpensesSyncServiceImpl @Inject constructor(
             { remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
         ).subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .onBackpressureLatest().flatMapCompletable { (updatesRemote, updatesLocal) ->
+            .onBackpressureLatest().concatMapCompletable { (updatesRemote, updatesLocal) ->
 
                 val syncFromLocal = Flowable
                     .fromIterable(updatesLocal)
                     .filter { it.state != ExpenseInfoSyncState.Persists }
-                    .flatMapCompletable(this::syncRemoteFromLocal)
+                    .concatMapCompletable(this::syncRemoteFromLocal)
 
                 if (updatesRemote.isEmpty()) syncFromLocal else Completable.complete()
             }.doOnError {
@@ -83,7 +84,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
                 updatedLocalExpense.expense.id
             )
             ExpenseInfoSyncState.Updated -> remoteDataSource.update(remoteModel)
-            ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(remoteModel)
+            ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(updatedLocalExpense.expense.id)
             else -> return Completable.complete() //TODO: review
         }
         return syncOperation.ignoreElement()
