@@ -28,6 +28,10 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             .get(ExpenseInfoAllFilter)
             .map { list -> list.filter { it.state != Persists } }
             .concatMapMaybe(this::getSyncModelsMaybe)
+            .distinctUntilChanged()
+            .doOnNext {
+                Log.d("","Local updates changed")
+            }
     }
 
     override fun createOrUpdate(expense: Expense, remoteId: String): Completable {

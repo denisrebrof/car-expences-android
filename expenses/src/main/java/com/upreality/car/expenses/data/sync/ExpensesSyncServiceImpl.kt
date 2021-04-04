@@ -20,9 +20,18 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
+    var updCount = 0
+
     override fun createSyncLoop(): Disposable {
 
         val composite = CompositeDisposable()
+
+        val getFromLocal = localDataSource.getUpdates()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe {
+            updCount = it.size
+        }
 
         val syncFromRemote = getUpdatedRemoteExpensesFlow().subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
@@ -41,19 +50,32 @@ class ExpensesSyncServiceImpl @Inject constructor(
             { remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
         ).subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .onBackpressureLatest().concatMapCompletable { (updatesRemote, updatesLocal) ->
+            .onBackpressureLatest().concatMapCompletable { (updatesRemote, updatesLocalChangeMark) ->
 
-                val syncFromLocal = Flowable
-                    .fromIterable(updatesLocal)
-                    .filter { it.state != ExpenseInfoSyncState.Persists }
-                    .concatMapCompletable(this::syncRemoteFromLocal)
+                //Stub
+                localDataSource
+                    .getUpdates()
+                    .firstElement()
+                    .flatMapCompletable { updatesLocal ->
+                        val syncFromLocal = Flowable
+                            .fromIterable(updatesLocal)
+                            .filter { it.state != ExpenseInfoSyncState.Persists }
+                            .concatMapCompletable(this::syncRemoteFromLocal)
+                            .doOnComplete {
+                                Log.d("SyncN", "End")
+                            }
 
-                if (updatesRemote.isEmpty()) syncFromLocal else Completable.complete()
+                        if (updatesRemote.isEmpty()) syncFromLocal else Completable.complete().doOnComplete {
+                            Log.d("SyncN", "End")
+                        }
+                    }
+
+
             }.doOnError {
                 Log.e("Sync", "Error during L sync occurs: $it")
             }.retry().subscribe()
 
-        composite.addAll(syncFromRemote, syncFromLocalAfterRemote)
+        composite.addAll(syncFromRemote, syncFromLocalAfterRemote, getFromLocal)
 
         return composite
     }

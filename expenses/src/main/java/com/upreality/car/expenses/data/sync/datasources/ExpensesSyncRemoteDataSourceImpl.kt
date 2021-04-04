@@ -88,7 +88,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
                 .delete(expense)
                 .andThen(updateInfo)
                 .andThen(updatedState)
-                .doOnSuccess { Log.d("Delete","Success!!") }
+                .doOnSuccess { Log.d("Delete", "Success!!") }
         }.onErrorResumeNext(updateInfo.andThen(Maybe.just(0L)))
     }
 
