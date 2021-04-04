@@ -87,6 +87,6 @@ class ExpensesSyncServiceImpl @Inject constructor(
             ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(updatedLocalExpense.expense.id)
             else -> return Completable.complete() //TODO: review
         }
-        return syncOperation.ignoreElement()
+        return syncOperation.flatMapCompletable(syncTimestampProvider::set)
     }
 }

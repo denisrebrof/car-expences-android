@@ -44,9 +44,22 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
 
     override fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long> {
         return remoteDataSource.create(remoteExpense).flatMap { id ->
-                val createdStateTimestampMaybe = createState(id)
-                setRemoteId(localId, id).andThen(createdStateTimestampMaybe)
-            }
+            val createdStateTimestampMaybe = createState(id)
+
+            val infoFilter = ExpenseInfoLocalIdFilter(localId)
+            val infoMaybe = expensesInfoLocalDataSource
+                .get(infoFilter)
+                .firstElement()
+                .map(List<ExpenseInfo>::firstOrNull)
+
+            val updateInfo = infoMaybe
+                .map { it.copy(state = ExpenseInfoSyncState.Persists) }
+                .flatMapCompletable(expensesInfoLocalDataSource::update)
+
+            setRemoteId(localId, id)
+                .andThen(createdStateTimestampMaybe)
+                .flatMap { updateInfo.andThen(Maybe.just(it)) }
+        }
     }
 
     override fun update(expense: ExpenseRemote): Maybe<Long> {
