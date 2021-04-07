@@ -20,62 +20,31 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
-    var updCount = 0
-
     override fun createSyncLoop(): Disposable {
 
         val composite = CompositeDisposable()
 
-        val getFromLocal = localDataSource.getUpdates()
+        val syncFromRemote = getUpdatedRemoteExpensesFlow()
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .subscribe {
-            updCount = it.size
-        }
-
-        val syncFromRemote = getUpdatedRemoteExpensesFlow().subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .onBackpressureLatest().concatMapCompletable { updatedRemote ->
-                Log.d("","Remote list changes: ${updatedRemote.size}")
+            .concatMapCompletable { updatedRemote ->
                 Flowable
                     .fromIterable(updatedRemote)
                     .concatMapCompletable(this::syncLocalFromRemote)
-            }.doOnError {
-                Log.e("Sync", "Error during R sync occurs: $it")
             }.retry().subscribe()
 
         val syncFromLocalAfterRemote = Flowable.combineLatest(
             getUpdatedRemoteExpensesFlow(),
-            localDataSource.getUpdates(),
-            { remoteUpdates, localUpdates -> remoteUpdates to localUpdates }
+            getFirstLocalUpdateFlow(),
+            { remoteUpdates, firstLocalUpdate -> remoteUpdates to firstLocalUpdate }
         ).subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .onBackpressureLatest().concatMapCompletable { (updatesRemote, updatesLocalChangeMark) ->
-
-                //Stub
-                localDataSource
-                    .getUpdates()
-                    .firstElement()
-                    .flatMapCompletable { updatesLocal ->
-                        val syncFromLocal = Flowable
-                            .fromIterable(updatesLocal)
-                            .filter { it.state != ExpenseInfoSyncState.Persists }
-                            .concatMapCompletable(this::syncRemoteFromLocal)
-                            .doOnComplete {
-                                Log.d("SyncN", "End")
-                            }
-
-                        if (updatesRemote.isEmpty()) syncFromLocal else Completable.complete().doOnComplete {
-                            Log.d("SyncN", "End")
-                        }
-                    }
-
-
-            }.doOnError {
-                Log.e("Sync", "Error during L sync occurs: $it")
+            .concatMapCompletable { (updatesRemote, lastLocalUpdate) ->
+                val syncFromLocal = syncRemoteFromLocal(lastLocalUpdate)
+                if (updatesRemote.isEmpty()) syncFromLocal else Completable.complete()
             }.retry().subscribe()
 
-        composite.addAll(syncFromRemote, syncFromLocalAfterRemote, getFromLocal)
+        composite.addAll(syncFromRemote, syncFromLocalAfterRemote)
 
         return composite
     }
@@ -84,6 +53,12 @@ class ExpensesSyncServiceImpl @Inject constructor(
         return syncTimestampProvider.get()
             .switchMap(remoteDataSource::getModified)
             .map { it.sortedBy(ExpenseSyncRemoteModel::timestamp) }
+    }
+
+    private fun getFirstLocalUpdateFlow(): Flowable<ExpenseLocalSyncModel> {
+        return localDataSource.getUpdates()
+            .filter(List<ExpenseLocalSyncModel>::isNotEmpty)
+            .map(List<ExpenseLocalSyncModel>::first)
     }
 
     private fun syncLocalFromRemote(syncRemoteModel: ExpenseSyncRemoteModel): Completable {
