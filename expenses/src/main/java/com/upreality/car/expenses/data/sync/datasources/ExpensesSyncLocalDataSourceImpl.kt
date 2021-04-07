@@ -37,8 +37,11 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             .filter(List<ExpenseInfo>::isNotEmpty)
             .map(List<ExpenseInfo>::first)
             .distinctUntilChanged { prevInfo, info ->
-                if (prevInfo.id == info.id) prevInfo.state != info.state else false
-            }.concatMapMaybe(this::getSyncModelUpdateMaybe)
+                if (prevInfo.id == info.id) prevInfo.state == info.state else false
+            }.doOnNext {
+                Log.d("","")
+            }
+            .concatMapMaybe(this::getSyncModelUpdateMaybe)
 
         return emptyUpdates.mergeWith(nonEmptyUpdates).distinctUntilChanged { prevModel, model ->
             prevModel is ExpenseLocalSyncModel.Empty && model is ExpenseLocalSyncModel.Empty
