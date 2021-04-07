@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.sync.datasources
 
+import android.util.Log
 import com.upreality.car.common.data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
 import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
@@ -43,6 +44,7 @@ class ExpensesLocalDSSyncDecorator @Inject constructor(
         return infoDS
             .get(ExpenseInfoLocalIdFilter(expense.id))
             .firstElement()
+            .doOnComplete { Log.d("","") }
             .map(List<ExpenseInfo>::firstOrNull)
             .map { it.copy(state = state) }
             .flatMapCompletable(infoDS::update)

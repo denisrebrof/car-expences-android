@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoAllFilter
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSource
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
@@ -17,7 +16,6 @@ import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers.mainThread
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
@@ -57,12 +55,14 @@ class ExpensesActivity : AppCompatActivity() {
         super.onStart()
         binding.createExpenseButton.setOnClickListener { executeCreation() }
         binding.deleteExpensesButton.setOnClickListener { executeDelete() }
+        binding.modifyExpenseButton.setOnClickListener { executeUpdate() }
         sync.createSyncLoop().disposeBy(lifecycle.disposers.onStop)
-        repository.get(ExpenseFilter.All)
-            .map(List<Expense>::size)
-            .map(Int::toString)
+
+        val expensesFlow = repository
+            .get(ExpenseFilter.All)
             .observeOn(mainThread())
-            .subscribe(this::setText)
+
+        expensesFlow.subscribe(this::onExpensesUpdates)
             .disposeBy(lifecycle.disposers.onStop)
 
         remDS.get(ExpenseRemoteFilter.All)
@@ -83,24 +83,50 @@ class ExpensesActivity : AppCompatActivity() {
     private fun executeDelete() {
         repository.get(ExpenseFilter.All)
             .firstElement()
-            .map{ list -> listOf(list.first()) }
+            .map { list -> listOf(list.first()) }
             .flattenAsFlowable { it }
             .flatMapCompletable(repository::delete)
             .subscribe()
             .disposeBy(lifecycle.disposers.onStop)
     }
 
+    private fun executeUpdate() {
+        repository.get(ExpenseFilter.All)
+            .firstElement()
+            .map { list -> listOf(list.first()) }
+            .flattenAsFlowable { it }
+            .map(this::getIncreasedExpense)
+            .flatMapCompletable(repository::update)
+            .doOnError {
+                Log.d("Error", "$it")
+            }
+            .subscribe()
+            .disposeBy(lifecycle.disposers.onStop)
+    }
+
+    private fun getIncreasedExpense(expense: Expense): Expense {
+        val updated = when (expense) {
+            is Expense.Fuel -> expense.copy(cost = 16f)
+            is Expense.Maintenance -> expense.copy(cost = 16f)
+            is Expense.Fine -> expense.copy(cost = 16f)
+        }.apply { id = expense.id }
+        return updated
+    }
+
     private fun executeCreation() {
         val expense = Expense.Maintenance(Date(), cost, MaintenanceType.Other, 2F)
-        cost+=1
+        cost += 1
         repository.create(expense)
             .subscribeOn(Schedulers.io())
             .subscribe()
             .disposeBy(lifecycle.disposers.onStop)
     }
 
-    private fun setText(text: String) {
-        binding.text.text = text
+    private fun onExpensesUpdates(expenses: List<Expense>) {
+        val last = expenses.lastOrNull()
+        binding.lastExpenseCost.text = last?.let(Expense::cost)?.toString() ?: "Undefined"
+        binding.lastExpenseDate.text = last?.let(Expense::date)?.toString() ?: "Undefined"
+        binding.text.text = expenses.size.toString()
     }
 
     private fun setText2(text: String) {

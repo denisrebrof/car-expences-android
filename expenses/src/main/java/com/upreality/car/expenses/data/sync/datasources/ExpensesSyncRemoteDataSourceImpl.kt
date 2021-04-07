@@ -29,7 +29,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     private val dateConverter = DateConverter()
 
     override fun getModified(fromTime: Long): Flowable<List<ExpenseSyncRemoteModel>> {
-        val filter = ExpenseRemoteStateFilter.FromTime(fromTime)
+        val filter = ExpenseRemoteStateFilter.FromTimePersisted(fromTime)
         return statesDAO.get(filter)
             .map { list -> list.sortedBy(ExpenseRemoteState::timestamp) }
             .concatMapMaybe { states ->
