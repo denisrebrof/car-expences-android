@@ -19,7 +19,7 @@ object RemoteExpenseEntityConverter {
         val date = DateConverter.toTime(remoteModel.date)
         val type = getExpenseType(remoteModel)
         return ExpenseEntityRemote(
-            String(), // empty
+            remoteModel.id,
             date,
             remoteModel.cost,
             RemoteExpenseTypeConverter.toExpenseTypeId(type),

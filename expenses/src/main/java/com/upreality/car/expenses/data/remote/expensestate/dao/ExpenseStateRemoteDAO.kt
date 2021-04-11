@@ -37,7 +37,8 @@ class ExpenseStateRemoteDAO @Inject constructor(
             ExpenseRemoteStateFilter.All -> getCollectionFlow()
             is ExpenseRemoteStateFilter.Id -> getDocumentFlow(filter.id).map { listOf(it) }
             is ExpenseRemoteStateFilter.FromTime -> getCollectionFromTime(filter.time)
-            is ExpenseRemoteStateFilter.FromTimePersisted -> getCollectionFromTimePersisted(filter.time)
+            is ExpenseRemoteStateFilter.FromTimePersisted -> getCollectionFromTime(filter.time)
+                .map { list -> list.filter { !it.deleted } }
             is ExpenseRemoteStateFilter.ByRemoteId -> getDocumentByRemoteId(filter.remoteId)
         }
     }
@@ -65,16 +66,6 @@ class ExpenseStateRemoteDAO @Inject constructor(
     private fun getCollectionFromTime(time: Long): Flowable<List<ExpenseRemoteState>> {
         val date = DateConverter.toDate(time)
         val fromTimeQuery = statesList.whereGreaterThan(ExpenseRemoteState::timestamp.name, date)
-        return RxFirestore.observeQueryRef(fromTimeQuery).map { snapshot ->
-            snapshot.documents.map { document -> document.toObject(ExpenseRemoteState::class.java)!! }
-        }
-    }
-
-    private fun getCollectionFromTimePersisted(time: Long): Flowable<List<ExpenseRemoteState>> {
-        val date = DateConverter.toDate(time)
-        val fromTimeQuery = statesList
-            .whereGreaterThan(ExpenseRemoteState::timestamp.name, date)
-            .whereEqualTo(ExpenseRemoteState::deleted.name, false)
         return RxFirestore.observeQueryRef(fromTimeQuery).map { snapshot ->
             snapshot.documents.map { document -> document.toObject(ExpenseRemoteState::class.java)!! }
         }

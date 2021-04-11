@@ -24,20 +24,23 @@ class ExpensesRemoteDataSource @Inject constructor(
     fun delete(expense: ExpenseRemote): Completable {
         return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
             val deleteExpense = expenseEntityDAO.delete(remoteExpense)
-            val details = RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
+            val details =
+                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
             val deleteDetails = expenseDetailsDAO.delete(details)
             deleteExpense.andThen(deleteDetails)
         }
     }
 
     fun update(expense: ExpenseRemote): Completable {
-        return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
-            val updateExpense = expenseEntityDAO.update(remoteExpense)
-            val details =
-                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
-            val updateDetails = expenseDetailsDAO.update(details)
-            updateExpense.andThen(updateDetails)
-        }
+        val entity = RemoteExpenseEntityConverter.toExpenseEntity(expense, String())
+        return getRemoteInstance(expense.id)
+            .map(ExpenseEntityRemote::detailsId)
+            .flatMapCompletable { detailsId ->
+                val updateExpense = expenseEntityDAO.update(entity.copy(detailsId = detailsId))
+                val details = RemoteExpenseEntityConverter.toExpenseDetails(expense, detailsId)
+                val updateDetails = expenseDetailsDAO.update(details)
+                updateExpense.andThen(updateDetails)
+            }
     }
 
     private fun getRemoteInstance(expenseId: String): Maybe<ExpenseEntityRemote> {
@@ -55,7 +58,7 @@ class ExpensesRemoteDataSource @Inject constructor(
     private fun convertToRemoteExpenses(entities: List<ExpenseEntityRemote>): Single<List<ExpenseRemote>> {
         return Flowable.fromIterable(entities).flatMapMaybe { remoteEntity ->
             val type = RemoteExpenseTypeConverter.toExpenseType(remoteEntity.type)
-            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId,type)
+            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId, type)
             val detailsMaybe = expenseDetailsDAO
                 .get(detailsSelector)
                 .firstElement()

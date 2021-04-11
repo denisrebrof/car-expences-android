@@ -7,6 +7,7 @@ import com.upreality.car.expenses.data.local.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState
+import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfoSyncState.*
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
 import com.upreality.car.expenses.data.repository.IExpensesLocalDataSource
 import io.reactivex.Completable
@@ -20,12 +21,12 @@ class ExpensesLocalDSSyncDecorator @Inject constructor(
 ) : IExpensesLocalDataSource {
 
     override fun delete(expense: ExpenseRoom): Completable {
-        val updateState = updateInfo(expense, ExpenseInfoSyncState.Deleted)
+        val updateState = updateInfo(expense, Deleted)
         return localDS.delete(expense).andThen(updateState)
     }
 
     override fun update(expense: ExpenseRoom): Completable {
-        val updateState = updateInfo(expense, ExpenseInfoSyncState.Updated)
+        val updateState = updateInfo(expense, Updated)
         return localDS.update(expense).andThen(updateState)
     }
 
@@ -44,9 +45,12 @@ class ExpensesLocalDSSyncDecorator @Inject constructor(
         return infoDS
             .get(ExpenseInfoLocalIdFilter(expense.id))
             .firstElement()
-            .doOnComplete { Log.d("","") }
+            .doOnComplete { Log.d("", "") }
             .map(List<ExpenseInfo>::firstOrNull)
-            .map { it.copy(state = state) }
-            .flatMapCompletable(infoDS::update)
+            .map {
+                //TODO - remove hack
+                val updateNotSynced = state == Updated && it.state == Created
+                if (updateNotSynced) it.copy(state = state) else it
+            }.flatMapCompletable(infoDS::update)
     }
 }

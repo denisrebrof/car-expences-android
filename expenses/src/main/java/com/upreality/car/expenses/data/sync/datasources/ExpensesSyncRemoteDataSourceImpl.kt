@@ -44,14 +44,22 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
 
     override fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long> {
         return remoteDataSource.create(remoteExpense).flatMap { id ->
-                val createdStateTimestampMaybe = createState(id)
-                setRemoteId(localId, id).andThen(createdStateTimestampMaybe)
-            }
+            val createdStateTimestampMaybe = createState(id)
+            setRemoteId(localId, id).andThen(createdStateTimestampMaybe)
+        }
     }
 
-    override fun update(expense: ExpenseRemote): Maybe<Long> {
-        val updatedState = updateState(expense, false)
-        return remoteDataSource.update(expense).andThen(updatedState)
+    override fun update(expense: ExpenseRemote, localId: Long): Maybe<Long> {
+        return ExpenseInfoLocalIdFilter(localId)
+            .let(expensesInfoLocalDataSource::get)
+            .firstElement()
+            .map(List<ExpenseInfo>::first)
+            .map(ExpenseInfo::remoteId)
+            .flatMap { remoteId ->
+                expense.id = remoteId
+                val updatedState = updateState(expense, false)
+                remoteDataSource.update(expense).andThen(updatedState)
+            }
     }
 
     override fun delete(localId: Long): Maybe<Long> {
@@ -75,7 +83,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
                 .delete(expense)
                 .andThen(updateInfo)
                 .andThen(updatedState)
-                .doOnSuccess { Log.d("Delete","Success!!") }
+                .doOnSuccess { Log.d("Delete", "Success!!") }
         }.onErrorResumeNext(updateInfo.andThen(Maybe.just(0L)))
     }
 
@@ -89,7 +97,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
 
     private fun updateState(expense: ExpenseRemote, deleted: Boolean): Maybe<Long> {
         val updateState = getState(expense)
-            .map { it.copy(deleted = deleted) }
+            .map { it.copy(deleted = deleted, timestamp = null) }
             .flatMapCompletable(statesDAO::update)
 
         val getUpdatedTimestamp = getState(expense)

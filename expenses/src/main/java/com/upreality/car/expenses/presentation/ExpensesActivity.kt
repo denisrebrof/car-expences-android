@@ -83,7 +83,7 @@ class ExpensesActivity : AppCompatActivity() {
     private fun executeDelete() {
         repository.get(ExpenseFilter.All)
             .firstElement()
-            .map { list -> listOf(list.first()) }
+            .map { list -> listOf(list.last()) }
             .flattenAsFlowable { it }
             .flatMapCompletable(repository::delete)
             .subscribe()
@@ -93,7 +93,7 @@ class ExpensesActivity : AppCompatActivity() {
     private fun executeUpdate() {
         repository.get(ExpenseFilter.All)
             .firstElement()
-            .map { list -> listOf(list.first()) }
+            .map { list -> listOf(list.last()) }
             .flattenAsFlowable { it }
             .map(this::getIncreasedExpense)
             .flatMapCompletable(repository::update)

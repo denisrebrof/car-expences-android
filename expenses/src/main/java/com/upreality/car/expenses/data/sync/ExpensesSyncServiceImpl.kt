@@ -73,13 +73,14 @@ class ExpensesSyncServiceImpl @Inject constructor(
 
     private fun syncRemoteFromLocal(updatedLocalExpense: ExpenseLocalSyncModel.Update): Completable {
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedLocalExpense.expense)
+        val localId = updatedLocalExpense.expense.id
         val syncOperation = when (updatedLocalExpense.state) {
             ExpenseInfoSyncState.Created -> remoteDataSource.create(
                 remoteModel,
                 updatedLocalExpense.expense.id
             )
-            ExpenseInfoSyncState.Updated -> remoteDataSource.update(remoteModel)
-            ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(updatedLocalExpense.expense.id)
+            ExpenseInfoSyncState.Updated -> remoteDataSource.update(remoteModel, localId)
+            ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(localId)
             else -> return Completable.complete() //TODO: review
         }
         return syncOperation.ignoreElement()

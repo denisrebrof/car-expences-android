@@ -35,7 +35,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
 
         val nonEmptyUpdates: Flowable<ExpenseLocalSyncModel> = listUpdates
             .filter(List<ExpenseInfo>::isNotEmpty)
-            .map(List<ExpenseInfo>::first)
+            .map(List<ExpenseInfo>::last)
             .distinctUntilChanged { prevInfo, info ->
                 if (prevInfo.id == info.id) prevInfo.state == info.state else false
             }.concatMapMaybe(this::getSyncModelUpdateMaybe)
