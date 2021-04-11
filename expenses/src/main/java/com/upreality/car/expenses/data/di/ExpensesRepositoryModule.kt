@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.di
 
+import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDataSource
 import com.upreality.car.expenses.data.repository.ExpensesRepositoryImpl
 import com.upreality.car.expenses.data.repository.IExpensesLocalDataSource
 import com.upreality.car.expenses.data.sync.datasources.ExpensesLocalDSSyncDecorator
@@ -19,5 +20,5 @@ abstract class ExpensesRepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun provideLocalDS(ds: ExpensesLocalDSSyncDecorator): IExpensesLocalDataSource
+    abstract fun provideLocalDS(ds: ExpensesLocalDataSource): IExpensesLocalDataSource
 }

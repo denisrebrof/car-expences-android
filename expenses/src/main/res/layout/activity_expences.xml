@@ -7,107 +7,191 @@
     tools:context=".presentation.ExpensesActivity">
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/last_expense_card"
+        android:id="@+id/stats_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginVertical="12dp"
-        app:cardElevation="4dp"
+        android:layout_margin="8dp"
+        app:cardBackgroundColor="@color/design_default_color_primary"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="16dp">
+            android:paddingVertical="8dp">
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/last_expense_title"
+                android:id="@+id/stats_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Last Expense" />
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Stats" />
+
+            <View
+                android:id="@+id/stats_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/design_default_color_on_primary"
+                app:layout_constraintTop_toBottomOf="@id/stats_title" />
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/last_expense_date"
+                android:id="@+id/stats_cost_per_distance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Date undefined" />
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/stats_divider"
+                tools:text="$16" />
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/last_expense_cost"
+                android:id="@+id/stats_cost_per_distance_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Cost undefined" />
-        </LinearLayout>
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginEnd="158dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/stats_cost_per_distance"
+                app:layout_constraintStart_toStartOf="@+id/stats_cost_per_distance"
+                app:layout_constraintTop_toBottomOf="@+id/stats_cost_per_distance"
+                tools:text="per mile" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/stats_cost_per_liter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintEnd_toStartOf="@+id/stats_cost_per_distance"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/stats_divider"
+                tools:text="$10" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/stats_cost_per_liter_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/stats_cost_per_liter"
+                app:layout_constraintStart_toStartOf="@+id/stats_cost_per_liter"
+                app:layout_constraintTop_toBottomOf="@+id/stats_cost_per_liter"
+                tools:text="per liter" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/stats_spent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/stats_cost_per_distance"
+                app:layout_constraintTop_toTopOf="@+id/stats_divider"
+                tools:text="$10" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/stats_spent_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textColor="@color/design_default_color_on_primary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/stats_spent"
+                app:layout_constraintStart_toStartOf="@+id/stats_spent"
+                app:layout_constraintTop_toBottomOf="@+id/stats_spent"
+                tools:text="per liter" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/textOp"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/history_card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No expenses created"
-        app:layout_constraintBottom_toTopOf="@id/text2"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/last_expense_card" />
+        android:layout_margin="8dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_card"
+        app:layout_constraintBottom_toBottomOf="@id/btn_block_guideline">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/text2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No Remote expenses created"
-        app:layout_constraintBottom_toTopOf="@id/text"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/history_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/text"
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/btn_block_guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No expenses created"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/btn_vertical_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.66" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/add_fuel_expense_btn"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="8dp"
+        app:icon="@drawable/ic_add_24"
+        app:iconGravity="textTop"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/btn_vertical_guideline"
+        app:layout_constraintTop_toTopOf="@+id/btn_block_guideline"
+        tools:text="Fuel" />
 
-    <Button
-        android:id="@+id/create_expense_button"
-        android:backgroundTint="@color/design_default_color_primary"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:elevation="10dp"
-        android:text="Create Expense"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text" />
-
-    <Button
-        android:id="@+id/modify_expense_button"
-        android:backgroundTint="@color/design_default_color_on_secondary"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/add_maintenance_expense_btn"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:elevation="10dp"
-        android:text="Increase cost"
-        app:layout_constraintLeft_toLeftOf="@id/create_expense_button"
-        app:layout_constraintRight_toRightOf="@id/create_expense_button"
-        app:layout_constraintTop_toBottomOf="@id/create_expense_button" />
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="8dp"
+        android:maxLines="1"
+        app:icon="@drawable/ic_add_24"
+        app:iconGravity="textStart"
+        app:layout_constraintBottom_toTopOf="@+id/add_fines_expense_btn"
+        app:layout_constraintEnd_toEndOf="@id/btn_vertical_guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/add_fuel_expense_btn"
+        tools:text="Maintenance" />
 
-    <Button
-        android:id="@+id/delete_expenses_button"
-        android:backgroundTint="@color/design_default_color_primary_dark"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/add_fines_expense_btn"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:elevation="10dp"
-        android:text="Delete Last"
-        app:layout_constraintLeft_toLeftOf="@id/create_expense_button"
-        app:layout_constraintRight_toRightOf="@id/create_expense_button"
-        app:layout_constraintTop_toBottomOf="@id/modify_expense_button" />
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="8dp"
+        app:icon="@drawable/ic_add_24"
+        app:iconGravity="textStart"
+        app:layout_constraintBottom_toBottomOf="@+id/add_fuel_expense_btn"
+        app:layout_constraintEnd_toEndOf="@id/btn_vertical_guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/add_maintenance_expense_btn"
+        tools:text="Fines" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

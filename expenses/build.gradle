@@ -98,5 +98,8 @@ dependencies {
     api rootProject.ext.firestore_database
     implementation rootProject.ext.rx2firebase
 
+    //Chart
+    implementation rootProject.ext.mp_chart
+
     api project(':common')
 }
