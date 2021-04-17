@@ -4,5 +4,6 @@ enum class ExpenseInfoSyncState(val id: Int) {
     Created(0),
     Persists(1),
     Updated(2),
-    Deleted(3)
+    Deleted(3),
+    PendingSync(4)
 }

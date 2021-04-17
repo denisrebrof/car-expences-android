@@ -11,6 +11,7 @@ import com.upreality.car.expenses.data.local.expensesinfo.model.entities.Expense
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.*
 import com.upreality.car.expenses.data.sync.IExpensesSyncLocalDataSource
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
+import com.upreality.car.expenses.data.sync.schedulers.ILocalInfoSchedulerProvider
 import com.upreality.car.expenses.domain.model.expence.Expense
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -20,41 +21,34 @@ import javax.inject.Inject
 
 class ExpensesSyncLocalDataSourceImpl @Inject constructor(
     private val expensesLocalDataSource: ExpensesLocalDataSource,
-    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
+    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource,
+    private val infoSchedulerProvider: ILocalInfoSchedulerProvider
 ) : IExpensesSyncLocalDataSource {
 
-    override fun getLastUpdate(): Flowable<ExpenseLocalSyncModel> {
-
-        val listUpdates = expensesInfoLocalDataSource
+    override fun getLastUpdates(): Flowable<List<ExpenseLocalSyncModel>> {
+        return expensesInfoLocalDataSource
             .get(ExpenseInfoAllFilter)
-            .map { list -> list.filter { it.state != Persists } }
-
-        val emptyUpdates: Flowable<ExpenseLocalSyncModel> = listUpdates
-            .filter(List<ExpenseInfo>::isEmpty)
-            .map { ExpenseLocalSyncModel.Empty }
-
-        val nonEmptyUpdates: Flowable<ExpenseLocalSyncModel> = listUpdates
-            .filter(List<ExpenseInfo>::isNotEmpty)
-            .map(List<ExpenseInfo>::first)
-            .distinctUntilChanged { prevInfo, info ->
-                if (prevInfo.id == info.id) prevInfo.state == info.state else false
-            }.concatMapMaybe(this::getSyncModelUpdateMaybe)
-
-        return emptyUpdates.mergeWith(nonEmptyUpdates).distinctUntilChanged { prevModel, model ->
-            prevModel is ExpenseLocalSyncModel.Empty && model is ExpenseLocalSyncModel.Empty
-        }
+            .subscribeOn(infoSchedulerProvider.get())
+            .map { list -> list.filter { it.state != Persists && it.state != PendingSync } }
+            .concatMapMaybe(this::getSyncModelsMaybe)
     }
 
     override fun createOrUpdate(expense: Expense, remoteId: String): Completable {
-        val infoMaybe = getExpenseInfoByRemoteId(remoteId)
+        val infoMaybe = getExpenseInfoByRemoteId(remoteId).subscribeOn(infoSchedulerProvider.get())
         val updatedExpense = RoomExpenseConverter.fromExpense(expense)
 
         return infoMaybe.flatMapCompletable { info ->
-            updatedExpense.id = info.localId
-            val updateExpense = expensesLocalDataSource.update(updatedExpense)
-            val updatedInfo = info.copy(state = Persists)
-            val updateInfo = expensesInfoLocalDataSource.update(updatedInfo)
-            updateExpense.andThen(updateInfo)
+            when(info.state){
+                PendingSync,
+                Persists -> {
+                    updatedExpense.id = info.localId
+                    val updateExpense = expensesLocalDataSource.update(updatedExpense)
+                    val updatedInfo = info.copy(state = Persists)
+                    val updateInfo = expensesInfoLocalDataSource.update(updatedInfo)
+                    updateExpense.andThen(updateInfo)
+                }
+                else -> Completable.complete()
+            }
         }.onErrorResumeNext {
             Log.e("Error:", "$it")
             val createInfo = { localId: Long ->
@@ -78,18 +72,19 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         }
     }
 
-    private fun getSyncModelUpdateMaybe(modifiedInfo: ExpenseInfo): Maybe<ExpenseLocalSyncModel.Update> {
-        return when (modifiedInfo.state) {
-            Deleted -> {
-                //TODO remove this hack
-                val expense = Expense.Fuel(Date(), 0f, 0f, 0f)
-                expense.id = modifiedInfo.localId
-                Maybe.just(ExpenseLocalSyncModel.Update(expense, Deleted))
+    private fun getSyncModelsMaybe(infos: List<ExpenseInfo>): Maybe<List<ExpenseLocalSyncModel>> {
+        return Flowable.fromIterable(infos).concatMapMaybe { modifiedInfo ->
+            when (modifiedInfo.state) {
+                Deleted -> {
+                    val expense = Expense.Fuel(Date(), 0f, 0f, 0f)
+                    expense.id = modifiedInfo.localId
+                    Maybe.just(ExpenseLocalSyncModel(expense, Deleted))
+                }
+                else -> getLocalExpense(modifiedInfo)
+                    .map(RoomExpenseConverter::toExpense)
+                    .map { ExpenseLocalSyncModel(it, modifiedInfo.state) }
             }
-            else -> getLocalExpense(modifiedInfo)
-                .map(RoomExpenseConverter::toExpense)
-                .map { ExpenseLocalSyncModel.Update(it, modifiedInfo.state) }
-        }
+        }.toList().toMaybe()
     }
 
     private fun getExpenseInfoByRemoteId(expenseId: String): Maybe<ExpenseInfo> {

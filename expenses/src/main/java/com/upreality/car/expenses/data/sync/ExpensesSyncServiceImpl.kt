@@ -8,9 +8,9 @@ import com.upreality.car.expenses.data.sync.model.ExpenseSyncRemoteModel
 import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ExpensesSyncServiceImpl @Inject constructor(
@@ -19,38 +19,36 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
-    private var localToRemoteSyncPossible = false
-
     override fun createSyncLoop(): Disposable {
+        return recursiveSync().subscribe()
+    }
 
-        val composite = CompositeDisposable()
+    private fun recursiveSync(): Completable{
+        val syncDelay = Completable.timer(500,TimeUnit.MILLISECONDS)
+        return executeSync().andThen(syncDelay).andThen(recursiveSync())
+    }
 
+    private fun executeSync(): Completable{
         val syncFromRemote = getUpdatedRemoteExpensesFlow()
+            .firstElement()
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .concatMapCompletable { updatedRemote ->
-                localToRemoteSyncPossible = updatedRemote.isEmpty()
-                Flowable
-                    .fromIterable(updatedRemote)
-                    .concatMapCompletable(this::syncLocalFromRemote)
+            .flatMapCompletable {
+                Flowable.fromIterable(it).concatMapCompletable(this::syncLocalFromRemote)
             }.doOnError {
-                Log.e("Error","$it")
-            }.subscribe()
+                Log.e("Error", "$it")
+            }
 
-        val syncFromLocalAfterRemote = localDataSource.getLastUpdate()
+        val syncFromLocal = localDataSource.getLastUpdates()
+            .firstElement()
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .filter { localToRemoteSyncPossible }
-            .concatMapCompletable { lastLocalUpdate ->
-                val localUpdate = lastLocalUpdate as? ExpenseLocalSyncModel.Update
-                localUpdate?.let(this::syncRemoteFromLocal) ?: Completable.complete()
+            .flatMapCompletable {
+                Flowable.fromIterable(it).concatMapCompletable(this::syncRemoteFromLocal)
             }.doOnError {
-                Log.e("Error","$it")
-            }.subscribe()
-
-        composite.addAll(syncFromRemote, syncFromLocalAfterRemote)
-
-        return composite
+                Log.e("Error", "$it")
+            }
+        return syncFromRemote.andThen(syncFromLocal)
     }
 
     private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseSyncRemoteModel>> {
@@ -71,7 +69,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
         return updateLocalInstanceMaybe.andThen(updateTimestampCompletable)
     }
 
-    private fun syncRemoteFromLocal(updatedLocalExpense: ExpenseLocalSyncModel.Update): Completable {
+    private fun syncRemoteFromLocal(updatedLocalExpense: ExpenseLocalSyncModel): Completable {
         val remoteModel = RemoteExpenseConverter.fromExpense(updatedLocalExpense.expense)
         val syncOperation = when (updatedLocalExpense.state) {
             ExpenseInfoSyncState.Created -> remoteDataSource.create(

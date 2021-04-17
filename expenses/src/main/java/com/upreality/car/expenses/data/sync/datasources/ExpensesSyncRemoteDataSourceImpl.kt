@@ -14,6 +14,7 @@ import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteSt
 import com.upreality.car.expenses.data.shared.model.DateConverter
 import com.upreality.car.expenses.data.sync.IExpensesSyncRemoteDataSource
 import com.upreality.car.expenses.data.sync.model.ExpenseSyncRemoteModel
+import com.upreality.car.expenses.data.sync.schedulers.ILocalInfoSchedulerProvider
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     private val remoteDataSource: ExpensesRemoteDataSource,
     private val statesDAO: ExpenseStateRemoteDAO,
-    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
+    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource,
+    private val infoSchedulerProvider: ILocalInfoSchedulerProvider
 ) : IExpensesSyncRemoteDataSource {
 
     private val dateConverter = DateConverter()
