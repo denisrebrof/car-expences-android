@@ -24,8 +24,7 @@ import javax.inject.Inject
 class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     private val remoteDataSource: ExpensesRemoteDataSource,
     private val statesDAO: ExpenseStateRemoteDAO,
-    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource,
-    private val infoSchedulerProvider: ILocalInfoSchedulerProvider
+    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
 ) : IExpensesSyncRemoteDataSource {
 
     private val dateConverter = DateConverter()
@@ -47,13 +46,15 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     override fun create(remoteExpense: ExpenseRemote, localId: Long): Maybe<Long> {
         return remoteDataSource.create(remoteExpense).flatMap { id ->
                 val createdStateTimestampMaybe = createState(id)
-                setRemoteId(localId, id).andThen(createdStateTimestampMaybe)
+                markSent(localId, id).andThen(createdStateTimestampMaybe)
             }
     }
 
-    override fun update(expense: ExpenseRemote): Maybe<Long> {
+    override fun update(expense: ExpenseRemote, localId: Long): Maybe<Long> {
         val updatedState = updateState(expense, false)
-        return remoteDataSource.update(expense).andThen(updatedState)
+        val mSent = markSent(localId, expense.id)
+        val updateMaybe = remoteDataSource.update(expense).andThen(updatedState)
+        return mSent.andThen(updateMaybe)
     }
 
     override fun delete(localId: Long): Maybe<Long> {
@@ -121,12 +122,12 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
             .map(dateConverter::toTimestamp)
     }
 
-    private fun setRemoteId(localId: Long, remoteId: String): Completable {
+    private fun markSent(localId: Long, remoteId: String): Completable {
         val filter = ExpenseInfoLocalIdFilter(localId)
         return expensesInfoLocalDataSource.get(filter)
             .map(List<ExpenseInfo>::firstOrNull)
             .firstElement()
-            .map { it.copy(remoteId = remoteId, state = ExpenseInfoSyncState.Persists) }
+            .map { it.copy(remoteId = remoteId, state = ExpenseInfoSyncState.PendingSync) }
             .flatMapCompletable(expensesInfoLocalDataSource::update)
     }
 }

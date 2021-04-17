@@ -23,12 +23,11 @@ class ExpensesSyncServiceImpl @Inject constructor(
         return recursiveSync().subscribe()
     }
 
-    private fun recursiveSync(): Completable{
-        val syncDelay = Completable.timer(500,TimeUnit.MILLISECONDS)
-        return executeSync().andThen(syncDelay).andThen(recursiveSync())
+    private fun recursiveSync(): Completable {
+        return executeSync().delay(500,TimeUnit.MILLISECONDS).repeat()
     }
 
-    private fun executeSync(): Completable{
+    private fun executeSync(): Completable {
         val syncFromRemote = getUpdatedRemoteExpensesFlow()
             .firstElement()
             .subscribeOn(Schedulers.io())
@@ -70,13 +69,13 @@ class ExpensesSyncServiceImpl @Inject constructor(
     }
 
     private fun syncRemoteFromLocal(updatedLocalExpense: ExpenseLocalSyncModel): Completable {
-        val remoteModel = RemoteExpenseConverter.fromExpense(updatedLocalExpense.expense)
+        val remoteModel = RemoteExpenseConverter.fromExpense(updatedLocalExpense.expense, updatedLocalExpense.remoteId)
         val syncOperation = when (updatedLocalExpense.state) {
             ExpenseInfoSyncState.Created -> remoteDataSource.create(
                 remoteModel,
                 updatedLocalExpense.expense.id
             )
-            ExpenseInfoSyncState.Updated -> remoteDataSource.update(remoteModel)
+            ExpenseInfoSyncState.Updated -> remoteDataSource.update(remoteModel, updatedLocalExpense.expense.id)
             ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(updatedLocalExpense.expense.id)
             else -> return Completable.complete() //TODO: review
         }

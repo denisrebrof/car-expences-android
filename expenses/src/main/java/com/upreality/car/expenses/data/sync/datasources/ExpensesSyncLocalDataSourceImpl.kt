@@ -21,20 +21,18 @@ import javax.inject.Inject
 
 class ExpensesSyncLocalDataSourceImpl @Inject constructor(
     private val expensesLocalDataSource: ExpensesLocalDataSource,
-    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource,
-    private val infoSchedulerProvider: ILocalInfoSchedulerProvider
+    private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
 ) : IExpensesSyncLocalDataSource {
 
     override fun getLastUpdates(): Flowable<List<ExpenseLocalSyncModel>> {
         return expensesInfoLocalDataSource
             .get(ExpenseInfoAllFilter)
-            .subscribeOn(infoSchedulerProvider.get())
             .map { list -> list.filter { it.state != Persists && it.state != PendingSync } }
             .concatMapMaybe(this::getSyncModelsMaybe)
     }
 
     override fun createOrUpdate(expense: Expense, remoteId: String): Completable {
-        val infoMaybe = getExpenseInfoByRemoteId(remoteId).subscribeOn(infoSchedulerProvider.get())
+        val infoMaybe = getExpenseInfoByRemoteId(remoteId)
         val updatedExpense = RoomExpenseConverter.fromExpense(expense)
 
         return infoMaybe.flatMapCompletable { info ->
@@ -82,7 +80,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
                 }
                 else -> getLocalExpense(modifiedInfo)
                     .map(RoomExpenseConverter::toExpense)
-                    .map { ExpenseLocalSyncModel(it, modifiedInfo.state) }
+                    .map { ExpenseLocalSyncModel(it, modifiedInfo.state, modifiedInfo.remoteId) }
             }
         }.toList().toMaybe()
     }

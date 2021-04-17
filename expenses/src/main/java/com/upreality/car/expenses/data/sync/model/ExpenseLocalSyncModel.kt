@@ -5,7 +5,8 @@ import com.upreality.car.expenses.domain.model.expence.Expense
 
 data class ExpenseLocalSyncModel(
     val expense: Expense,
-    val state: ExpenseInfoSyncState
+    val state: ExpenseInfoSyncState,
+    val remoteId: String = String()
 )
 
 
