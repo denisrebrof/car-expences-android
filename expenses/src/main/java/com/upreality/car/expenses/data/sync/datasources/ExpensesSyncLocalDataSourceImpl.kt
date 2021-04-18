@@ -11,7 +11,6 @@ import com.upreality.car.expenses.data.local.expensesinfo.model.entities.Expense
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.*
 import com.upreality.car.expenses.data.sync.IExpensesSyncLocalDataSource
 import com.upreality.car.expenses.data.sync.model.ExpenseLocalSyncModel
-import com.upreality.car.expenses.data.sync.schedulers.ILocalInfoSchedulerProvider
 import com.upreality.car.expenses.domain.model.expence.Expense
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -27,7 +26,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
     override fun getLastUpdates(): Flowable<List<ExpenseLocalSyncModel>> {
         return expensesInfoLocalDataSource
             .get(ExpenseInfoAllFilter)
-            .map { list -> list.filter { it.state != Persists && it.state != PendingSync } }
+            .map { list -> list.filter { it.state != Sent && it.state != PendingSync } }
             .concatMapMaybe(this::getSyncModelsMaybe)
     }
 
@@ -38,10 +37,10 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         return infoMaybe.flatMapCompletable { info ->
             when(info.state){
                 PendingSync,
-                Persists -> {
+                Sent -> {
                     updatedExpense.id = info.localId
                     val updateExpense = expensesLocalDataSource.update(updatedExpense)
-                    val updatedInfo = info.copy(state = Persists)
+                    val updatedInfo = info.copy(state = Sent)
                     val updateInfo = expensesInfoLocalDataSource.update(updatedInfo)
                     updateExpense.andThen(updateInfo)
                 }
@@ -50,7 +49,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
         }.onErrorResumeNext {
             Log.e("Error:", "$it")
             val createInfo = { localId: Long ->
-                ExpenseInfo(0, localId, remoteId, Persists)
+                ExpenseInfo(0, localId, remoteId, Sent)
                     .let(expensesInfoLocalDataSource::create)
                     .ignoreElement()
             }
@@ -63,7 +62,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
     override fun delete(remoteId: String): Completable {
         val deletedExpenseInfo = getExpenseInfoByRemoteId(remoteId)
         return deletedExpenseInfo.flatMapCompletable { info ->
-            val updatedInfo = info.copy(state = Persists)
+            val updatedInfo = info.copy(state = Sent)
             getLocalExpense(info)
                 .flatMapCompletable(expensesLocalDataSource::delete)
                 .andThen { expensesInfoLocalDataSource.delete(updatedInfo) }
