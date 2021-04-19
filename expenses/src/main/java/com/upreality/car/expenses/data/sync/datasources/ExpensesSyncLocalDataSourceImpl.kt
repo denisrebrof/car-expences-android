@@ -23,28 +23,6 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
     private val expensesInfoLocalDataSource: ExpensesInfoLocalDataSource
 ) : IExpensesSyncLocalDataSource {
 
-    override fun getLastUpdate(): Flowable<ExpenseLocalSyncModel> {
-
-        val listUpdates = expensesInfoLocalDataSource
-            .get(ExpenseInfoAllFilter)
-            .map { list -> list.filter { it.state != Persists } }
-
-        val emptyUpdates: Flowable<ExpenseLocalSyncModel> = listUpdates
-            .filter(List<ExpenseInfo>::isEmpty)
-            .map { ExpenseLocalSyncModel.Empty }
-
-        val nonEmptyUpdates: Flowable<ExpenseLocalSyncModel> = listUpdates
-            .filter(List<ExpenseInfo>::isNotEmpty)
-            .map(List<ExpenseInfo>::first)
-            .distinctUntilChanged { prevInfo, info ->
-                if (prevInfo.id == info.id) prevInfo.state == info.state else false
-            }.concatMapMaybe(this::getSyncModelUpdateMaybe)
-
-        return emptyUpdates.mergeWith(nonEmptyUpdates).distinctUntilChanged { prevModel, model ->
-            prevModel is ExpenseLocalSyncModel.Empty && model is ExpenseLocalSyncModel.Empty
-        }
-    }
-
     override fun createOrUpdate(expense: Expense, remoteId: String): Completable {
         val infoMaybe = getExpenseInfoByRemoteId(remoteId)
         val updatedExpense = RoomExpenseConverter.fromExpense(expense)
@@ -75,20 +53,6 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             getLocalExpense(info)
                 .flatMapCompletable(expensesLocalDataSource::delete)
                 .andThen { expensesInfoLocalDataSource.delete(updatedInfo) }
-        }
-    }
-
-    private fun getSyncModelUpdateMaybe(modifiedInfo: ExpenseInfo): Maybe<ExpenseLocalSyncModel.Update> {
-        return when (modifiedInfo.state) {
-            Deleted -> {
-                //TODO remove this hack
-                val expense = Expense.Fuel(Date(), 0f, 0f, 0f)
-                expense.id = modifiedInfo.localId
-                Maybe.just(ExpenseLocalSyncModel.Update(expense, Deleted))
-            }
-            else -> getLocalExpense(modifiedInfo)
-                .map(RoomExpenseConverter::toExpense)
-                .map { ExpenseLocalSyncModel.Update(it, modifiedInfo.state) }
         }
     }
 

@@ -19,38 +19,17 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
-    private var localToRemoteSyncPossible = false
-
     override fun createSyncLoop(): Disposable {
-
-        val composite = CompositeDisposable()
-
-        val syncFromRemote = getUpdatedRemoteExpensesFlow()
+        return getUpdatedRemoteExpensesFlow()
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .concatMapCompletable { updatedRemote ->
-                localToRemoteSyncPossible = updatedRemote.isEmpty()
                 Flowable
                     .fromIterable(updatedRemote)
                     .concatMapCompletable(this::syncLocalFromRemote)
             }.doOnError {
                 Log.e("Error","$it")
             }.subscribe()
-
-        val syncFromLocalAfterRemote = localDataSource.getLastUpdate()
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .filter { localToRemoteSyncPossible }
-            .concatMapCompletable { lastLocalUpdate ->
-                val localUpdate = lastLocalUpdate as? ExpenseLocalSyncModel.Update
-                localUpdate?.let(this::syncRemoteFromLocal) ?: Completable.complete()
-            }.doOnError {
-                Log.e("Error","$it")
-            }.subscribe()
-
-        composite.addAll(syncFromRemote, syncFromLocalAfterRemote)
-
-        return composite
     }
 
     private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseSyncRemoteModel>> {
@@ -69,19 +48,5 @@ class ExpensesSyncServiceImpl @Inject constructor(
         }
         val updateTimestampCompletable = syncTimestampProvider.set(syncRemoteModel.timestamp)
         return updateLocalInstanceMaybe.andThen(updateTimestampCompletable)
-    }
-
-    private fun syncRemoteFromLocal(updatedLocalExpense: ExpenseLocalSyncModel.Update): Completable {
-        val remoteModel = RemoteExpenseConverter.fromExpense(updatedLocalExpense.expense)
-        val syncOperation = when (updatedLocalExpense.state) {
-            ExpenseInfoSyncState.Created -> remoteDataSource.create(
-                remoteModel,
-                updatedLocalExpense.expense.id
-            )
-            ExpenseInfoSyncState.Updated -> remoteDataSource.update(remoteModel)
-            ExpenseInfoSyncState.Deleted -> remoteDataSource.delete(updatedLocalExpense.expense.id)
-            else -> return Completable.complete() //TODO: review
-        }
-        return syncOperation.ignoreElement()
     }
 }
