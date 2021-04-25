@@ -7,7 +7,7 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 
 interface IExpensesInteractor {
-    fun createExpense(expense: Expense): Maybe<Long>
+    fun createExpense(expense: Expense): Completable
     fun getExpensesFlow(filter: ExpenseFilter): Flowable<List<Expense>>
     fun deleteExpense(expense: Expense): Completable
     fun updateExpense(expense: Expense): Completable

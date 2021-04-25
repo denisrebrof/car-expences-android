@@ -15,12 +15,12 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import javax.inject.Inject
 
-class ExpensesLocalDataSource @Inject constructor(
+class ExpensesLocalDAO @Inject constructor(
     private val expensesDao: ExpensesDao,
     private val expenseDetailsDao: ExpenseDetailsDao
-): IExpensesLocalDataSource {
+) {
 
-    override fun create(expense: ExpenseRoom): Maybe<Long> {
+    fun create(expense: ExpenseRoom): Maybe<Long> {
         val details = RoomExpenseEntitiesConverter.toExpenseDetails(expense, 0)
         return expenseDetailsDao.insert(details).flatMap { detailsId ->
             val expenseEntity = RoomExpenseEntitiesConverter.toExpenseEntity(expense, detailsId)
@@ -28,7 +28,7 @@ class ExpensesLocalDataSource @Inject constructor(
         }
     }
 
-    override fun get(filter: IDatabaseFilter): Flowable<List<ExpenseRoom>> {
+    fun get(filter: IDatabaseFilter): Flowable<List<ExpenseRoom>> {
         val query = SimpleSQLiteQuery(filter.getFilterExpression())
         val expenseEntitiesFlow = expensesDao.load(query)
 
@@ -40,7 +40,7 @@ class ExpensesLocalDataSource @Inject constructor(
         }
     }
 
-    override fun update(expense: ExpenseRoom): Completable {
+    fun update(expense: ExpenseRoom): Completable {
         val savedExpenseMaybe = getSavedExpenseEntity(expense.id)
         return savedExpenseMaybe.flatMapCompletable { entity ->
             val detailsId = entity.detailsId
@@ -64,7 +64,7 @@ class ExpensesLocalDataSource @Inject constructor(
         }
     }
 
-    override fun delete(expense: ExpenseRoom): Completable {
+    fun delete(expense: ExpenseRoom): Completable {
         return getSavedExpenseEntity(expense.id).flatMapCompletable {
             val detailsId = it.detailsId
             val details = RoomExpenseEntitiesConverter.toExpenseDetails(expense, detailsId)

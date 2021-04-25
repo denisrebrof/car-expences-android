@@ -12,8 +12,5 @@ data class ExpenseInfo(
     @ColumnInfo(name = "local_id")
     val localId: Long,
     @ColumnInfo(name = "remote_id")
-    val remoteId: String = String(),
-    @ColumnInfo(name = "state")
-    @field:TypeConverters(ExpenseInfoRemoteStateConverter::class)
-    val state: ExpenseInfoSyncState = ExpenseInfoSyncState.Created
+    val remoteId: String = String()
 )

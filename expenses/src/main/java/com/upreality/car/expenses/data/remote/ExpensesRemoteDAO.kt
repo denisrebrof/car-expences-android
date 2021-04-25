@@ -16,7 +16,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javax.inject.Inject
 
-class ExpensesRemoteDataSource @Inject constructor(
+class ExpensesRemoteDAO @Inject constructor(
     private val expenseEntityDAO: ExpenseEntityRemoteDAO,
     private val expenseDetailsDAO: ExpenseDetailsRemoteDAO
 ) {

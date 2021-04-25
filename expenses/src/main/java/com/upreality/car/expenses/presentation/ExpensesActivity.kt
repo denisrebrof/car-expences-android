@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
-import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSource
+import com.upreality.car.expenses.data.remote.ExpensesRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
@@ -33,7 +33,7 @@ class ExpensesActivity : AppCompatActivity() {
     lateinit var sync: IExpensesSyncService
 
     @Inject
-    lateinit var remDS: ExpensesRemoteDataSource
+    lateinit var remDS: ExpensesRemoteDAO
 
     @Inject
     lateinit var remOpDAO: ExpenseOperationRemoteDAO
@@ -118,6 +118,9 @@ class ExpensesActivity : AppCompatActivity() {
         cost += 1
         repository.create(expense)
             .subscribeOn(Schedulers.io())
+            .doOnError {
+                Log.d("error","")
+            }
             .subscribe()
             .disposeBy(lifecycle.disposers.onStop)
     }

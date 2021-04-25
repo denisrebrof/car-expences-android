@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0359f609568601f3b2ba93e8fcd859d7",
+    "identityHash": "2f4631395c2c09e620e304dff74919f9",
     "entities": [
       {
         "tableName": "expenses",
@@ -140,7 +140,7 @@
       },
       {
         "tableName": "expense_info",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `local_id` INTEGER NOT NULL, `remote_id` TEXT NOT NULL, `state` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `local_id` INTEGER NOT NULL, `remote_id` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -159,12 +159,6 @@
             "columnName": "remote_id",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "state",
-            "columnName": "state",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -180,7 +174,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0359f609568601f3b2ba93e8fcd859d7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2f4631395c2c09e620e304dff74919f9')"
     ]
   }
 }
