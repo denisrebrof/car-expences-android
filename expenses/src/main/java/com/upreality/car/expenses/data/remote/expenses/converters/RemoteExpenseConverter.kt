@@ -26,7 +26,7 @@ object RemoteExpenseConverter {
         }
     }
 
-    fun fromExpense(domainModel: Expense): ExpenseRemote {
+    fun fromExpense(domainModel: Expense, remoteId: String = String()): ExpenseRemote {
         return when (domainModel) {
             is Expense.Fine -> ExpenseRemote.Fine(
                 domainModel.date,
@@ -45,6 +45,6 @@ object RemoteExpenseConverter {
                 domainModel.type,
                 domainModel.mileage,
             )
-        }
+        }.also { it.id = remoteId }
     }
 }

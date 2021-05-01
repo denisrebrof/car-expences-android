@@ -35,7 +35,7 @@ class ExpensesRemoteDataSourceImpl @Inject constructor(
     override fun update(expense: Expense): Completable {
         return getLocalInfo(expense)
             .map(ExpenseInfo::remoteId)
-            .flatMap(this::getExpense)
+            .map { RemoteExpenseConverter.fromExpense(expense, it) }
             .flatMapCompletable { expenseRemote ->
                 val updateStateOperation = updateState(expenseRemote, false)
                 remoteDAO.update(expenseRemote).andThen(updateStateOperation)
@@ -60,7 +60,7 @@ class ExpensesRemoteDataSourceImpl @Inject constructor(
         return statesDAO.get(filter)
             .firstElement()
             .map(List<ExpenseRemoteState>::firstOrNull)
-            .map { it.copy(deleted = deleted) }
+            .map { it.copy(deleted = deleted, timestamp = null) }
             .flatMapCompletable(statesDAO::update)
     }
 

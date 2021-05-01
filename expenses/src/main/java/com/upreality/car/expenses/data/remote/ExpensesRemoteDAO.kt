@@ -24,7 +24,8 @@ class ExpensesRemoteDAO @Inject constructor(
     fun delete(expense: ExpenseRemote): Completable {
         return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
             val deleteExpense = expenseEntityDAO.delete(remoteExpense)
-            val details = RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
+            val details =
+                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
             val deleteDetails = expenseDetailsDAO.delete(details)
             deleteExpense.andThen(deleteDetails)
         }
@@ -32,9 +33,11 @@ class ExpensesRemoteDAO @Inject constructor(
 
     fun update(expense: ExpenseRemote): Completable {
         return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
-            val updateExpense = expenseEntityDAO.update(remoteExpense)
-            val details =
-                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
+            val updatedExpenseEntity = RemoteExpenseEntityConverter
+                .toExpenseEntity(expense, remoteExpense.detailsId)
+            val updateExpense = expenseEntityDAO.update(updatedExpenseEntity)
+            val details = RemoteExpenseEntityConverter
+                .toExpenseDetails(expense, remoteExpense.detailsId)
             val updateDetails = expenseDetailsDAO.update(details)
             updateExpense.andThen(updateDetails)
         }
@@ -55,7 +58,7 @@ class ExpensesRemoteDAO @Inject constructor(
     private fun convertToRemoteExpenses(entities: List<ExpenseEntityRemote>): Single<List<ExpenseRemote>> {
         return Flowable.fromIterable(entities).flatMapMaybe { remoteEntity ->
             val type = RemoteExpenseTypeConverter.toExpenseType(remoteEntity.type)
-            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId,type)
+            val detailsSelector = ExpenseDetailsRemoteFilter.Id(remoteEntity.detailsId, type)
             val detailsMaybe = expenseDetailsDAO
                 .get(detailsSelector)
                 .firstElement()
