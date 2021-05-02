@@ -56,28 +56,51 @@ class ExpensesActivity : AppCompatActivity() {
         binding.createExpenseButton.setOnClickListener { executeCreation() }
         binding.deleteExpensesButton.setOnClickListener { executeDelete() }
         binding.modifyExpenseButton.setOnClickListener { executeUpdate() }
-        sync.createSyncLoop().disposeBy(lifecycle.disposers.onStop)
+        sync.createSyncLoop()
+            .doOnDispose {
+                Log.e("ULError", "Dispose WTF???")
+            }
+            .doOnEvent {
+                Log.e("ULError", "Event WTF???")
+            }.doOnTerminate {
+                Log.e("ULError", "Terminate")
+            }.subscribe({
+                Log.e("ULError", "Completed WTF???")
+            }) {
+                Log.e("ULError", it.toString())
+            }.disposeBy(lifecycle.disposers.onStop)
 
-        val expensesFlow = repository
+        repository
             .get(ExpenseFilter.All)
             .observeOn(mainThread())
-
-        expensesFlow.subscribe(this::onExpensesUpdates)
+            .doOnError() {
+                Log.e("Get", "Event WTF???")
+            }.doOnTerminate {
+                Log.e("Get", "Terminate")
+            }
+            .doOnCancel {
+                Log.e("Get", "Cancel")
+            }
+            .doOnError {
+                Log.e("Get", "Error")
+            }
+            .doOnComplete {
+                Log.e("Get", "Event Complete???")
+            }
+            .subscribe(this::onExpensesUpdates) {
+                Log.e("Get Error", it.toString())
+            }
             .disposeBy(lifecycle.disposers.onStop)
 
-        remDS.get(ExpenseRemoteFilter.All)
+        remDS
+            .get(ExpenseRemoteFilter.All)
             .map(List<ExpenseRemote>::size)
             .map(Int::toString)
             .observeOn(mainThread())
-            .subscribe(this::setText2)
+            .subscribe(this::setText2) {
+                Log.e("Get Remote Error", it.toString())
+            }
             .disposeBy(lifecycle.disposers.onStop)
-
-        val filter = ExpenseRemoteOperationFilter.FromTime(0)
-        remOpDAO.get(filter)
-            .observeOn(mainThread())
-            .subscribe {
-                binding.textOp.text = "Oper Size from zero: ${it.size}"
-            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun executeDelete() {
@@ -86,7 +109,9 @@ class ExpensesActivity : AppCompatActivity() {
             .map { list -> listOf(list.first()) }
             .flattenAsFlowable { it }
             .flatMapCompletable(repository::delete)
-            .subscribe()
+            .subscribe({}) {
+                Log.e("Delete Error", it.toString())
+            }
             .disposeBy(lifecycle.disposers.onStop)
     }
 
@@ -97,10 +122,9 @@ class ExpensesActivity : AppCompatActivity() {
             .flattenAsFlowable { it }
             .map(this::getIncreasedExpense)
             .flatMapCompletable(repository::update)
-            .doOnError {
-                Log.d("Error", "$it")
+            .subscribe({}) {
+                Log.e("Update Error", it.toString())
             }
-            .subscribe()
             .disposeBy(lifecycle.disposers.onStop)
     }
 
@@ -118,11 +142,9 @@ class ExpensesActivity : AppCompatActivity() {
         cost += 1
         repository.create(expense)
             .subscribeOn(Schedulers.io())
-            .doOnError {
-                Log.d("error","")
-            }
-            .subscribe()
-            .disposeBy(lifecycle.disposers.onStop)
+            .subscribe({}) {
+                Log.e("Update Error", it.toString())
+            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun onExpensesUpdates(expenses: List<Expense>) {

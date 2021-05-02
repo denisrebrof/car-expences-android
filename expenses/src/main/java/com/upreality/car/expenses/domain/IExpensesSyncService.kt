@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.domain
 
-import io.reactivex.disposables.Disposable
+import io.reactivex.Completable
 
 interface IExpensesSyncService {
-    fun createSyncLoop(): Disposable
+    fun createSyncLoop(): Completable
 }

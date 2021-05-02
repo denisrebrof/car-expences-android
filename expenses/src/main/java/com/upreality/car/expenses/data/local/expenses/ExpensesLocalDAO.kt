@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.local.expenses
 
+import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.upreality.car.common.data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.expenses.converters.RoomExpenseEntitiesConverter
@@ -68,9 +69,19 @@ class ExpensesLocalDAO @Inject constructor(
         return getSavedExpenseEntity(expense.id).flatMapCompletable {
             val detailsId = it.detailsId
             val details = RoomExpenseEntitiesConverter.toExpenseDetails(expense, detailsId)
-            expenseDetailsDao.delete(details).andThen(
-                expensesDao.delete(RoomExpenseEntitiesConverter.toExpenseEntity(expense, detailsId))
-            )
+            expensesDao
+                .delete(RoomExpenseEntitiesConverter.toExpenseEntity(expense, detailsId))
+                .andThen(
+                    expenseDetailsDao.delete(details)
+                ).doOnComplete {
+                    Log.e("Compl","")
+                }
+                .doOnError {
+                    Log.e("Error","")
+                }
+                .doFinally {
+                    Log.e("Fin","")
+                }
         }
     }
 

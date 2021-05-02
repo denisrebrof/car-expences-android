@@ -1,8 +1,9 @@
-package com.upreality.car.expenses.data.repository
+package com.upreality.car.expenses.data.local
 
 import com.upreality.car.common.data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.expenses.ExpensesLocalDAO
 import com.upreality.car.expenses.data.local.expenses.converters.RoomExpenseConverter
+import com.upreality.car.expenses.data.repository.IExpensesLocalDataSource
 import com.upreality.car.expenses.domain.model.expence.Expense
 import io.reactivex.Flowable
 import javax.inject.Inject

@@ -1,16 +1,16 @@
-package com.upreality.car.expenses.data.repository
+package com.upreality.car.expenses.data.remote
 
 import android.util.Log
 import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
 import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
-import com.upreality.car.expenses.data.remote.ExpensesRemoteDAO
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import com.upreality.car.expenses.data.remote.expensestate.dao.ExpenseStateRemoteDAO
 import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteState
 import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteStateFilter
+import com.upreality.car.expenses.data.repository.IExpensesRemoteDataSource
 import com.upreality.car.expenses.domain.model.expence.Expense
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -25,7 +25,7 @@ class ExpensesRemoteDataSourceImpl @Inject constructor(
     override fun delete(expense: Expense): Completable {
         return getLocalInfo(expense)
             .map(ExpenseInfo::remoteId)
-            .flatMap(this::getExpense)
+            .map { RemoteExpenseConverter.fromExpense(expense, it) }
             .flatMapCompletable { expenseRemote ->
                 val updatedState = updateState(expenseRemote, true)
                 remoteDAO.delete(expenseRemote).andThen(updatedState)
@@ -45,14 +45,6 @@ class ExpensesRemoteDataSourceImpl @Inject constructor(
     override fun create(expense: Expense): Completable {
         val remoteExpense = RemoteExpenseConverter.fromExpense(expense)
         return remoteDAO.create(remoteExpense).flatMapCompletable(this::createState)
-    }
-
-    private fun getExpense(remoteId: String): Maybe<ExpenseRemote> {
-        val filter = ExpenseRemoteFilter.Id(remoteId)
-        return remoteDAO
-            .get(filter)
-            .firstElement()
-            .map(List<ExpenseRemote>::firstOrNull)
     }
 
     private fun updateState(expense: ExpenseRemote, deleted: Boolean): Completable {

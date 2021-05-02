@@ -26,6 +26,6 @@ class ExpensesInfoLocalDataSource @Inject constructor(
     }
 
     fun delete(info: ExpenseInfo): Completable {
-        return expenseInfoDAO.update(info)
+        return expenseInfoDAO.delete(info)
     }
 }

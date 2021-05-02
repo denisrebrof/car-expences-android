@@ -6,7 +6,6 @@ import com.upreality.car.expenses.data.sync.model.ExpenseSyncRemoteModel
 import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -16,7 +15,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
     private val syncTimestampProvider: IExpensesSyncTimestampProvider
 ) : IExpensesSyncService {
 
-    override fun createSyncLoop(): Disposable {
+    override fun createSyncLoop(): Completable {
         return getUpdatedRemoteExpensesFlow()
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
@@ -24,9 +23,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
                 Flowable
                     .fromIterable(updatedRemote)
                     .concatMapCompletable(this::syncLocalFromRemote)
-            }.doOnError {
-                Log.e("Error","$it")
-            }.subscribe()
+            }
     }
 
     private fun getUpdatedRemoteExpensesFlow(): Flowable<List<ExpenseSyncRemoteModel>> {
@@ -36,14 +33,21 @@ class ExpensesSyncServiceImpl @Inject constructor(
     }
 
     private fun syncLocalFromRemote(syncRemoteModel: ExpenseSyncRemoteModel): Completable {
-        val updateLocalInstanceMaybe = when (syncRemoteModel.deleted) {
-            true -> localDataSource.delete(syncRemoteModel.remoteModel.id)
-            else -> {
+        val updateLocalInstance = when (syncRemoteModel) {
+            is ExpenseSyncRemoteModel.Deleted -> {
+                //In some fucking reason this never completes, wtf?
+                //now it does not handled, simple subscribe call
+                localDataSource.delete(syncRemoteModel.id).onErrorComplete().subscribe()
+                Completable.complete()
+            }
+            is ExpenseSyncRemoteModel.Persisted -> {
                 val expense = RemoteExpenseConverter.toExpense(syncRemoteModel.remoteModel)
                 localDataSource.createOrUpdate(expense, syncRemoteModel.remoteModel.id)
             }
-        }
+        }.onErrorComplete()
         val updateTimestampCompletable = syncTimestampProvider.set(syncRemoteModel.timestamp)
-        return updateLocalInstanceMaybe.andThen(updateTimestampCompletable)
+        return updateLocalInstance.andThen(updateTimestampCompletable).doOnComplete {
+            Log.e("Compl","Compl")
+        }
     }
 }

@@ -29,7 +29,6 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             updatedExpense.id = info.localId
             expensesLocalDataSource.update(updatedExpense)
         }.onErrorResumeNext {
-            Log.e("Error:", "$it")
             val createInfo = { localId: Long ->
                 ExpenseInfo(0, localId, remoteId)
                     .let(expensesInfoLocalDataSource::create)
@@ -47,6 +46,8 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
             getLocalExpense(info)
                 .flatMapCompletable(expensesLocalDataSource::delete)
                 .andThen { expensesInfoLocalDataSource.delete(info) }
+        }.doOnComplete {
+            Log.d("Compl","")
         }
     }
 

@@ -23,9 +23,11 @@ class ExpensesRemoteDAO @Inject constructor(
 
     fun delete(expense: ExpenseRemote): Completable {
         return getRemoteInstance(expense.id).flatMapCompletable { remoteExpense ->
-            val deleteExpense = expenseEntityDAO.delete(remoteExpense)
-            val details =
-                RemoteExpenseEntityConverter.toExpenseDetails(expense, remoteExpense.detailsId)
+            val deletedExpenseEntity = RemoteExpenseEntityConverter
+                .toExpenseEntity(expense, remoteExpense.detailsId)
+            val deleteExpense = expenseEntityDAO.delete(deletedExpenseEntity)
+            val details = RemoteExpenseEntityConverter
+                .toExpenseDetails(expense, remoteExpense.detailsId)
             val deleteDetails = expenseDetailsDAO.delete(details)
             deleteExpense.andThen(deleteDetails)
         }
