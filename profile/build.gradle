@@ -15,15 +15,6 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += [
-                        "room.incremental"   : "true",
-                        "room.schemaLocation": "$projectDir/schemas".toString()
-                ]
-            }
-        }
     }
 
     buildTypes {
@@ -32,22 +23,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
     buildFeatures {
         viewBinding true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
     kotlinOptions {
         jvmTarget = '1.8'
-        freeCompilerArgs = ["-Xallow-result-return-type"]
     }
 }
 
 dependencies {
+
     //Common
     implementation rootProject.ext.kotlin_stdlib
     implementation rootProject.ext.core_ktx
@@ -60,26 +51,8 @@ dependencies {
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core
 
-    //Room - local database lib
-    implementation rootProject.ext.room_runtime
-    kapt rootProject.ext.room_compiler_kapt
-    kaptAndroidTest rootProject.ext.room_compiler_kapt_android_test
-    implementation rootProject.ext.room_ktx
-    testImplementation rootProject.ext.room_testing
-
-    //For test room and Rx
-    androidTestImplementation(rootProject.ext.core_testing) {
-        exclude module: 'support-compat'
-        exclude module: 'support-annotations'
-        exclude module: 'support-core-utils'
-    }
-
     //Cards - UI only
     implementation rootProject.ext.cardview
-
-    //Navigation
-    implementation rootProject.ext.navigation_fragment_ktx
-    implementation rootProject.ext.navigation_ui_ktx
 
     //Hilt - DI framework
     implementation 'com.google.dagger:hilt-android:2.33-beta'
@@ -95,14 +68,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
-
-    //Firebase
-    api rootProject.ext.firestore_database
-    implementation rootProject.ext.rx2firebase
-
-    def paging_version = "3.0.0-rc01"
-    implementation "androidx.paging:paging-runtime-ktx:3.0.0-rc01"
-    implementation "androidx.paging:paging-rxjava2-ktx:3.0.0-rc01"
 
     api project(':common')
 }

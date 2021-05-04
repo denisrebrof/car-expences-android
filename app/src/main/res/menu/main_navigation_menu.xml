@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/landing"
+        android:icon="@drawable/ic_home"
+        android:iconTint="@color/colorPrimary"
+        android:title="Landing" />
+    <item
+        android:id="@+id/expenses_list"
+        android:icon="@drawable/ic_list_outlined"
+        android:iconTint="@color/colorPrimary"
+        android:title="Expenses" />
+    <item
+        android:id="@+id/stats"
+        android:icon="@drawable/ic_area_chart"
+        android:iconTint="@color/colorPrimary"
+        android:title="Stats" />
+    <item
+        android:id="@+id/profile"
+        android:icon="@drawable/ic_account"
+        android:iconTint="@color/colorPrimary"
+        android:title="Profile" />
+</menu>

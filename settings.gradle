@@ -1,3 +1,5 @@
+include ':stats'
+include ':profile'
 include ':auth'
 include ':common'
 include ':brending'
