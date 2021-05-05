@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/expenses_list"
-        android:name="com.upreality.car.expenses.presentation.ExpensesFragment"
+        android:name="com.upreality.car.expenses.presentation.ExpensesListFragment"
         android:label="Expenses Fragment"
         tools:layout="@layout/fragment_expenses_list" />
 

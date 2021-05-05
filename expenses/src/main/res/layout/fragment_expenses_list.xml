@@ -8,5 +8,5 @@
     android:layout_height="match_parent"
     android:paddingHorizontal="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".presentation.ExpensesFragment"
+    tools:context=".presentation.ExpensesListFragment"
     tools:listitem="@layout/expense_list_item" />
