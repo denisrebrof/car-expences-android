@@ -93,5 +93,6 @@ dependencies {
         implementation project(":auth")
         implementation project(":profile")
         implementation project(":stats")
+        implementation project(":uikit")
     }
 }

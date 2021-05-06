@@ -105,4 +105,5 @@ dependencies {
     implementation "androidx.paging:paging-rxjava2-ktx:3.0.0-rc01"
 
     api project(':common')
+    api project(":uikit")
 }
