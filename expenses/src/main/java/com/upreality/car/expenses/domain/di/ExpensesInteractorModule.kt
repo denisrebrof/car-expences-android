@@ -11,7 +11,7 @@ import dagger.hilt.android.components.ActivityComponent
 @InstallIn(ActivityComponent::class)
 abstract class ExpensesInteractorModule {
     @Binds
-    abstract fun provideRepository(
+    abstract fun provideInteractor(
         interactorImpl: ExpensesInteractorImpl
     ): IExpensesInteractor
 }
