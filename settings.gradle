@@ -1,3 +1,4 @@
+include ':uikit'
 include ':stats'
 include ':profile'
 include ':auth'
