@@ -1,6 +1,7 @@
 package com.upreality.car.expenses.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.upreality.car.expenses.databinding.FragmentExpensesListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
+import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,7 +28,10 @@ class ExpensesListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = ExpensesListAdapter()
+        //TODO: implement with di
+        adapter = requireContext()
+            .let(::ExpensesListAdapterExpenseTypeDataProviderImpl)
+            .let(::ExpensesListAdapter)
     }
 
     @ExperimentalCoroutinesApi
@@ -41,6 +46,15 @@ class ExpensesListFragment : Fragment() {
             adapter.submitData(lifecycle, it)
         }.disposeBy(lifecycle.disposers.onDestroy)
         return requireBinding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.createDebugExpense()
+            .subscribeOn(Schedulers.io())
+            .subscribe({}) {
+                Log.e("Create Error", it.toString())
+            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     override fun onDestroy() {

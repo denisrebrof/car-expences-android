@@ -20,11 +20,12 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/expense_type_caption"
         style="@style/Widget.MaterialComponents.TextView"
+        android:lines="1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:layout_marginTop="6dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-        app:layout_constraintBottom_toTopOf="@id/expense_details_short"
         app:layout_constraintStart_toEndOf="@id/expense_type_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Fuel" />
@@ -35,9 +36,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:layout_marginBottom="6dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/expense_type_icon"
-        app:layout_constraintTop_toBottomOf="@id/expense_type_caption"
         tools:text="16 liters" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/expense_cost"
+        style="@style/Widget.MaterialComponents.TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="300 $" />
 </androidx.constraintlayout.widget.ConstraintLayout>
