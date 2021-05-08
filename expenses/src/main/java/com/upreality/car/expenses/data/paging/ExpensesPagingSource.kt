@@ -33,6 +33,6 @@ class ExpensesPagingSource @Inject constructor(
     }
 
     override fun getRefreshKey(state: PagingState<Int, Expense>): Int? {
-        return state.anchorPosition
+        return state.anchorPosition?.let(state::closestPageToPosition)?.nextKey
     }
 }

@@ -10,6 +10,7 @@
         android:name="com.upreality.car.expenses.presentation.ExpensesFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layoutAnimation="@anim/layout_animation"
         app:layoutManager="LinearLayoutManager"
         tools:context=".presentation.ExpensesListFragment"
         tools:listitem="@layout/expense_list_item" />
@@ -22,4 +23,12 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@drawable/ic_add" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/expenses_list_refresh"
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:src="@drawable/common_google_signin_btn_icon_dark" />
 </FrameLayout>

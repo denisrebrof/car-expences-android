@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -13,6 +14,7 @@ import com.upreality.car.expenses.domain.usecases.ExpensesInteractorImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 import javax.inject.Inject
@@ -21,13 +23,22 @@ import javax.inject.Inject
 class ExpensesListFragmentViewModel @Inject constructor(
     //TODO fix injection
     private val interactor: ExpensesInteractorImpl,
-    private val sourceFactory: IExpensesPagingSourceFactory
+    private val sourceFactory: IExpensesPagingSourceFactory,
+    //TODO fix injection
+    private val refreshEventProvider: RefreshExpensesEventProviderImpl
 ) : ViewModel() {
+
+    private var lastSource: PagingSource<Int, Expense>? = null
 
     @ExperimentalCoroutinesApi
     fun getExpensesFlow(): Flowable<PagingData<Expense>> {
-        return Pager(PagingConfig(pageSize = 6)) {
-            sourceFactory.get()
+        return Pager(
+            PagingConfig(
+                pageSize = 6,
+                initialLoadSize = 6
+            )
+        ) {
+            sourceFactory.get().also { lastSource = it }
         }.flowable.cachedIn(viewModelScope)
     }
 
@@ -36,7 +47,21 @@ class ExpensesListFragmentViewModel @Inject constructor(
         return interactor.createExpense(expense)
     }
 
+    fun getRefreshFlow(): Flowable<Unit>{
+        return refreshEventProvider.getRefreshFlow().map {
+            refresh()
+        }
+    }
+
+    fun refresh() {
+        lastSource?.invalidate()
+    }
+
     interface IExpensesPagingSourceFactory {
         fun get(): PagingSource<Int, Expense>
+    }
+
+    interface IRefreshExpensesListEventProvider {
+        fun getRefreshFlow(): Flowable<Unit>
     }
 }

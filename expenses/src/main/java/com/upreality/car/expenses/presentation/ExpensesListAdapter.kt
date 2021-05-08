@@ -44,7 +44,8 @@ class ExpensesListAdapter(
         }
 
         override fun areContentsTheSame(oldItem: Expense, newItem: Expense): Boolean {
-            return oldItem == newItem
+            val same = oldItem == newItem
+            return same
         }
     }
 

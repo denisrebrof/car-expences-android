@@ -9,7 +9,10 @@ import javax.inject.Inject
 class ExpensesPagingSourceFactoryImpl @Inject constructor(
     private val repository: IExpensesRepository
 ) : ExpensesListFragmentViewModel.IExpensesPagingSourceFactory {
+
     override fun get(): PagingSource<Int, Expense> {
         return ExpensesPagingSource(repository = repository)
     }
+
+
 }

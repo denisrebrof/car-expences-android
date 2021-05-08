@@ -45,16 +45,25 @@ class ExpensesListFragment : Fragment() {
         viewModel.getExpensesFlow().subscribeWithLogError {
             adapter.submitData(lifecycle, it)
         }.disposeBy(lifecycle.disposers.onDestroy)
+        viewModel.getRefreshFlow().subscribeWithLogError{
+            requireBinding.list.scheduleLayoutAnimation()
+        }.disposeBy(lifecycle.disposers.onDestroy)
         return requireBinding.root
     }
 
     override fun onStart() {
         super.onStart()
-        viewModel.createDebugExpense()
-            .subscribeOn(Schedulers.io())
-            .subscribe({}) {
-                Log.e("Create Error", it.toString())
-            }.disposeBy(lifecycle.disposers.onStop)
+        requireBinding.expensesListFab.setOnClickListener {
+            viewModel.createDebugExpense()
+                .subscribeOn(Schedulers.io())
+                .subscribe({}) {
+                    Log.e("Create Error", it.toString())
+                }.disposeBy(lifecycle.disposers.onStop)
+        }
+        requireBinding.expensesListRefresh.setOnClickListener {
+            viewModel.refresh()
+            adapter.refresh()
+        }
     }
 
     override fun onDestroy() {
