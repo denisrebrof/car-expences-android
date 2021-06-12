@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy
 import com.upreality.car.expenses.databinding.FragmentExpensesListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
@@ -25,6 +27,7 @@ class ExpensesListFragment : Fragment() {
         get() = binding!!
 
     lateinit var adapter: ExpensesListAdapter
+    lateinit var layoutManager: LinearLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +35,7 @@ class ExpensesListFragment : Fragment() {
         adapter = requireContext()
             .let(::ExpensesListAdapterExpenseTypeDataProviderImpl)
             .let(::ExpensesListAdapter)
+        adapter.stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
     }
 
     @ExperimentalCoroutinesApi
@@ -40,15 +44,26 @@ class ExpensesListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentExpensesListBinding.inflate(inflater, container, false)
-        requireBinding.list.layoutManager = LinearLayoutManager(context)
+        layoutManager = LinearLayoutManager(context).also(requireBinding.list::setLayoutManager)
         requireBinding.list.adapter = adapter
         viewModel.getExpensesFlow().subscribeWithLogError {
+//
             adapter.submitData(lifecycle, it)
+            requireBinding.list.scheduleLayoutAnimation()
         }.disposeBy(lifecycle.disposers.onDestroy)
         viewModel.getRefreshFlow().subscribeWithLogError{
+//            layoutManager.scrollToPosition(0)
             requireBinding.list.scheduleLayoutAnimation()
         }.disposeBy(lifecycle.disposers.onDestroy)
         return requireBinding.root
+
+//        conversationAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+//            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+//                if (positionStart == 0) {
+//                    manager.scrollToPosition(0)
+//                }
+//            }
+//        })
     }
 
     override fun onStart() {
@@ -59,10 +74,6 @@ class ExpensesListFragment : Fragment() {
                 .subscribe({}) {
                     Log.e("Create Error", it.toString())
                 }.disposeBy(lifecycle.disposers.onStop)
-        }
-        requireBinding.expensesListRefresh.setOnClickListener {
-            viewModel.refresh()
-            adapter.refresh()
         }
     }
 

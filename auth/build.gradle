@@ -23,7 +23,6 @@ android {
         viewBinding true
     }
 
-
     buildTypes {
         release {
             minifyEnabled false
@@ -55,9 +54,21 @@ dependencies {
     kapt 'com.google.dagger:hilt-android-compiler:2.33-beta'
 
     //ViewModel
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
 
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
+
+    implementation rootProject.ext.retrofit
+    implementation rootProject.ext.retrofit_rxjava
+    implementation rootProject.ext.retrofit_converter_gson
+
+    //RxJava2ac
+    implementation rootProject.ext.rxjava
+    implementation rootProject.ext.rxandroid
+
+    dependencies {
+        implementation project(":uikit")
+    }
 }

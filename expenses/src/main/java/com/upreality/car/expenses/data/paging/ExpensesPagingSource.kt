@@ -16,23 +16,22 @@ class ExpensesPagingSource @Inject constructor(
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Expense>> {
         // Start refresh at page 1 if undefined.
-        val nextPage = params.key ?: 1
-        val response = ExpenseFilter.Paged(nextPage, params.loadSize).let(repository::get)
+        val key = params.key ?: 0
+        val response = ExpenseFilter.Paged(key.toLong(), params.loadSize).let(repository::get)
 
         return response
             .firstElement()
             .toSingle()
             .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .map { expensesList ->
-            LoadResult.Page(
-                data = expensesList,
-                prevKey = if (nextPage == 1) null else nextPage - 1,
-                nextKey = if (expensesList.isEmpty()) null else nextPage + 1
-            )
-        }
+                val prevKey = if (key == 0) null else (key - params.loadSize).coerceAtLeast(0)
+                val nextKey = if (expensesList.isEmpty()) null else key + params.loadSize
+                LoadResult.Page(expensesList, prevKey, nextKey)
+            }
     }
 
     override fun getRefreshKey(state: PagingState<Int, Expense>): Int? {
-        return state.anchorPosition?.let(state::closestPageToPosition)?.nextKey
+        return state.anchorPosition
     }
 }

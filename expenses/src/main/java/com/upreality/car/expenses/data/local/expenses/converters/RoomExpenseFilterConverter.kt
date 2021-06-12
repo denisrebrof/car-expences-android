@@ -16,7 +16,7 @@ object RoomExpenseFilterConverter {
             ExpenseFilter.Maintenance -> ExpenseTypeFilter(ExpenseType.Maintenance)
             ExpenseFilter.Fuel -> ExpenseTypeFilter(ExpenseType.Fuel)
             is ExpenseFilter.Paged -> ExpenseTimePaginatedFilter(
-                (filter.page - 1).coerceAtLeast(0) * filter.pageSize.toLong(),
+                filter.cursor.coerceAtLeast(0),
                 filter.pageSize
             )
         }

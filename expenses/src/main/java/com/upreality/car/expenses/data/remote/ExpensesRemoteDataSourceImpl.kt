@@ -73,11 +73,6 @@ class ExpensesRemoteDataSourceImpl @Inject constructor(
                     .get(it)
                     .firstElement()
                     .map(List<ExpenseRemoteState>::firstOrNull)
-                    .doOnError {
-                        Log.d("Gotcha","")
-                    }.doOnSuccess {
-                        Log.d("Gotcha 2","")
-                    }
             }.ignoreElement()
     }
 }

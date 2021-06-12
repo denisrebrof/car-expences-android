@@ -1,9 +1,11 @@
 package com.upreality.car.expenses.presentation
 
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.AsyncPagingDataDiffer
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.upreality.car.expenses.databinding.ExpenseListItemBinding
@@ -16,6 +18,8 @@ import javax.inject.Singleton
 class ExpensesListAdapter(
     private val provider: ExpenseTypeDataProvider
 ) : PagingDataAdapter<Expense, ViewHolder>(DiffCallback) {
+
+//    private val differ = AsyncPagingDataDiffer(DiffCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return LayoutInflater.from(parent.context)
@@ -40,11 +44,14 @@ class ExpensesListAdapter(
 
     object DiffCallback : DiffUtil.ItemCallback<Expense>() {
         override fun areItemsTheSame(oldItem: Expense, newItem: Expense): Boolean {
-            return oldItem.id == newItem.id
+            val same = oldItem.id == newItem.id
+//            Log.d("Same items","$same")
+            return same
         }
 
         override fun areContentsTheSame(oldItem: Expense, newItem: Expense): Boolean {
             val same = oldItem == newItem
+            Log.d("Same","$same")
             return same
         }
     }

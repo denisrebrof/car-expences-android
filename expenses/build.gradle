@@ -41,6 +41,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs = ["-Xallow-result-return-type"]
@@ -103,6 +104,9 @@ dependencies {
     def paging_version = "3.0.0-rc01"
     implementation "androidx.paging:paging-runtime-ktx:3.0.0-rc01"
     implementation "androidx.paging:paging-rxjava2-ktx:3.0.0-rc01"
+
+    //Google OAuth
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     api project(':common')
     api project(":uikit")
