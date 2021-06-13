@@ -15,13 +15,12 @@ import com.upreality.car.auth.domain.IAuthRepository
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
 @AndroidEntryPoint
-class GoogleSingInActivity : AppCompatActivity() {
+class GoogleSignInActivity : AppCompatActivity() {
     companion object {
         const val RC_SIGN_IN = 1
         const val SIGN_IN_CODE_SUCCESS = 2
@@ -45,17 +44,7 @@ class GoogleSingInActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("405077401282-a1hkiv1k470atvih8rha869nue8pl9ns.apps.googleusercontent.com")
-            .requestEmail()
-            .build()
-
-        // Build a GoogleSignInClient with the options specified by gso.
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        googleSignInClient = GoogleSignIn.getClient(this, authRepository.getGoogleSignInOptions())
 
         binding.testAuthButton.setOnClickListener {
             val account = GoogleSignIn.getLastSignedInAccount(this)

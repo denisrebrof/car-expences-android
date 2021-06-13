@@ -1,5 +1,6 @@
-package com.upreality.car.auth.data.remote
+package com.upreality.car.auth.data.remote.api
 
+import com.upreality.car.auth.data.remote.model.AccountResponse
 import io.reactivex.Maybe
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded

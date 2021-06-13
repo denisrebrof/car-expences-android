@@ -1,4 +1,4 @@
-package com.upreality.car.auth.data.remote
+package com.upreality.car.auth.data.remote.model
 
 import java.util.*
 

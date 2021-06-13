@@ -1,6 +1,7 @@
 package com.upreality.car.auth.data.remote
 
 import com.upreality.car.auth.data.IAuthRemoteDataSource
+import com.upreality.car.auth.data.remote.api.AuthAPI
 import com.upreality.car.auth.domain.Account
 import io.reactivex.Maybe
 import javax.inject.Inject

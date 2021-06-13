@@ -1,11 +1,17 @@
 package com.upreality.car.auth.data.di
 
+import android.content.Context
 import com.google.gson.Gson
-import com.upreality.car.auth.data.remote.AuthAPI
+import com.upreality.car.auth.data.local.TokenDAO
+import com.upreality.car.auth.data.remote.TokenAuthenticator
+import com.upreality.car.auth.data.remote.api.AuthAPI
+import com.upreality.car.auth.data.remote.api.TokenRefreshApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -19,19 +25,34 @@ object RetrofitModule {
 
     @Singleton
     @Provides
-    fun provideRetrofit(): Retrofit {
-        val  gson = Gson()
+    fun provideRetrofit(authenticator: TokenAuthenticator): Retrofit {
+        val gson = Gson()
 
-        return Retrofit.Builder()
+        val client: OkHttpClient = OkHttpClient.Builder()
+            .authenticator(authenticator)
+            .build()
+
+        val retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
+
+        retrofit.create(TokenRefreshApi::class.java).let(authenticator::setTokenApi)
+
+        return retrofit
     }
 
     @Singleton
     @Provides
     fun provideApi(retrofit: Retrofit): AuthAPI {
         return retrofit.create(AuthAPI::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideTokenDAO(@ApplicationContext context: Context): TokenDAO{
+        return TokenDAO(context)
     }
 }
