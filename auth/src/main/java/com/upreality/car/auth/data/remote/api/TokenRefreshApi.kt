@@ -8,8 +8,8 @@ import retrofit2.http.POST
 
 interface TokenRefreshApi {
     @FormUrlEncoded
-    @POST("auth/refresh-token")
+    @POST("accounts/refresh-token")
     fun refreshAccessToken(
-        @Field("refresh_token") refreshToken: String?
+        @Field("refreshToken") refreshToken: String?
     ): Maybe<TokenResponse>
 }

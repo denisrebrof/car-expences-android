@@ -2,9 +2,11 @@ package com.upreality.car.auth.data.di
 
 import android.content.Context
 import com.google.gson.Gson
+import com.upreality.car.auth.data.AccessTokenInterceptor
 import com.upreality.car.auth.data.local.TokenDAO
 import com.upreality.car.auth.data.remote.TokenAuthenticator
 import com.upreality.car.auth.data.remote.api.AuthAPI
+import com.upreality.car.auth.data.remote.api.TestGetIdApi
 import com.upreality.car.auth.data.remote.api.TokenRefreshApi
 import dagger.Module
 import dagger.Provides
@@ -25,10 +27,14 @@ object RetrofitModule {
 
     @Singleton
     @Provides
-    fun provideRetrofit(authenticator: TokenAuthenticator): Retrofit {
+    fun provideRetrofit(
+        authenticator: TokenAuthenticator,
+        interceptor: AccessTokenInterceptor
+    ): Retrofit {
         val gson = Gson()
 
         val client: OkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
             .authenticator(authenticator)
             .build()
 
@@ -52,7 +58,13 @@ object RetrofitModule {
 
     @Singleton
     @Provides
-    fun provideTokenDAO(@ApplicationContext context: Context): TokenDAO{
+    fun provideTestApi(retrofit: Retrofit): TestGetIdApi {
+        return retrofit.create(TestGetIdApi::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideTokenDAO(@ApplicationContext context: Context): TokenDAO {
         return TokenDAO(context)
     }
 }

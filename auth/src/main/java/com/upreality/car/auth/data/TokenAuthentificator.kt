@@ -19,12 +19,12 @@ class TokenAuthenticator @Inject constructor(
     }
 
     override fun authenticate(route: Route?, response: Response): Request? {
-
         val storedRefreshToken = tokenDAO.get(TokenDAO.TokenType.REFRESH)
         val storedAccessToken = tokenDAO.get(TokenDAO.TokenType.ACCESS)
-        val refreshResponse = kotlin.runCatching {
+        val refreshResponseResult = kotlin.runCatching {
             tokenApi.refreshAccessToken(storedRefreshToken).blockingGet()
-        }.getOrNull()
+        }
+        val refreshResponse = refreshResponseResult.getOrNull()
 
         return refreshResponse?.let { tokenResponse ->
             tokenResponse.access_token?.let { tokenDAO.set(it, TokenDAO.TokenType.ACCESS) }
