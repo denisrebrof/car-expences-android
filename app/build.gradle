@@ -5,7 +5,7 @@ apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId 'com.upreality.car'
@@ -42,7 +42,7 @@ android {
         }
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding true
     }
 
@@ -58,16 +58,19 @@ dependencies {
     implementation rootProject.ext.kotlin_stdlib
     implementation rootProject.ext.core_ktx
     implementation rootProject.ext.appcompat
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation rootProject.ext.material
     implementation rootProject.ext.constraintlayout
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    testImplementation 'junit:junit:4.13.2'
+    implementation rootProject.ext.legacy_support
+    testImplementation rootProject.ext.junit_test
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core
 
     //Hilt - DI framework
-    implementation 'com.google.dagger:hilt-android:2.33-beta'
-    kapt 'com.google.dagger:hilt-android-compiler:2.33-beta'
+    implementation rootProject.ext.hilt_android
+    kapt rootProject.ext.hilt_android_compiler_kapt
+
+    //ViewModel
+    implementation rootProject.ext.viewmodel_ktx
 
     //Room - local database lib
     implementation rootProject.ext.room_runtime
