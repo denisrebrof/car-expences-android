@@ -13,8 +13,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val localDataSource: IAuthLocalDataSource
 ) : IAuthRepository {
 
-    private val signInState: BehaviorProcessor<AuthState>()
-
+    private val signInState = BehaviorProcessor.createDefault(AuthState.Unauthorized)
+    
     override fun getSignedInState(): AuthState{
 
     }
