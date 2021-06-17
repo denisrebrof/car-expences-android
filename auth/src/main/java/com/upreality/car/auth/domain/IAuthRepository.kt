@@ -6,4 +6,5 @@ import io.reactivex.Maybe
 interface IAuthRepository {
     fun getGoogleSignInOptions(): GoogleSignInOptions
     fun googleSignIn(token: String): Maybe<Account>
+    fun getSignedInState(): AuthState
 }

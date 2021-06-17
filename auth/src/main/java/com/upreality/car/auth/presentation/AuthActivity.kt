@@ -34,12 +34,12 @@ class AuthActivity : AppCompatActivity() {
 
     private val googleLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == ResolveResult.SUCCESS.resultCode) {
-            result.data
-                ?.getStringExtra(GoogleSignInActivity.TOKEN_EXTRA_KEY)
-                ?.let(viewModel::googleSignIn)
-                ?.subscribe({ account -> navigator.completeAuthorization(account, this) }) { _ ->
-                    Toast.makeText(this, "auth failure", Toast.LENGTH_SHORT).show()
-                }
+            val token = result.data?.getStringExtra(GoogleSignInActivity.TOKEN_EXTRA_KEY)
+            token?.let(viewModel::googleSignIn)?.subscribe({ account ->
+                navigator.completeAuthorization(account, this)
+            }) { _ ->
+                Toast.makeText(this, "auth failure", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
