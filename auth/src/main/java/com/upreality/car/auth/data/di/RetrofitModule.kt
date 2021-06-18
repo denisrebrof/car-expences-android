@@ -3,8 +3,10 @@ package com.upreality.car.auth.data.di
 import android.content.Context
 import com.google.gson.Gson
 import com.upreality.car.auth.data.AccessTokenInterceptor
+import com.upreality.car.auth.data.local.ILastAuthStateDAO
+import com.upreality.car.auth.data.local.LastAuthStateDAOImpl
 import com.upreality.car.auth.data.local.TokenDAO
-import com.upreality.car.auth.data.remote.TokenAuthenticator
+import com.upreality.car.auth.data.TokenAuthenticator
 import com.upreality.car.auth.data.remote.api.AuthAPI
 import com.upreality.car.auth.data.remote.api.TestGetIdApi
 import com.upreality.car.auth.data.remote.api.TokenRefreshApi
@@ -66,5 +68,11 @@ object RetrofitModule {
     @Provides
     fun provideTokenDAO(@ApplicationContext context: Context): TokenDAO {
         return TokenDAO(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideLastAuthStateDAO(@ApplicationContext context: Context): ILastAuthStateDAO {
+        return LastAuthStateDAOImpl(context)
     }
 }

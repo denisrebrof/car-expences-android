@@ -19,7 +19,7 @@ class AuthActivity : AppCompatActivity() {
     private val viewModel: AuthViewModel by viewModels()
 
     @Inject
-    private lateinit var navigator: AuthNavigator
+    lateinit var navigator: AuthNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
