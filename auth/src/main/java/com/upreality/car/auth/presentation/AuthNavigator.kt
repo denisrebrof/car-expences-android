@@ -1,6 +1,7 @@
 package com.upreality.car.auth.presentation
 
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import com.upreality.car.auth.domain.Account
 import javax.inject.Inject

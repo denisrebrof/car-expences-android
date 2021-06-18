@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.upreality.car.auth.databinding.ActivityAuthBinding
 import com.upreality.car.auth.presentation.GoogleSignInActivity.ResolveResult
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -35,7 +37,10 @@ class AuthActivity : AppCompatActivity() {
     private val googleLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == ResolveResult.SUCCESS.resultCode) {
             val token = result.data?.getStringExtra(GoogleSignInActivity.TOKEN_EXTRA_KEY)
-            token?.let(viewModel::googleSignIn)?.subscribe({ account ->
+            token?.let(viewModel::googleSignIn)
+                ?.subscribeOn(Schedulers.io())
+                ?.observeOn(AndroidSchedulers.mainThread())
+                ?.subscribe({ account ->
                 navigator.completeAuthorization(account, this)
             }) { _ ->
                 Toast.makeText(this, "auth failure", Toast.LENGTH_SHORT).show()

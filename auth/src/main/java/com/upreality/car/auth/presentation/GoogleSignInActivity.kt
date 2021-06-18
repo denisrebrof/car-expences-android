@@ -2,7 +2,7 @@ package com.upreality.car.auth.presentation
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.upreality.car.auth.domain.IAuthRepository
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @Suppress("DEPRECATION")
 @AndroidEntryPoint
-class GoogleSignInActivity : AppCompatActivity() {
+class GoogleSignInActivity : ComponentActivity() {
     companion object {
         private const val RC_SIGN_IN = 1
         const val TOKEN_EXTRA_KEY = "GOOGLE_TOKEN"
@@ -72,8 +72,8 @@ class GoogleSignInActivity : AppCompatActivity() {
 //    }
 
     private fun resolveActivity(result: ResolveResult, idToken: String? = null) {
-        val success = result==ResolveResult.SUCCESS && idToken!=null
-        val data = if(success) Intent().putExtra(TOKEN_EXTRA_KEY, idToken) else null
+        val success = result == ResolveResult.SUCCESS && idToken != null
+        val data = if (success) Intent().putExtra(TOKEN_EXTRA_KEY, idToken) else null
         setResult(result.resultCode, data)
         finish()
     }
