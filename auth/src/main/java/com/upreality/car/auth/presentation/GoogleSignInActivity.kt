@@ -48,7 +48,7 @@ class GoogleSignInActivity : ComponentActivity() {
             // a listener.
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             task?.addOnSuccessListener {
-                resolveActivity(ResolveResult.SUCCESS, it.idToken)
+                resolveActivity(ResolveResult.SUCCESS, it.serverAuthCode)
             }?.addOnCanceledListener {
                 resolveActivity(ResolveResult.CANCELLED)
             }?.addOnFailureListener {

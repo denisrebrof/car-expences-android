@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.di
 
-import com.upreality.car.expenses.data.local.ExpensesLocalDataSourceImpl
+import com.upreality.car.expenses.data.local.room.ExpensesLocalDataSourceImpl
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSourceImpl
 import com.upreality.car.expenses.data.repository.*
 import com.upreality.car.expenses.domain.IExpensesRepository

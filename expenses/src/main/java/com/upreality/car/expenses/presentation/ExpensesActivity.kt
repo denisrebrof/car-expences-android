@@ -3,10 +3,9 @@ package com.upreality.car.expenses.presentation
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
+import com.upreality.car.expenses.data.local.room.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
-import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import com.upreality.car.expenses.databinding.ActivityExpencesBinding
