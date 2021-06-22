@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
-
+apply plugin: 'realm-android'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
@@ -45,6 +45,10 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs = ["-Xallow-result-return-type"]
+    }
+
+    realm {
+        syncEnabled = true
     }
 }
 
@@ -110,4 +114,6 @@ dependencies {
 
     api project(':common')
     api project(":uikit")
+
+    kapt 'dk.ilios:realmfieldnameshelper:2.0.0'
 }
