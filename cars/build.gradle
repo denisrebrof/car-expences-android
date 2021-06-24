@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 30
@@ -35,6 +36,10 @@ android {
 
     buildFeatures {
         viewBinding true
+    }
+
+    realm {
+        syncEnabled = true
     }
 
     compileOptions {
@@ -97,6 +102,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
+
+    kapt 'dk.ilios:realmfieldnameshelper:2.0.0'
 
     implementation project(":expenses")
     implementation project(":brending")

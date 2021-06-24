@@ -23,8 +23,8 @@ class CarsRepositoryImpl @Inject constructor(
             .map { it.first() }
     }
 
-    override fun create(car: Car): Maybe<Long> {
-        return dataSource.create(car)
+    override fun create(car: Car): Completable {
+        return dataSource.create(car).ignoreElement()
     }
 
     override fun updateCar(car: Car): Completable {
