@@ -12,6 +12,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.realm.Realm
 import io.realm.RealmQuery
+import java.util.*
 import javax.inject.Inject
 
 class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
@@ -19,27 +20,28 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
     private val baseRealm: Realm = Realm.getDefaultInstance()
 
     override fun create(expense: Expense): Completable {
-        val realm = Realm.getDefaultInstance()
-        val dataModel = ExpenseRealmConverter.fromDomain(expense)
+        expense.id = UUID.randomUUID().hashCode().toLong()
         return Completable.fromAction {
+            val realm = Realm.getDefaultInstance()
+            realm.beginTransaction()
+            val dataModel = ExpenseRealmConverter.fromDomain(expense, realm)
             realm.copyToRealmOrUpdate(dataModel)
-        }.doOnDispose {
+            realm.commitTransaction()
             realm.close()
         }
     }
 
     override fun get(filter: ExpenseFilter): Flowable<List<Expense>> {
         val realm = Realm.getDefaultInstance()
-        val expensesQuery = baseRealm.where(ExpenseRealm::class.java)
+        val expensesQuery = realm.where(ExpenseRealm::class.java)
         return when (filter) {
             ExpenseFilter.All -> expensesQuery
             ExpenseFilter.Fines -> filterQueryByType(expensesQuery, ExpenseType.Fines)
             ExpenseFilter.Fuel -> filterQueryByType(expensesQuery, ExpenseType.Fuel)
             ExpenseFilter.Maintenance -> filterQueryByType(expensesQuery, ExpenseType.Maintenance)
-            is ExpenseFilter.Paged -> expensesQuery.greaterThanOrEqualTo(
-                ExpenseRealmFields.ID,
-                filter.cursor
-            ).limit(filter.pageSize.toLong())
+            is ExpenseFilter.Paged -> expensesQuery
+//                .greaterThanOrEqualTo(ExpenseRealmFields.ID, filter.cursor)
+//                .limit(filter.pageSize.toLong())
         }.findAllAsync().asFlowable().map { results ->
             results.toList().map(ExpenseRealmConverter::toDomain)
         }
@@ -56,23 +58,25 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
     }
 
     override fun update(expense: Expense): Completable {
-        val realm = Realm.getDefaultInstance()
-        val dataModel = ExpenseRealmConverter.fromDomain(expense)
         return Completable.fromAction {
+            val realm = Realm.getDefaultInstance()
+            realm.beginTransaction()
+            val dataModel = ExpenseRealmConverter.fromDomain(expense, realm)
             realm.copyToRealmOrUpdate(dataModel)
-        }.doOnDispose {
+            realm.commitTransaction()
             realm.close()
         }
     }
 
     override fun delete(expense: Expense): Completable {
-        val realm = Realm.getDefaultInstance()
         return Completable.fromAction {
+            val realm = Realm.getDefaultInstance()
+            realm.beginTransaction()
             realm.where(ExpenseRealm::class.java)
                 .contains(ExpenseRealmFields.ID, expense.id.toString())
                 .findFirst()
                 ?.deleteFromRealm()
-        }.doOnDispose {
+            realm.commitTransaction()
             realm.close()
         }
     }
