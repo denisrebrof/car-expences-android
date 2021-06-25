@@ -84,6 +84,15 @@ class ExpensesListFragment : Fragment() {
                     Log.e("Create Error", it.toString())
                 }.disposeBy(lifecycle.disposers.onStop)
         }
+
+        viewModel.getExpensesCountFlow()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                Log.d("","Get $it exp")
+            }) {
+                Log.e("Get All Error", it.toString())
+            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     override fun onDestroy() {

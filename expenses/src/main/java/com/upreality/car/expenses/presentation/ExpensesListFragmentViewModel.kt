@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.rxjava2.cachedIn
 import androidx.paging.rxjava2.flowable
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.ExpensesInteractorImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,6 +54,12 @@ class ExpensesListFragmentViewModel @Inject constructor(
 
     fun refresh() {
         lastSource?.invalidate()
+    }
+
+    fun getExpensesCountFlow() : Flowable<Int> {
+        return interactor.getExpensesFlow(ExpenseFilter.All).map {
+            it.size
+        }
     }
 
     interface IExpensesPagingSourceFactory {

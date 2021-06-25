@@ -12,12 +12,11 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.realm.Realm
 import io.realm.RealmQuery
+import io.realm.RealmResults
 import java.util.*
 import javax.inject.Inject
 
 class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
-
-    private val baseRealm: Realm = Realm.getDefaultInstance()
 
     override fun create(expense: Expense): Completable {
         expense.id = UUID.randomUUID().hashCode().toLong()
@@ -39,12 +38,14 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
             ExpenseFilter.Fines -> filterQueryByType(expensesQuery, ExpenseType.Fines)
             ExpenseFilter.Fuel -> filterQueryByType(expensesQuery, ExpenseType.Fuel)
             ExpenseFilter.Maintenance -> filterQueryByType(expensesQuery, ExpenseType.Maintenance)
-            is ExpenseFilter.Paged -> expensesQuery
-//                .greaterThanOrEqualTo(ExpenseRealmFields.ID, filter.cursor)
-//                .limit(filter.pageSize.toLong())
-        }.findAllAsync().asFlowable().map { results ->
-            results.toList().map(ExpenseRealmConverter::toDomain)
-        }
+            is ExpenseFilter.Paged -> expensesQuery.
+                .limit(filter.pageSize.toLong())
+        }.findAllAsync()
+            .asFlowable()
+            .filter(RealmResults<ExpenseRealm>::isLoaded)
+            .map { results ->
+                results.toList().map(ExpenseRealmConverter::toDomain)
+            }
     }
 
     private fun filterQueryByType(
