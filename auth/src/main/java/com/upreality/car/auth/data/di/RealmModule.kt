@@ -23,6 +23,9 @@ object RealmModule {
         context: Context
     ): App {
         Realm.init(context)
-        return App(AppConfiguration.Builder(realmAppId).build())
+        val config = AppConfiguration
+            .Builder(realmAppId)
+            .build()
+        return App(config)
     }
 }
