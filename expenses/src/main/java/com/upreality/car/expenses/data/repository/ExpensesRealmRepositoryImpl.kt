@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.repository
 
+import com.upreality.car.common.data.SyncedRealmProvider
 import com.upreality.car.expenses.data.realm.model.ExpenseRealm
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmConverter
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmFields
@@ -11,18 +12,19 @@ import com.upreality.car.expenses.domain.model.expence.Expense
 import domain.RxListExtentions.mapList
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.realm.Realm
 import io.realm.RealmQuery
 import io.realm.RealmResults
 import java.util.*
 import javax.inject.Inject
 
-class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
+class ExpensesRealmRepositoryImpl @Inject constructor(
+    private val realmProvider: SyncedRealmProvider
+) : IExpensesRepository {
 
     override fun create(expense: Expense): Completable {
         expense.id = UUID.randomUUID().hashCode().toLong()
         return Completable.fromAction {
-            val realm = Realm.getDefaultInstance()
+            val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
             val dataModel = ExpenseRealmConverter.fromDomain(expense, realm)
             realm.copyToRealmOrUpdate(dataModel)
@@ -32,7 +34,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
     }
 
     override fun get(filter: ExpenseFilter): Flowable<List<Expense>> {
-        val realm = Realm.getDefaultInstance()
+        val realm = realmProvider.getRealmInstance()
         val expensesQuery = realm.where(ExpenseRealm::class.java)
         return when (filter) {
             ExpenseFilter.All -> expensesQuery
@@ -44,16 +46,22 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
             .asFlowable()
             .filter(RealmResults<ExpenseRealm>::isLoaded)
             .map { results ->
-                when(filter){
+                when (filter) {
                     is ExpenseFilter.Paged -> results
-                        .toList().let { pageList(it, filter.cursor.toInt(), filter.cursor.toInt() + filter.pageSize) }
-                    else ->  results.toList()
+                        .toList().let {
+                            pageList(
+                                it,
+                                filter.cursor.toInt(),
+                                filter.cursor.toInt() + filter.pageSize
+                            )
+                        }
+                    else -> results.toList()
                 }
             }.mapList(ExpenseRealmConverter::toDomain)
     }
 
-    private fun <T> pageList(list: List<T>, from: Int, to: Int): List<T>{
-        return when{
+    private fun <T> pageList(list: List<T>, from: Int, to: Int): List<T> {
+        return when {
             list.size > to -> list.subList(from, to)
             list.size > from -> list.subList(from, list.size - 1)
             else -> listOf()
@@ -72,7 +80,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
 
     override fun update(expense: Expense): Completable {
         return Completable.fromAction {
-            val realm = Realm.getDefaultInstance()
+            val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
             val dataModel = ExpenseRealmConverter.fromDomain(expense, realm)
             realm.copyToRealmOrUpdate(dataModel)
@@ -83,7 +91,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor() : IExpensesRepository {
 
     override fun delete(expense: Expense): Completable {
         return Completable.fromAction {
-            val realm = Realm.getDefaultInstance()
+            val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
             realm.where(ExpenseRealm::class.java)
                 .contains(ExpenseRealmFields.ID, expense.id.toString())

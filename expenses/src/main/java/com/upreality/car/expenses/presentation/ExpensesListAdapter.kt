@@ -5,13 +5,11 @@ import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.AsyncPagingDataDiffer
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import com.upreality.car.expenses.databinding.ExpenseListItemBinding
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.presentation.ExpensesListAdapter.ViewHolder
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
@@ -44,9 +42,7 @@ class ExpensesListAdapter(
 
     object DiffCallback : DiffUtil.ItemCallback<Expense>() {
         override fun areItemsTheSame(oldItem: Expense, newItem: Expense): Boolean {
-            val same = oldItem.id == newItem.id
-//            Log.d("Same items","$same")
-            return same
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Expense, newItem: Expense): Boolean {

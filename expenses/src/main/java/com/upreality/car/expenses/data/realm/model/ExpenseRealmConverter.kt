@@ -3,7 +3,6 @@ package com.upreality.car.expenses.data.realm.model
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.expence.Expense
 import io.realm.Realm
-import java.util.*
 
 object ExpenseRealmConverter {
     fun fromDomain(expense: Expense, realm: Realm): ExpenseRealm {

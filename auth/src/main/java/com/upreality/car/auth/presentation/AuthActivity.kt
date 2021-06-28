@@ -21,7 +21,7 @@ class AuthActivity : AppCompatActivity() {
     private val viewModel: AuthViewModel by viewModels()
 
     @Inject
-    lateinit var navigator: AuthNavigator
+    lateinit var navigator: IAuthNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +36,8 @@ class AuthActivity : AppCompatActivity() {
 
     private val googleLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == ResolveResult.SUCCESS.resultCode) {
-            val token = result.data?.getStringExtra(GoogleSignInActivity.TOKEN_EXTRA_KEY)
-            token?.let(viewModel::googleSignIn)
+            val authCode = result.data?.getStringExtra(GoogleSignInActivity.AUTH_CODE_EXTRA_KEY)
+            authCode?.let(viewModel::googleSignIn)
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe({ account ->

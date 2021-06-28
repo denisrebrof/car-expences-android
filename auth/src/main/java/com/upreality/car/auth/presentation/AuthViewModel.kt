@@ -9,5 +9,5 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val repository: IAuthRepository
 ) : ViewModel() {
-    fun googleSignIn(token: String) = repository.googleSignIn(token)
+    fun googleSignIn(authCode: String) = repository.googleSignIn(authCode)
 }

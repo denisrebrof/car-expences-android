@@ -88,10 +88,6 @@ dependencies {
     implementation 'com.google.dagger:hilt-android:2.33-beta'
     kapt 'com.google.dagger:hilt-android-compiler:2.33-beta'
 
-    //Hilt - DI framework
-    implementation 'com.google.dagger:hilt-android:2.33-beta'
-    kapt 'com.google.dagger:hilt-android-compiler:2.33-beta'
-
     //RxJava2
     implementation rootProject.ext.rxjava
     implementation rootProject.ext.rxandroid

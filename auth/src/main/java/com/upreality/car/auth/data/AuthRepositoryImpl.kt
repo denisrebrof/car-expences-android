@@ -8,6 +8,7 @@ import com.upreality.car.auth.domain.IAuthRepository
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.processors.BehaviorProcessor
+import io.realm.Realm
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -31,8 +32,8 @@ class AuthRepositoryImpl @Inject constructor(
             .build()
     }
 
-    override fun googleSignIn(token: String): Maybe<Account> {
-        return remoteDataSource.googleSignIn(token).doOnSuccess { account ->
+    override fun googleSignIn(authCode: String): Maybe<Account> {
+        return remoteDataSource.googleSignIn(authCode).doOnSuccess { account ->
             AuthState.Authorized(account).let(localDataSource::setAuthState)
             localDataSource.setLastAuthType(AuthType.GOOGLE)
         }

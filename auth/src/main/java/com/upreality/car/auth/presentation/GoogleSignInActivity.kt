@@ -15,7 +15,7 @@ import javax.inject.Inject
 class GoogleSignInActivity : ComponentActivity() {
     companion object {
         private const val RC_SIGN_IN = 1
-        const val TOKEN_EXTRA_KEY = "GOOGLE_TOKEN"
+        const val AUTH_CODE_EXTRA_KEY = "GOOGLE_TOKEN"
         const val TRY_LAST_SIGNED_IN_ACCOUNT = "TRY_LAST_SIGNED_IN_ACCOUNT"
     }
 
@@ -32,7 +32,7 @@ class GoogleSignInActivity : ComponentActivity() {
         val tryRefresh = savedInstanceState?.containsKey(TRY_LAST_SIGNED_IN_ACCOUNT) == true
         if (tryRefresh) {
             GoogleSignIn.getLastSignedInAccount(this)?.let { account ->
-                resolveActivity(ResolveResult.SUCCESS, account.idToken)
+                resolveActivity(ResolveResult.SUCCESS, account.serverAuthCode)
                 return
             }
         }
@@ -71,9 +71,9 @@ class GoogleSignInActivity : ComponentActivity() {
 //            }?.let(disposable::add)
 //    }
 
-    private fun resolveActivity(result: ResolveResult, idToken: String? = null) {
-        val success = result == ResolveResult.SUCCESS && idToken != null
-        val data = if (success) Intent().putExtra(TOKEN_EXTRA_KEY, idToken) else null
+    private fun resolveActivity(result: ResolveResult, authCode: String? = null) {
+        val success = result == ResolveResult.SUCCESS && authCode != null
+        val data = if (success) Intent().putExtra(AUTH_CODE_EXTRA_KEY, authCode) else null
         setResult(result.resultCode, data)
         finish()
     }

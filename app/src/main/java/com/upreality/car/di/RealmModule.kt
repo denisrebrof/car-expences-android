@@ -1,4 +1,4 @@
-package com.upreality.car.auth.data.di
+package com.upreality.car.di
 
 import android.content.Context
 import dagger.Module
@@ -9,6 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import io.realm.Realm
 import io.realm.mongodb.App
 import io.realm.mongodb.AppConfiguration
+import io.realm.mongodb.sync.SyncConfiguration
+import javax.inject.Named
 import javax.inject.Singleton
 
 const val realmAppId = "carexpenses-jfgls"
@@ -16,6 +18,7 @@ const val realmAppId = "carexpenses-jfgls"
 @Module
 @InstallIn(SingletonComponent::class)
 object RealmModule {
+
     @Provides
     @Singleton
     fun getRealmApp(
@@ -27,5 +30,18 @@ object RealmModule {
             .Builder(realmAppId)
             .build()
         return App(config)
+    }
+
+    @Provides
+    @Singleton
+    @Named("Sync")
+    fun getSyncedRealmApp(
+        app: App
+    ): Realm {
+        val config = SyncConfiguration.Builder(app.currentUser(), "partitionKey")
+            .allowQueriesOnUiThread(true)
+            .allowWritesOnUiThread(true)
+            .build()
+        return Realm.getInstance(config)
     }
 }
