@@ -9,7 +9,7 @@ import java.util.*
 
 open class ExpenseRealm : RealmObject() {
     @PrimaryKey
-    var id: Long = 0L
+    var _id: Long = 0L
     var date: Date = Date()
     var cost: Float = 0f
 

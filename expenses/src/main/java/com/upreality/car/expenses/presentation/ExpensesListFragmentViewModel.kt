@@ -24,7 +24,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
     private val interactor: ExpensesInteractorImpl,
     private val sourceFactory: IExpensesPagingSourceFactory,
     //TODO fix injection
-    private val refreshEventProvider: RefreshExpensesEventProviderImpl
+    private val refreshEventProvider: RefreshExpensesRealmEventProvider
 ) : ViewModel() {
 
     private var lastSource: PagingSource<Int, Expense>? = null
@@ -52,7 +52,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
         }
     }
 
-    fun refresh() {
+    private fun refresh() {
         lastSource?.invalidate()
     }
 

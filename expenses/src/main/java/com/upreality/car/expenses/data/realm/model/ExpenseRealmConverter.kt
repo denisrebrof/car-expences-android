@@ -50,6 +50,6 @@ object ExpenseRealmConverter {
                 dataModel.maintenanceType,
                 dataModel.mileage,
             )
-        }.apply { id = dataModel.id }
+        }.apply { id = dataModel._id }
     }
 }

@@ -41,10 +41,10 @@ class AuthActivity : AppCompatActivity() {
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe({ account ->
-                navigator.completeAuthorization(account, this)
-            }) { _ ->
-                Toast.makeText(this, "auth failure", Toast.LENGTH_SHORT).show()
-            }
+                    navigator.completeAuthorization(account, this)
+                }) { _ ->
+                    Toast.makeText(this, "auth failure", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 

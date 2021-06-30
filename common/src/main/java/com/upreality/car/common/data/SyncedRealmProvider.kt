@@ -1,5 +1,6 @@
 package com.upreality.car.common.data
 
+import android.util.Log
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.mongodb.App
@@ -14,9 +15,20 @@ class SyncedRealmProvider @Inject constructor(
     }
 
     private fun getRealmConfig(): RealmConfiguration {
-        return SyncConfiguration.Builder(app.currentUser(), "partitionKey")
+        return SyncConfiguration.Builder(app.currentUser(), app.currentUser()?.id)
+            .errorHandler { session, error ->
+                Log.e(
+                    "Sync",
+                    "Sync error: $error"
+                )
+            }
             .allowQueriesOnUiThread(true)
             .allowWritesOnUiThread(true)
-            .build()
+            .clientResetHandler { session, error ->
+                Log.e(
+                    "EXAMPLE",
+                    "Client Reset required for: ${session.configuration.serverUrl} for error: $error"
+                )
+            }.build()
     }
 }

@@ -26,7 +26,7 @@ class ExpensesPagingSource @Inject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .map { expensesList ->
                 val prevKey = if (key == 0) null else (key - params.loadSize).coerceAtLeast(0)
-                val nextKey = if (expensesList.isEmpty()) null else key + params.loadSize
+                val nextKey = if (expensesList.size < params.loadSize) null else key + params.loadSize
                 LoadResult.Page(expensesList, prevKey, nextKey)
             }
     }

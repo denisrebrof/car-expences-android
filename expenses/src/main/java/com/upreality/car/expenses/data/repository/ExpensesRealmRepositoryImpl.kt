@@ -61,11 +61,12 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
     }
 
     private fun <T> pageList(list: List<T>, from: Int, to: Int): List<T> {
-        return when {
-            list.size > to -> list.subList(from, to)
-            list.size > from -> list.subList(from, list.size - 1)
+        val list = when {
+            list.size > (to + 1) -> list.subList(from, to + 1)
+            list.size > from -> list.subList(from, list.size)
             else -> listOf()
         }
+        return list
     }
 
     private fun filterQueryByType(
@@ -94,7 +95,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
             val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
             realm.where(ExpenseRealm::class.java)
-                .contains(ExpenseRealmFields.ID, expense.id.toString())
+                .contains(ExpenseRealmFields._ID, expense.id.toString())
                 .findFirst()
                 ?.deleteFromRealm()
             realm.commitTransaction()

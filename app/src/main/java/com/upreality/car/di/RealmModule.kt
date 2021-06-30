@@ -38,7 +38,7 @@ object RealmModule {
     fun getSyncedRealmApp(
         app: App
     ): Realm {
-        val config = SyncConfiguration.Builder(app.currentUser(), "partitionKey")
+        val config = SyncConfiguration.Builder(app.currentUser(), app.currentUser()?.id)
             .allowQueriesOnUiThread(true)
             .allowWritesOnUiThread(true)
             .build()
