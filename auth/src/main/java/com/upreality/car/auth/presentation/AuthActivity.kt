@@ -1,55 +1,38 @@
 package com.upreality.car.auth.presentation
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import by.kirich1409.viewbindingdelegate.viewBinding
+import com.upreality.car.auth.R
 import com.upreality.car.auth.databinding.ActivityAuthBinding
-import com.upreality.car.auth.presentation.GoogleSignInActivity.ResolveResult
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAuthBinding
+    private val binding: ActivityAuthBinding by viewBinding(ActivityAuthBinding::bind)
     private val viewModel: AuthViewModel by viewModels()
 
     @Inject
-    lateinit var navigator: IAuthNavigator
+    lateinit var googleSignInNavigator: IGoogleSignInNavigator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ActivityAuthBinding
-            .inflate(layoutInflater)
-            .also(this::binding::set)
-            .let(ActivityAuthBinding::getRoot)
-            .let(this::setContentView)
-
+        setContentView(R.layout.activity_auth)
         binding.testAuthButton.setOnClickListener(this::launchGoogleSignIn)
     }
 
     private val googleLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        if (result.resultCode == ResolveResult.SUCCESS.resultCode) {
-            val authCode = result.data?.getStringExtra(GoogleSignInActivity.AUTH_CODE_EXTRA_KEY)
-            authCode?.let(viewModel::googleSignIn)
-                ?.subscribeOn(Schedulers.io())
-                ?.observeOn(AndroidSchedulers.mainThread())
-                ?.subscribe({ account ->
-                    navigator.completeAuthorization(account, this)
-                }) { _ ->
-                    Toast.makeText(this, "auth failure", Toast.LENGTH_SHORT).show()
-                }
-        }
+        googleSignInNavigator.processGoogleSignInResult(this, result, viewModel)
     }
 
     private fun launchGoogleSignIn(source: View) {
-        val intent = Intent(this, GoogleSignInActivity::class.java)
-        googleLauncher.launch(intent)
+        googleSignInNavigator
+            .getGoogleSignInActivityIntent(this, false)
+            .let(googleLauncher::launch)
     }
 }

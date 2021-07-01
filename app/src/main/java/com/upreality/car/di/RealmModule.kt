@@ -1,6 +1,7 @@
 package com.upreality.car.di
 
 import android.content.Context
+import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -9,6 +10,8 @@ import dagger.hilt.components.SingletonComponent
 import io.realm.Realm
 import io.realm.mongodb.App
 import io.realm.mongodb.AppConfiguration
+import io.realm.mongodb.AuthenticationListener
+import io.realm.mongodb.User
 import io.realm.mongodb.sync.SyncConfiguration
 import javax.inject.Named
 import javax.inject.Singleton
@@ -29,7 +32,17 @@ object RealmModule {
         val config = AppConfiguration
             .Builder(realmAppId)
             .build()
-        return App(config)
+        val app = App(config)
+        app.addAuthenticationListener(object : AuthenticationListener{
+            override fun loggedIn(user: User?) {
+                Log.d("","Logged in")
+            }
+
+            override fun loggedOut(user: User?) {
+                Log.d("","Logged out")
+            }
+        })
+        return app
     }
 
     @Provides

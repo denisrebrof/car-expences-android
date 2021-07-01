@@ -57,20 +57,6 @@ class GoogleSignInActivity : ComponentActivity() {
         }
     }
 
-//    private fun googleSignInOnBackend(account: GoogleSignInAccount) {
-//        account.idToken
-//            ?.let(authRepository::googleSignIn)
-//            ?.subscribeOn(Schedulers.io())
-//            ?.observeOn(AndroidSchedulers.mainThread())
-//            ?.subscribe({
-//                Log.d("success", "res: $it")
-//                Toast.makeText(this, "Auth success", Toast.LENGTH_SHORT).show()
-//            }) {
-//                Log.e("error", "error: $it")
-//                Toast.makeText(this, "Auth failure", Toast.LENGTH_SHORT).show()
-//            }?.let(disposable::add)
-//    }
-
     private fun resolveActivity(result: ResolveResult, authCode: String? = null) {
         val success = result == ResolveResult.SUCCESS && authCode != null
         val data = if (success) Intent().putExtra(AUTH_CODE_EXTRA_KEY, authCode) else null

@@ -80,6 +80,8 @@ dependencies {
     implementation rootProject.ext.navigation_fragment_ktx
     implementation rootProject.ext.navigation_ui_ktx
 
+    implementation rootProject.ext.disposer
+
     dependencies {
         implementation project(":uikit")
     }

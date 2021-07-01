@@ -1,6 +1,8 @@
 package com.upreality.car.di
 
+import com.upreality.car.auth.presentation.GoogleSignInNavigator
 import com.upreality.car.auth.presentation.IAuthNavigator
+import com.upreality.car.auth.presentation.IGoogleSignInNavigator
 import com.upreality.car.presentation.AuthNavigatorImpl
 import dagger.Binds
 import dagger.Module
@@ -13,4 +15,7 @@ abstract class AuthNavigatorModule {
 
     @Binds
     abstract fun provideNavigator(navigator: AuthNavigatorImpl): IAuthNavigator
+
+    @Binds
+    abstract fun provideGoogleNavigator(navigator: GoogleSignInNavigator): IGoogleSignInNavigator
 }
