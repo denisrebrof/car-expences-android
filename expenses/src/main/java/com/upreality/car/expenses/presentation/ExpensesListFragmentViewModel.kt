@@ -47,7 +47,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
     }
 
     fun getRefreshFlow(): Flowable<Unit> {
-        return refreshEventProvider.getRefreshFlow().map {
+        return refreshEventProvider.getRefreshFlow().doOnNext {
             refresh()
         }
     }

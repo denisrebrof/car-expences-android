@@ -49,7 +49,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
                 val resultsList = when (filter) {
                     is ExpenseFilter.Paged -> pageList(
                         results.toList(),
-                        filter.cursor.toInt(),
+                        filter.cursor.toInt().coerceAtLeast(0),
                         filter.cursor.toInt() + filter.pageSize
                     )
                     else -> results.toList()
@@ -60,8 +60,8 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
 
     private fun <T> pageList(list: List<T>, from: Int, to: Int): List<T> {
         val pagedList = when {
-            list.size > (to + 1) -> list.subList(from, to)
-            list.size > from -> list.subList(from, list.size - 1)
+            list.size >= to -> list.subList(from, to)
+            list.size > from -> list.subList(from, list.size)
             else -> listOf()
         }
         return pagedList

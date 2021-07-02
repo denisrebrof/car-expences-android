@@ -62,7 +62,6 @@ class ExpensesListFragment : Fragment() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError {
 //            layoutManager.scrollToPosition(0)
-            requireBinding.list.scheduleLayoutAnimation()
         }.disposeBy(lifecycle.disposers.onDestroy)
         return requireBinding.root
 

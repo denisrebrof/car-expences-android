@@ -25,13 +25,16 @@ class ExpensesPagingSource @Inject constructor(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { expensesList ->
-                val prevKey = if (key == 0) null else (key - params.loadSize).coerceAtLeast(0)
+                var prevKey = if (key == 0) null else (key - params.loadSize).coerceAtLeast(0)
+                if(prevKey == 0){
+                    prevKey = null
+                }
                 val nextKey = if (expensesList.size < params.loadSize) null else key + params.loadSize
                 LoadResult.Page(expensesList, prevKey, nextKey)
             }
     }
 
     override fun getRefreshKey(state: PagingState<Int, Expense>): Int? {
-        return state.anchorPosition
+        return 0
     }
 }
