@@ -46,27 +46,25 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
             .asFlowable()
             .filter(RealmResults<ExpenseRealm>::isLoaded)
             .map { results ->
-                when (filter) {
-                    is ExpenseFilter.Paged -> results
-                        .toList().let {
-                            pageList(
-                                it,
-                                filter.cursor.toInt(),
-                                filter.cursor.toInt() + filter.pageSize
-                            )
-                        }
+                val resultsList = when (filter) {
+                    is ExpenseFilter.Paged -> pageList(
+                        results.toList(),
+                        filter.cursor.toInt(),
+                        filter.cursor.toInt() + filter.pageSize
+                    )
                     else -> results.toList()
                 }
+                resultsList
             }.mapList(ExpenseRealmConverter::toDomain)
     }
 
     private fun <T> pageList(list: List<T>, from: Int, to: Int): List<T> {
-        val list = when {
-            list.size > (to + 1) -> list.subList(from, to + 1)
-            list.size > from -> list.subList(from, list.size)
+        val pagedList = when {
+            list.size > (to + 1) -> list.subList(from, to)
+            list.size > from -> list.subList(from, list.size - 1)
             else -> listOf()
         }
-        return list
+        return pagedList
     }
 
     private fun filterQueryByType(
@@ -95,7 +93,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
             val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
             realm.where(ExpenseRealm::class.java)
-                .contains(ExpenseRealmFields._ID, expense.id.toString())
+                .equalTo(ExpenseRealmFields._ID, expense.id)
                 .findFirst()
                 ?.deleteFromRealm()
             realm.commitTransaction()

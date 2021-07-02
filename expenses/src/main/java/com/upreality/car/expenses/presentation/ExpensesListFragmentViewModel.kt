@@ -62,6 +62,10 @@ class ExpensesListFragmentViewModel @Inject constructor(
         }
     }
 
+    fun deleteExpense(expense: Expense): Completable {
+        return interactor.deleteExpense(expense)
+    }
+
     interface IExpensesPagingSourceFactory {
         fun get(): PagingSource<Int, Expense>
     }

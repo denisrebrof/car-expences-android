@@ -14,10 +14,11 @@ import javax.inject.Singleton
 
 @Singleton
 class ExpensesListAdapter(
-    private val provider: ExpenseTypeDataProvider
+    private val provider: ExpenseTypeDataProvider,
+    private val onItemClicked: (Expense) -> Unit
 ) : PagingDataAdapter<Expense, ViewHolder>(DiffCallback) {
 
-//    private val differ = AsyncPagingDataDiffer(DiffCallback)
+    //    private val differ = AsyncPagingDataDiffer(DiffCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return LayoutInflater.from(parent.context)
@@ -33,6 +34,9 @@ class ExpensesListAdapter(
             expenseDetailsShort.text = provider.getDetails(item)
             //Debug, replace with cost
             expenseCost.text = item.id.toString()
+            root.setOnClickListener {
+                onItemClicked(item)
+            }
         }
     }
 
@@ -48,12 +52,12 @@ class ExpensesListAdapter(
         override fun areContentsTheSame(oldItem: Expense, newItem: Expense): Boolean {
 //            val same = oldItem == newItem
             val same = oldItem.date == newItem.date && oldItem::class == newItem::class
-            Log.d("Same","$same")
+            Log.d("Same", "$same")
             return same
         }
     }
 
-    interface ExpenseTypeDataProvider{
+    interface ExpenseTypeDataProvider {
         fun getIcon(expense: Expense): Drawable?
         fun getTypeLabel(expense: Expense): String?
         fun getDetails(expense: Expense): String?

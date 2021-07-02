@@ -32,9 +32,12 @@ class ExpensesListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //TODO: implement with di
-        adapter = requireContext()
-            .let(::ExpensesListAdapterExpenseTypeDataProviderImpl)
-            .let(::ExpensesListAdapter)
+        val provider = requireContext().let(::ExpensesListAdapterExpenseTypeDataProviderImpl)
+        adapter = ExpensesListAdapter(provider) { clickedExpense ->
+            viewModel.deleteExpense(clickedExpense).subscribe({}) { error ->
+                Log.e("Error", "Delete expense error: $error")
+            }.disposeBy(lifecycle.disposers.onDestroy)
+        }
         adapter.stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
     }
 
