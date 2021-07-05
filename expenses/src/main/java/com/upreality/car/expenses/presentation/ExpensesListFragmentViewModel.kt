@@ -52,7 +52,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
         }
     }
 
-    private fun refresh() {
+    fun refresh() {
         lastSource?.invalidate()
     }
 

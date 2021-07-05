@@ -87,6 +87,10 @@ class ExpensesListFragment : Fragment() {
                 }.disposeBy(lifecycle.disposers.onStop)
         }
 
+        requireBinding.expensesListRefresh.setOnClickListener {
+            viewModel.refresh()
+        }
+
         viewModel.getExpensesCountFlow()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

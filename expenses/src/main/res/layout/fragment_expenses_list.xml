@@ -23,12 +23,12 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:src="@drawable/ic_add" />
-<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-<!--        android:id="@+id/expenses_list_refresh"-->
-<!--        style="@style/Widget.MaterialComponents.FloatingActionButton"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="bottom|start"-->
-<!--        android:layout_margin="16dp"-->
-<!--        android:src="@drawable/common_google_signin_btn_icon_dark" />-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/expenses_list_refresh"
+        style="@style/Widget.MaterialComponents.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:src="@drawable/common_google_signin_btn_icon_dark" />
 </FrameLayout>
