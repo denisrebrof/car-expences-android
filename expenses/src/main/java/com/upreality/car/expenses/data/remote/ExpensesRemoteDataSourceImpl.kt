@@ -1,12 +1,10 @@
 package com.upreality.car.expenses.data.remote
 
-import android.util.Log
-import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
-import com.upreality.car.expenses.data.local.expensesinfo.model.entities.ExpenseInfo
-import com.upreality.car.expenses.data.local.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
+import com.upreality.car.expenses.data.local.room.expensesinfo.ExpensesInfoLocalDataSource
+import com.upreality.car.expenses.data.local.room.expensesinfo.model.entities.ExpenseInfo
+import com.upreality.car.expenses.data.local.room.expensesinfo.model.queries.ExpenseInfoLocalIdFilter
 import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import com.upreality.car.expenses.data.remote.expensestate.dao.ExpenseStateRemoteDAO
 import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteState
 import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteStateFilter
@@ -73,11 +71,6 @@ class ExpensesRemoteDataSourceImpl @Inject constructor(
                     .get(it)
                     .firstElement()
                     .map(List<ExpenseRemoteState>::firstOrNull)
-                    .doOnError {
-                        Log.d("Gotcha","")
-                    }.doOnSuccess {
-                        Log.d("Gotcha 2","")
-                    }
             }.ignoreElement()
     }
 }

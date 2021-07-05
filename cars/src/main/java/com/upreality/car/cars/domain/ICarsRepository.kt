@@ -6,10 +6,10 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 
 interface ICarsRepository {
-    fun getCars(): Flowable<List<Car>>
-    fun create(car: Car): Maybe<Long>
+    fun create(car: Car): Completable
     fun updateCar(car: Car): Completable
     fun deleteCar(car: Car): Completable
+    fun getCars(): Flowable<List<Car>>
     //TODO: no car case processing
     fun getCar(carId: Long): Flowable<Car>
 }

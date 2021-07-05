@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.data.repository
 
 import android.util.Log
-import com.upreality.car.expenses.data.local.expenses.converters.RoomExpenseFilterConverter
+import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense

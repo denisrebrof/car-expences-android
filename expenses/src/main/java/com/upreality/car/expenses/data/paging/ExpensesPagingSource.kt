@@ -6,6 +6,8 @@ import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class ExpensesPagingSource @Inject constructor(
@@ -14,19 +16,25 @@ class ExpensesPagingSource @Inject constructor(
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Expense>> {
         // Start refresh at page 1 if undefined.
-        val nextPage = params.key ?: 1
-        val response = ExpenseFilter.Paged(nextPage, params.loadSize).let(repository::get)
+        val key = params.key ?: 0
+        val response = ExpenseFilter.Paged(key.toLong(), params.loadSize).let(repository::get)
 
-        return response.firstElement().toSingle().map { expensesList ->
-            LoadResult.Page(
-                data = expensesList,
-                prevKey = if (nextPage == 1) null else nextPage - 1,
-                nextKey = if (expensesList.isEmpty()) null else nextPage + 1
-            )
-        }
+        return response
+            .firstElement()
+            .toSingle()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { expensesList ->
+                var prevKey = if (key == 0) null else (key - params.loadSize).coerceAtLeast(0)
+                if(prevKey == 0){
+                    prevKey = null
+                }
+                val nextKey = if (expensesList.size < params.loadSize) null else key + params.loadSize
+                LoadResult.Page(expensesList, prevKey, nextKey)
+            }
     }
 
     override fun getRefreshKey(state: PagingState<Int, Expense>): Int? {
-        return state.anchorPosition
+        return 0
     }
 }

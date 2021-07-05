@@ -3,11 +3,13 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs.kotlin'
+    id 'realm-android'
 }
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         minSdkVersion 21
@@ -18,11 +20,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
-    
+
     buildFeatures {
         viewBinding true
     }
-
 
     buildTypes {
         release {
@@ -30,6 +31,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    realm {
+        syncEnabled = true
+    }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -44,20 +50,39 @@ dependencies {
     implementation rootProject.ext.kotlin_stdlib
     implementation rootProject.ext.core_ktx
     implementation rootProject.ext.appcompat
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation rootProject.ext.material
     implementation rootProject.ext.constraintlayout
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation rootProject.ext.junit_test
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core
 
     //Hilt - DI framework
-    implementation 'com.google.dagger:hilt-android:2.33-beta'
-    kapt 'com.google.dagger:hilt-android-compiler:2.33-beta'
+    implementation rootProject.ext.hilt_android
+    kapt rootProject.ext.hilt_android_compiler_kapt
 
     //ViewModel
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
+    implementation rootProject.ext.viewmodel_ktx
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
 
-    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+    //Google OAuth
+    implementation rootProject.ext.google_auth
+
+    implementation rootProject.ext.retrofit
+    implementation rootProject.ext.retrofit_rxjava
+    implementation rootProject.ext.retrofit_converter_gson
+
+    //RxJava2ac
+    implementation rootProject.ext.rxjava
+    implementation rootProject.ext.rxandroid
+
+    //Navigation
+    implementation rootProject.ext.navigation_fragment_ktx
+    implementation rootProject.ext.navigation_ui_ktx
+
+    implementation rootProject.ext.disposer
+
+    dependencies {
+        implementation project(":uikit")
+    }
 }

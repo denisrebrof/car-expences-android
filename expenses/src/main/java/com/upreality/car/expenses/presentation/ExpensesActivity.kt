@@ -3,10 +3,9 @@ package com.upreality.car.expenses.presentation
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.upreality.car.expenses.data.local.expensesinfo.ExpensesInfoLocalDataSource
+import com.upreality.car.expenses.data.local.room.expensesinfo.ExpensesInfoLocalDataSource
 import com.upreality.car.expenses.data.remote.ExpensesRemoteDAO
 import com.upreality.car.expenses.data.remote.expenseoperations.dao.ExpenseOperationRemoteDAO
-import com.upreality.car.expenses.data.remote.expenseoperations.model.filters.ExpenseRemoteOperationFilter
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
 import com.upreality.car.expenses.databinding.ActivityExpencesBinding
@@ -73,7 +72,7 @@ class ExpensesActivity : AppCompatActivity() {
         repository
             .get(ExpenseFilter.All)
             .observeOn(mainThread())
-            .doOnError() {
+            .doOnError {
                 Log.e("Get", "Event WTF???")
             }.doOnTerminate {
                 Log.e("Get", "Terminate")
@@ -129,12 +128,11 @@ class ExpensesActivity : AppCompatActivity() {
     }
 
     private fun getIncreasedExpense(expense: Expense): Expense {
-        val updated = when (expense) {
+        return when (expense) {
             is Expense.Fuel -> expense.copy(cost = 16f)
             is Expense.Maintenance -> expense.copy(cost = 16f)
             is Expense.Fine -> expense.copy(cost = 16f)
         }.apply { id = expense.id }
-        return updated
     }
 
     private fun executeCreation() {

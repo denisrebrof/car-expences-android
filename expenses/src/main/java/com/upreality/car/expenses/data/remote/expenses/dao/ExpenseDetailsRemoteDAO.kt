@@ -1,7 +1,6 @@
 package com.upreality.car.expenses.data.remote.expenses.dao
 
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.upreality.car.expenses.data.remote.expenses.model.entities.ExpenseDetailsRemote
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter
 import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseDetailsRemoteFilter.All
