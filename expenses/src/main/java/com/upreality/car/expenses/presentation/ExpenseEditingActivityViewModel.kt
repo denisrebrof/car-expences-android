@@ -1,10 +1,11 @@
 package com.upreality.car.expenses.presentation
 
-import android.text.Editable
 import androidx.lifecycle.ViewModel
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.processors.BehaviorProcessor
@@ -18,33 +19,56 @@ class ExpenseEditingActivityViewModel @Inject constructor(
     private val expensesInteractor: IExpensesInteractor
 ) : ViewModel() {
 
-    private val viewStateFlow = BehaviorProcessor.create<ExpenseEditingViewState>()
+    private val viewStateFlow = ExpenseEditingViewState(
+        false,
+        ExpenseEditingInputState()
+    ).let { BehaviorProcessor.createDefault(it) }
     private val currentInputState = viewStateFlow.value?.inputState
 
-    fun getInputStateFlow(): Flowable<ExpenseEditingViewState> = viewStateFlow
+    fun getViewStateFlow(): Flowable<ExpenseEditingViewState> = viewStateFlow
 
-    fun setCostInput(editable: Editable) {
-        checkFloatInput(editable).let { inputState ->
+    fun setCostInput(text: String) {
+        checkFloatInput(text).let { inputState ->
             currentInputState
                 ?.copy(costInputState = inputState)
                 ?.let(this::updateInputState)
         }
     }
 
-    fun setLitersInput(editable: Editable) {
-        checkFloatInput(editable).let { inputState ->
+    fun setLitersInput(text: String) {
+        checkFloatInput(text).let { inputState ->
             currentInputState
                 ?.copy(litersInputState = inputState)
                 ?.let(this::updateInputState)
         }
     }
 
-    fun setMileageInput(editable: Editable) {
-        checkFloatInput(editable).let { inputState ->
+    fun setMileageInput(text: String) {
+        checkFloatInput(text).let { inputState ->
             currentInputState
                 ?.copy(mileageInputState = inputState)
                 ?.let(this::updateInputState)
         }
+    }
+
+    fun getExpense(expenseId: Long): Maybe<Expense> {
+        return expensesInteractor
+            .getExpensesFlow(ExpenseFilter.Id(expenseId))
+            .firstElement()
+            .filter(List<Expense>::isNotEmpty)
+            .map(List<Expense>::first)
+    }
+
+    fun updateExpense(expenseId: Long): Maybe<Result<Unit>> {
+        val viewState = viewStateFlow.value
+            ?: return Result.failure<Unit>(NullPointerException()).let { Maybe.just(it) }
+
+        return getExpenseFromInput(viewState.inputState).getOrNull()
+            ?.also { it.id = expenseId }
+            ?.let(expensesInteractor::updateExpense)
+            ?.toMaybe<Result<Unit>>()
+            ?.onErrorReturn { Result.failure(it) }
+            ?: Result.success(Unit).let { Maybe.just(it) }
     }
 
     fun createExpense(): Maybe<Result<Unit>> {
@@ -54,7 +78,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
         return getExpenseFromInput(viewState.inputState).getOrNull()
             ?.let(expensesInteractor::createExpense)
             ?.toMaybe<Result<Unit>>()
-            ?.onErrorReturn { Result.failure<Unit>(it) }
+            ?.onErrorReturn { Result.failure(it) }
             ?: Result.success(Unit).let { Maybe.just(it) }
     }
 
@@ -76,11 +100,11 @@ class ExpenseEditingActivityViewModel @Inject constructor(
         ExpenseEditingViewState(inputStateValid, inputState).let(viewStateFlow::onNext)
     }
 
-    private fun checkFloatInput(editable: Editable): InputState<Float> {
+    private fun checkFloatInput(text: String): InputState<Float> {
         return when {
-            editable.isEmpty() -> InputState.Empty
-            editable.toString().toFloatOrNull() == null -> InputState.Invalid()
-            else -> InputState.Valid(editable.toString().toFloat())
+            text.isEmpty() -> InputState.Empty
+            text.toFloatOrNull() == null -> InputState.Invalid("Invalid input")
+            else -> InputState.Valid(text.toFloat())
         }
     }
 }

@@ -34,9 +34,10 @@ class ExpensesListFragment : Fragment() {
         //TODO: implement with di
         val provider = requireContext().let(::ExpensesListAdapterExpenseTypeDataProviderImpl)
         adapter = ExpensesListAdapter(provider) { clickedExpense ->
-            viewModel.deleteExpense(clickedExpense).subscribe({}) { error ->
-                Log.e("Error", "Delete expense error: $error")
-            }.disposeBy(lifecycle.disposers.onDestroy)
+//            viewModel.deleteExpense(clickedExpense).subscribe({}) { error ->
+//                Log.e("Error", "Delete expense error: $error")
+//            }.disposeBy(lifecycle.disposers.onDestroy)
+            ExpenseEditingActivity.openInEditMode(requireContext(), clickedExpense.id)
         }
         adapter.stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
     }
@@ -81,7 +82,7 @@ class ExpensesListFragment : Fragment() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    Log.d("","Created")
+                    Log.d("", "Created")
                 }) {
                     Log.e("Create Error", it.toString())
                 }.disposeBy(lifecycle.disposers.onStop)
@@ -95,7 +96,7 @@ class ExpensesListFragment : Fragment() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                Log.d("","Get $it exp")
+                Log.d("", "Get $it exp")
             }) {
                 Log.e("Get All Error", it.toString())
             }.disposeBy(lifecycle.disposers.onStop)
