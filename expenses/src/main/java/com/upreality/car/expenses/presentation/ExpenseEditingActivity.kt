@@ -3,14 +3,16 @@ package com.upreality.car.expenses.presentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
+import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
@@ -61,6 +63,13 @@ class ExpenseEditingActivity : AppCompatActivity() {
         (selectedExpenseState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
             ?.let(this::setupSelectedExpense)
+        binding.applyButton.text = when (selectedExpenseState) {
+            is SelectedExpenseState.Defined -> "Update Expense"
+            is SelectedExpenseState.NotDefined -> "Create Expense"
+        }
+        binding.deleteButton.isVisible = selectedExpenseState is SelectedExpenseState.Defined
+        binding.applyButton.setOnClickListener(this::onCreateOrUpdateClicked)
+        binding.deleteButton.setOnClickListener(this::onDeleteClicked)
     }
 
     override fun onStart() {
@@ -68,9 +77,8 @@ class ExpenseEditingActivity : AppCompatActivity() {
         viewModel.getViewStateFlow()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(this::applyViewState) {
-                Log.e(this.localClassName, "Error while get view state: $it")
-            }.disposeBy(lifecycle.disposers.onStop)
+            .subscribeWithLogError(this::applyViewState)
+            .disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun applyViewState(viewState: ExpenseEditingViewState) {
@@ -84,12 +92,27 @@ class ExpenseEditingActivity : AppCompatActivity() {
         binding.applyButton.isEnabled = viewState.isValid
     }
 
+    private fun onDeleteClicked(v: View) {
+        val definedState = (selectedExpenseState as? SelectedExpenseState.Defined) ?: return
+        definedState
+            .let(SelectedExpenseState.Defined::id)
+            .let(viewModel::deleteExpense)
+            .subscribeWithLogError { finish() }
+            .disposeBy(lifecycle.disposers.onDestroy)
+    }
+
+    private fun onCreateOrUpdateClicked(v: View) {
+        when (val selectedState = selectedExpenseState) {
+            is SelectedExpenseState.Defined -> viewModel.updateExpense(selectedState.id)
+            is SelectedExpenseState.NotDefined -> viewModel.createExpense()
+        }
+    }
+
     private fun setupSelectedExpense(expenseId: Long) {
         viewModel.getExpense(expenseId)
             .subscribeOn(Schedulers.io())
-            .subscribe(this::setupExpense) {
-                Log.e(this.localClassName, "Error while setup expense: $it")
-            }.disposeBy(lifecycle.disposers.onDestroy)
+            .subscribeWithLogError(this::setupExpense)
+            .disposeBy(lifecycle.disposers.onDestroy)
     }
 
     private fun setupExpense(expense: Expense) {

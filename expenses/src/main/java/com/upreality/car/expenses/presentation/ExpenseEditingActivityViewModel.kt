@@ -5,7 +5,6 @@ import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.processors.BehaviorProcessor
@@ -23,13 +22,14 @@ class ExpenseEditingActivityViewModel @Inject constructor(
         false,
         ExpenseEditingInputState()
     ).let { BehaviorProcessor.createDefault(it) }
-    private val currentInputState = viewStateFlow.value?.inputState
+
+    private fun getCurrentInputState() = viewStateFlow.value?.inputState
 
     fun getViewStateFlow(): Flowable<ExpenseEditingViewState> = viewStateFlow
 
     fun setCostInput(text: String) {
         checkFloatInput(text).let { inputState ->
-            currentInputState
+            getCurrentInputState()
                 ?.copy(costInputState = inputState)
                 ?.let(this::updateInputState)
         }
@@ -37,7 +37,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
 
     fun setLitersInput(text: String) {
         checkFloatInput(text).let { inputState ->
-            currentInputState
+            getCurrentInputState()
                 ?.copy(litersInputState = inputState)
                 ?.let(this::updateInputState)
         }
@@ -45,7 +45,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
 
     fun setMileageInput(text: String) {
         checkFloatInput(text).let { inputState ->
-            currentInputState
+            getCurrentInputState()
                 ?.copy(mileageInputState = inputState)
                 ?.let(this::updateInputState)
         }
@@ -58,6 +58,16 @@ class ExpenseEditingActivityViewModel @Inject constructor(
             .filter(List<Expense>::isNotEmpty)
             .map(List<Expense>::first)
     }
+
+    fun deleteExpense(expenseId: Long): Maybe<Result<Unit>> {
+        val stubExpense = Expense.Fuel(Date(), 0f, 0f, 0f).apply { id = expenseId }
+        return stubExpense
+            .also { it.id = expenseId }
+            .let(expensesInteractor::deleteExpense)
+            .andThen(Maybe.just(Result.success(Unit)))
+            .onErrorReturn { Result.failure(it) }
+    }
+
 
     fun updateExpense(expenseId: Long): Maybe<Result<Unit>> {
         val viewState = viewStateFlow.value
@@ -103,7 +113,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
     private fun checkFloatInput(text: String): InputState<Float> {
         return when {
             text.isEmpty() -> InputState.Empty
-            text.toFloatOrNull() == null -> InputState.Invalid("Invalid input")
+            text.toFloatOrNull() == null || text.toFloat() > 3 -> InputState.Invalid("Invalid input")
             else -> InputState.Valid(text.toFloat())
         }
     }

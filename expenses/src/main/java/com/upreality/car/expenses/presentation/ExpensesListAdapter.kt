@@ -40,6 +40,8 @@ class ExpensesListAdapter(
         }
     }
 
+    fun getItemByPosition(position: Int) = getItem(position)
+
     inner class ViewHolder(
         val binding: ExpenseListItemBinding
     ) : RecyclerView.ViewHolder(binding.root)
