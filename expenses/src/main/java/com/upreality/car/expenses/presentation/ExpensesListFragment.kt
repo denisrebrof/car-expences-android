@@ -57,12 +57,12 @@ class ExpensesListFragment : Fragment() {
                 adapter.submitData(lifecycle, it)
                 requireBinding.list.scheduleLayoutAnimation()
             }.disposeBy(lifecycle.disposers.onDestroy)
-        viewModel.getRefreshFlow()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWithLogError {
-//            layoutManager.scrollToPosition(0)
-        }.disposeBy(lifecycle.disposers.onDestroy)
+//        viewModel.getRefreshFlow()
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .subscribeWithLogError {
+////            layoutManager.scrollToPosition(0)
+//        }.disposeBy(lifecycle.disposers.onDestroy)
         return requireBinding.root
 
 //        conversationAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
@@ -88,7 +88,7 @@ class ExpensesListFragment : Fragment() {
         }
 
         requireBinding.expensesListRefresh.setOnClickListener {
-            viewModel.refresh()
+            adapter.refresh()
         }
 
         viewModel.getExpensesCountFlow()

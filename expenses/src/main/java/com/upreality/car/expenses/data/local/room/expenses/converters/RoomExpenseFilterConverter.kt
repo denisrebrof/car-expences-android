@@ -4,6 +4,7 @@ import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseEmptyFilter
 import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseTypeFilter
 import com.upreality.car.common.data.database.IDatabaseFilter
+import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseIdFilter
 import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseTimePaginatedFilter
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 
@@ -19,6 +20,7 @@ object RoomExpenseFilterConverter {
                 filter.cursor.coerceAtLeast(0),
                 filter.pageSize
             )
+            is ExpenseFilter.Id -> ExpenseIdFilter(filter.id)
         }
     }
 

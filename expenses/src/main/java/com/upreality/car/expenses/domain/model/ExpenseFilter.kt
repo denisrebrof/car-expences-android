@@ -6,4 +6,5 @@ sealed class ExpenseFilter {
     object Maintenance : ExpenseFilter()
     object Fuel : ExpenseFilter()
     data class Paged(val cursor: Long, val pageSize: Int) : ExpenseFilter()
+    data class Id(val id: Long) : ExpenseFilter()
 }

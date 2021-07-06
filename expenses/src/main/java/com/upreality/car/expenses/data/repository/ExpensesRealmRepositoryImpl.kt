@@ -42,6 +42,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
             ExpenseFilter.Fuel -> filterQueryByType(expensesQuery, ExpenseType.Fuel)
             ExpenseFilter.Maintenance -> filterQueryByType(expensesQuery, ExpenseType.Maintenance)
             is ExpenseFilter.Paged -> expensesQuery
+            is ExpenseFilter.Id -> expensesQuery.equalTo(ExpenseRealmFields._ID, filter.id)
         }.findAllAsync()
             .asFlowable()
             .filter(RealmResults<ExpenseRealm>::isLoaded)

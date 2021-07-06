@@ -3,13 +3,16 @@
     package="com.upreality.car.expenses">
 
     <application>
+        <activity android:name=".presentation.ExpenseEditingActivity"></activity>
         <activity
             android:name=".presentation.ExpensesActivity"
             android:theme="@style/AppTheme">
             <intent-filter>
-<!--                 <action android:name="android.intent.action.MAIN" />-->
-<!--                 <category android:name="android.intent.category.LAUNCHER" />-->
+
+                <!-- <action android:name="android.intent.action.MAIN" /> -->
+                <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
                 <action android:name=".presentation.ExpensesActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
