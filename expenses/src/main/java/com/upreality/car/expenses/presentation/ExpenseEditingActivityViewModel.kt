@@ -76,7 +76,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
         return getExpenseFromInput(viewState.inputState).getOrNull()
             ?.also { it.id = expenseId }
             ?.let(expensesInteractor::updateExpense)
-            ?.toMaybe<Result<Unit>>()
+            ?.andThen(Maybe.just(Result.success(Unit)))
             ?.onErrorReturn { Result.failure(it) }
             ?: Result.success(Unit).let { Maybe.just(it) }
     }
@@ -87,7 +87,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
 
         return getExpenseFromInput(viewState.inputState).getOrNull()
             ?.let(expensesInteractor::createExpense)
-            ?.toMaybe<Result<Unit>>()
+            ?.andThen(Maybe.just(Result.success(Unit)))
             ?.onErrorReturn { Result.failure(it) }
             ?: Result.success(Unit).let { Maybe.just(it) }
     }
@@ -113,7 +113,7 @@ class ExpenseEditingActivityViewModel @Inject constructor(
     private fun checkFloatInput(text: String): InputState<Float> {
         return when {
             text.isEmpty() -> InputState.Empty
-            text.toFloatOrNull() == null || text.toFloat() > 3 -> InputState.Invalid("Invalid input")
+            text.toFloatOrNull() == null -> InputState.Invalid("Invalid input")
             else -> InputState.Valid(text.toFloat())
         }
     }

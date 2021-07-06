@@ -17,8 +17,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityMainBinding
-    lateinit var navController: NavController
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     //TODO: move to global scope
     @Inject

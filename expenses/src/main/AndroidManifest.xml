@@ -3,10 +3,12 @@
     package="com.upreality.car.expenses">
 
     <application>
-        <activity android:name=".presentation.ExpenseEditingActivity"></activity>
+        <activity
+            android:name=".presentation.ExpenseEditingActivity"
+            android:theme="@style/AppThemeM" />
         <activity
             android:name=".presentation.ExpensesActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppThemeM">
             <intent-filter>
 
                 <!-- <action android:name="android.intent.action.MAIN" /> -->

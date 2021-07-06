@@ -102,10 +102,13 @@ class ExpenseEditingActivity : AppCompatActivity() {
     }
 
     private fun onCreateOrUpdateClicked(v: View) {
-        when (val selectedState = selectedExpenseState) {
+        val actionMaybe = when (val selectedState = selectedExpenseState) {
             is SelectedExpenseState.Defined -> viewModel.updateExpense(selectedState.id)
             is SelectedExpenseState.NotDefined -> viewModel.createExpense()
         }
+        actionMaybe.subscribeWithLogError {
+            finish()
+        }.disposeBy(lifecycle.disposers.onDestroy)
     }
 
     private fun setupSelectedExpense(expenseId: Long) {

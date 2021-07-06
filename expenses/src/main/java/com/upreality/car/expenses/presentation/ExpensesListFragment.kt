@@ -51,7 +51,7 @@ class ExpensesListFragment : Fragment() {
         binding = FragmentExpensesListBinding.inflate(inflater, container, false)
         layoutManager = LinearLayoutManager(context).also(requireBinding.list::setLayoutManager)
         requireBinding.list.adapter = adapter
-//        getItemTouchHelper().attachToRecyclerView(requireBinding.list)
+        getItemTouchHelper().attachToRecyclerView(requireBinding.list)
 
         viewModel
             .getExpensesFlow()
@@ -90,14 +90,15 @@ class ExpensesListFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         requireBinding.expensesListFab.setOnClickListener {
-            viewModel.createDebugExpense()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    Log.d("", "Created")
-                }) {
-                    Log.e("Create Error", it.toString())
-                }.disposeBy(lifecycle.disposers.onStop)
+//            viewModel.createDebugExpense()
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe({
+//                    Log.d("", "Created")
+//                }) {
+//                    Log.e("Create Error", it.toString())
+//                }.disposeBy(lifecycle.disposers.onStop)
+            activity?.let(ExpenseEditingActivity::openInCreateMode)
         }
 
         requireBinding.expensesListRefresh.setOnClickListener {
