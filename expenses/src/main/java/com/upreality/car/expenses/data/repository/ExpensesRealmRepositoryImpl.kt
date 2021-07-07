@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.data.repository
 
+import android.util.Log
 import com.upreality.car.common.data.SyncedRealmProvider
 import com.upreality.car.expenses.data.realm.model.ExpenseRealm
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmConverter
@@ -26,9 +27,13 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         return Completable.fromAction {
             val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
-            val dataModel = ExpenseRealmConverter.fromDomain(expense, realm)
-            realm.copyToRealmOrUpdate(dataModel)
-            realm.commitTransaction()
+            try {
+                val dataModel = ExpenseRealmConverter.fromDomain(expense)
+                realm.insertOrUpdate(dataModel)
+                realm.commitTransaction()
+            } catch (exception: Exception) {
+                Log.e("", "Error while create expense: $exception")
+            }
             realm.close()
         }
     }
@@ -82,9 +87,13 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         return Completable.fromAction {
             val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
-            val dataModel = ExpenseRealmConverter.fromDomain(expense, realm)
-            realm.copyToRealmOrUpdate(dataModel)
-            realm.commitTransaction()
+            try {
+                val dataModel = ExpenseRealmConverter.fromDomain(expense)
+                realm.insertOrUpdate(dataModel)
+                realm.commitTransaction()
+            } catch (exception: Exception) {
+                Log.e("", "Error while update expense: $exception")
+            }
             realm.close()
         }
     }
@@ -93,11 +102,15 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         return Completable.fromAction {
             val realm = realmProvider.getRealmInstance()
             realm.beginTransaction()
-            realm.where(ExpenseRealm::class.java)
-                .equalTo(ExpenseRealmFields._ID, expense.id)
-                .findFirst()
-                ?.deleteFromRealm()
-            realm.commitTransaction()
+            try {
+                realm.where(ExpenseRealm::class.java)
+                    .equalTo(ExpenseRealmFields._ID, expense.id)
+                    .findFirst()
+                    ?.deleteFromRealm()
+                realm.commitTransaction()
+            } catch (exception: Exception) {
+                Log.e("", "Error while delete expense: $exception")
+            }
             realm.close()
         }
     }

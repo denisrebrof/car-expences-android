@@ -2,16 +2,14 @@ package com.upreality.car.expenses.data.realm.model
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.expence.Expense
-import io.realm.Realm
 
 object ExpenseRealmConverter {
-    fun fromDomain(expense: Expense, realm: Realm): ExpenseRealm {
-        val dataModel = realm
-            .createObject(ExpenseRealm::class.java, expense.id)
-            .apply {
-                cost = expense.cost
-                date = expense.date
-            }
+    fun fromDomain(expense: Expense): ExpenseRealm {
+        val dataModel = ExpenseRealm().apply {
+            _id = expense.id
+            cost = expense.cost
+            date = expense.date
+        }
         when (expense) {
             is Expense.Fine -> {
                 dataModel.type = ExpenseType.Fines

@@ -3,7 +3,6 @@ package com.upreality.car.expenses.presentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -63,16 +62,12 @@ class ExpenseEditingActivity : AppCompatActivity() {
         binding.costEt.addAfterTextChangedListener(viewModel::setCostInput)
         binding.litersEt.addAfterTextChangedListener(viewModel::setLitersInput)
         binding.mileageEt.addAfterTextChangedListener(viewModel::setMileageInput)
+        binding.mileageEt.setOnEditorActionListener(lastFieldListener)
         (selectedExpenseState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
             ?.let(this::setupSelectedExpense)
 
-        binding.mileageEt.setOnEditorActionListener { view, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_NEXT)
-                onCreateOrUpdateClicked(view)
 
-            return@setOnEditorActionListener actionId == EditorInfo.IME_ACTION_NEXT
-        }
         binding.applyButton.text = when (selectedExpenseState) {
             is SelectedExpenseState.Defined -> "Update Expense"
             is SelectedExpenseState.NotDefined -> "Create Expense"
@@ -116,9 +111,11 @@ class ExpenseEditingActivity : AppCompatActivity() {
             is SelectedExpenseState.Defined -> viewModel.updateExpense(selectedState.id)
             is SelectedExpenseState.NotDefined -> viewModel.createExpense()
         }
-        actionMaybe.subscribeWithLogError {
-            finish()
-        }.disposeBy(lifecycle.disposers.onDestroy)
+        actionMaybe
+            .subscribeOn(Schedulers.io())
+            .subscribeWithLogError {
+                finish()
+            }.disposeBy(lifecycle.disposers.onDestroy)
     }
 
     private fun setupSelectedExpense(expenseId: Long) {
@@ -136,13 +133,11 @@ class ExpenseEditingActivity : AppCompatActivity() {
         }
     }
 
-    private object lastFieldListener: TextView.OnEditorActionListener {
-        override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-            if (actionId == EditorInfo.IME_ACTION_NEXT)
-                onCreateOrUpdateClicked(view)
+    private val lastFieldListener = TextView.OnEditorActionListener { view, actionId, event ->
+        if (actionId == EditorInfo.IME_ACTION_DONE)
+            onCreateOrUpdateClicked(view)
 
-            return actionId == EditorInfo.IME_ACTION_NEXT
-        }
+        actionId == EditorInfo.IME_ACTION_NEXT
     }
 
     private sealed class SelectedExpenseState {
