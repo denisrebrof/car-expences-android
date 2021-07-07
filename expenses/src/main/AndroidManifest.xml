@@ -5,7 +5,8 @@
     <application>
         <activity
             android:name=".presentation.ExpenseEditingActivity"
-            android:theme="@style/AppThemeM" />
+            android:theme="@style/AppThemeM"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".presentation.ExpensesActivity"
             android:theme="@style/AppThemeM">
@@ -14,7 +15,6 @@
                 <!-- <action android:name="android.intent.action.MAIN" /> -->
                 <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
                 <action android:name=".presentation.ExpensesActivity" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

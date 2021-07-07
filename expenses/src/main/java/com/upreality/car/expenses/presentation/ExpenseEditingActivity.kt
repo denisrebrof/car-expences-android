@@ -3,8 +3,11 @@ package com.upreality.car.expenses.presentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -63,6 +66,13 @@ class ExpenseEditingActivity : AppCompatActivity() {
         (selectedExpenseState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
             ?.let(this::setupSelectedExpense)
+
+        binding.mileageEt.setOnEditorActionListener { view, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_NEXT)
+                onCreateOrUpdateClicked(view)
+
+            return@setOnEditorActionListener actionId == EditorInfo.IME_ACTION_NEXT
+        }
         binding.applyButton.text = when (selectedExpenseState) {
             is SelectedExpenseState.Defined -> "Update Expense"
             is SelectedExpenseState.NotDefined -> "Create Expense"
@@ -123,6 +133,15 @@ class ExpenseEditingActivity : AppCompatActivity() {
         (expense as? Expense.Fuel)?.let { fuelExpense ->
             fuelExpense.liters.toString().let(binding.litersEt::setText)
             fuelExpense.mileage.toString().let(binding.mileageEt::setText)
+        }
+    }
+
+    private object lastFieldListener: TextView.OnEditorActionListener {
+        override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+            if (actionId == EditorInfo.IME_ACTION_NEXT)
+                onCreateOrUpdateClicked(view)
+
+            return actionId == EditorInfo.IME_ACTION_NEXT
         }
     }
 
