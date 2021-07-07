@@ -1,9 +1,11 @@
 package com.upreality.car.expenses.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
+import com.upreality.car.expenses.presentation.ExpenseEditingActivity.Companion.EXPENSE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -14,9 +16,16 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class ExpenseEditingActivityViewModel @Inject constructor(
-    private val expensesInteractor: IExpensesInteractor
+class ExpenseEditingViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val expensesInteractor: IExpensesInteractor,
 ) : ViewModel() {
+
+    val selectedState: SelectedExpenseState by lazy {
+        savedStateHandle.get<Long>(EXPENSE_ID)
+            ?.let(SelectedExpenseState::Defined)
+            ?: SelectedExpenseState.NotDefined
+    }
 
     private val viewStateFlow = ExpenseEditingViewState(
         false,
@@ -59,8 +68,11 @@ class ExpenseEditingActivityViewModel @Inject constructor(
             .map(List<Expense>::first)
     }
 
-    fun deleteExpense(expenseId: Long): Maybe<Result<Unit>> {
-        val stubExpense = Expense.Fuel(Date(), 0f, 0f, 0f).apply { id = expenseId }
+    fun deleteExpense(): Maybe<Result<Unit>> {
+        val stubExpense = Expense.Fuel(Date(), 0f, 0f, 0f)
+        val expenseId = (selectedState as? SelectedExpenseState.Defined)
+            ?.id
+            ?: return Maybe.just(Result.failure(java.lang.NullPointerException()))
         return stubExpense
             .also { it.id = expenseId }
             .let(expensesInteractor::deleteExpense)
@@ -68,11 +80,12 @@ class ExpenseEditingActivityViewModel @Inject constructor(
             .onErrorReturn { Result.failure(it) }
     }
 
-
-    fun updateExpense(expenseId: Long): Maybe<Result<Unit>> {
+    fun updateExpense(): Maybe<Result<Unit>> {
         val viewState = viewStateFlow.value
             ?: return Result.failure<Unit>(NullPointerException()).let { Maybe.just(it) }
-
+        val expenseId = (selectedState as? SelectedExpenseState.Defined)
+            ?.id
+            ?: return Maybe.just(Result.failure(java.lang.NullPointerException()))
         return getExpenseFromInput(viewState.inputState).getOrNull()
             ?.also { it.id = expenseId }
             ?.let(expensesInteractor::updateExpense)
@@ -129,3 +142,8 @@ data class ExpenseEditingInputState(
     val litersInputState: InputState<Float> = InputState.Empty,
     val mileageInputState: InputState<Float> = InputState.Empty,
 )
+
+sealed class SelectedExpenseState {
+    object NotDefined : SelectedExpenseState()
+    data class Defined(val id: Long) : SelectedExpenseState()
+}

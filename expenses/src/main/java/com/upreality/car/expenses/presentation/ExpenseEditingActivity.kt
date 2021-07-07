@@ -4,12 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.expence.Expense
@@ -22,14 +21,14 @@ import io.sellmair.disposer.disposers
 import presentation.InputState
 import presentation.addAfterTextChangedListener
 import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as ViewBinding
-import com.upreality.car.expenses.presentation.ExpenseEditingActivityViewModel as ViewModel
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel as ViewModel
 
 @AndroidEntryPoint
 class ExpenseEditingActivity : AppCompatActivity() {
 
     companion object {
 
-        private const val EXPENSE_ID = "EXPENSE_ID"
+        const val EXPENSE_ID = "EXPENSE_ID"
 
         fun openInEditMode(context: Context, expenseId: Long) {
             val intent = Intent(context, ExpenseEditingActivity::class.java)
@@ -46,33 +45,27 @@ class ExpenseEditingActivity : AppCompatActivity() {
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ViewModel by viewModels()
 
-    private val selectedExpenseState: SelectedExpenseState by lazy {
-        intent.extras?.getLong(EXPENSE_ID)
-            ?.let(SelectedExpenseState::Defined)
-            ?: SelectedExpenseState.NotDefined
-    }
-
-    private val defaultFieldError: String by lazy {
-        "Invalid input 2"
-    }
+    private val defaultFieldError: String = "Invalid input 2"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
         binding.costEt.addAfterTextChangedListener(viewModel::setCostInput)
-        binding.litersEt.addAfterTextChangedListener(viewModel::setLitersInput)
-        binding.mileageEt.addAfterTextChangedListener(viewModel::setMileageInput)
-        binding.mileageEt.setOnEditorActionListener(lastFieldListener)
-        (selectedExpenseState as? SelectedExpenseState.Defined)
+        (viewModel.selectedState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
             ?.let(this::setupSelectedExpense)
 
+        val navHostId = binding.expenseDetailsContainer.id
+        val navHostFragment = supportFragmentManager.findFragmentById(navHostId) as NavHostFragment
+        val navController = navHostFragment.navController
+        binding.button1.setOnClickListener { navController.navigate(R.id.action_global_expenseEditingFuelFragment) }
+        binding.button2.setOnClickListener { navController.navigate(R.id.action_global_expenseEditingFineFragment) }
 
-        binding.applyButton.text = when (selectedExpenseState) {
+        binding.applyButton.text = when (viewModel.selectedState) {
             is SelectedExpenseState.Defined -> "Update Expense"
             is SelectedExpenseState.NotDefined -> "Create Expense"
         }
-        binding.deleteButton.isVisible = selectedExpenseState is SelectedExpenseState.Defined
+        binding.deleteButton.isVisible = viewModel.selectedState is SelectedExpenseState.Defined
         binding.applyButton.setOnClickListener(this::onCreateOrUpdateClicked)
         binding.deleteButton.setOnClickListener(this::onDeleteClicked)
     }
@@ -92,23 +85,18 @@ class ExpenseEditingActivity : AppCompatActivity() {
             editText.error = reason
         }
         setErrorIfDefined(viewState.inputState.costInputState, binding.costEt)
-        setErrorIfDefined(viewState.inputState.litersInputState, binding.litersEt)
-        setErrorIfDefined(viewState.inputState.mileageInputState, binding.mileageEt)
         binding.applyButton.isEnabled = viewState.isValid
     }
 
     private fun onDeleteClicked(v: View) {
-        val definedState = (selectedExpenseState as? SelectedExpenseState.Defined) ?: return
-        definedState
-            .let(SelectedExpenseState.Defined::id)
-            .let(viewModel::deleteExpense)
+        viewModel.deleteExpense()
             .subscribeWithLogError { finish() }
             .disposeBy(lifecycle.disposers.onDestroy)
     }
 
     private fun onCreateOrUpdateClicked(v: View) {
-        val actionMaybe = when (val selectedState = selectedExpenseState) {
-            is SelectedExpenseState.Defined -> viewModel.updateExpense(selectedState.id)
+        val actionMaybe = when (viewModel.selectedState) {
+            is SelectedExpenseState.Defined -> viewModel.updateExpense()
             is SelectedExpenseState.NotDefined -> viewModel.createExpense()
         }
         actionMaybe
@@ -127,21 +115,12 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     private fun setupExpense(expense: Expense) {
         expense.cost.toString().let(binding.costEt::setText)
-        (expense as? Expense.Fuel)?.let { fuelExpense ->
-            fuelExpense.liters.toString().let(binding.litersEt::setText)
-            fuelExpense.mileage.toString().let(binding.mileageEt::setText)
-        }
     }
 
-    private val lastFieldListener = TextView.OnEditorActionListener { view, actionId, event ->
-        if (actionId == EditorInfo.IME_ACTION_DONE)
-            onCreateOrUpdateClicked(view)
-
-        actionId == EditorInfo.IME_ACTION_NEXT
-    }
-
-    private sealed class SelectedExpenseState {
-        object NotDefined : SelectedExpenseState()
-        data class Defined(val id: Long) : SelectedExpenseState()
-    }
+//    private val lastFieldListener = TextView.OnEditorActionListener { view, actionId, event ->
+//        if (actionId == EditorInfo.IME_ACTION_DONE)
+//            onCreateOrUpdateClicked(view)
+//
+//        actionId == EditorInfo.IME_ACTION_NEXT
+//    }
 }

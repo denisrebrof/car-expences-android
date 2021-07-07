@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/expense_editing_navigation_graph"
+    app:startDestination="@id/expenseEditingFuelFieldsFragment">
+
+    <fragment
+        android:id="@+id/expenseEditingFuelFieldsFragment"
+        android:name="com.upreality.car.expenses.presentation.ExpenseEditingFuelFragment"
+        android:label="fragment_expense_editing_fuel_fields"
+        tools:layout="@layout/fragment_expense_editing_fuel" />
+    <fragment
+        android:id="@+id/expenseEditingFineFragment"
+        android:name="com.upreality.car.expenses.presentation.ExpenseEditingFineFragment"
+        android:label="ExpenseEditingFineFragment"
+        tools:layout="@layout/fragment_expense_editing_fine" />
+    <action
+        android:id="@+id/action_global_expenseEditingFineFragment"
+        app:destination="@id/expenseEditingFineFragment" />
+    <action
+        android:id="@+id/action_global_expenseEditingFuelFragment"
+        app:destination="@id/expenseEditingFuelFieldsFragment" />
+</navigation>

@@ -27,45 +27,42 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/liters_input_layout"
-        style="@style/Widget.TextInputLayout"
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggle_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:hint="Liters"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:checkedButton="@id/button1"
         app:layout_constraintTop_toBottomOf="@id/cost_input_layout"
-        app:startIconDrawable="@drawable/ic_fuel_half_filled">
+        app:selectionRequired="true"
+        app:singleSelection="true">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/liters_et"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/button1"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal" />
+            android:layout_weight="1"
+            android:text="Fuel" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+        <Button
+            android:id="@+id/button2"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Fine" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/mileage_input_layout"
-        style="@style/Widget.TextInputLayout"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/expense_details_container"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:hint="Mileage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/liters_input_layout"
-        app:startIconDrawable="@drawable/ic_hundred">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/mileage_et"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toggle_button"
+        app:navGraph="@navigation/expense_editing_navigation_graph" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/coordinator"
