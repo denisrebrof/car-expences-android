@@ -11,21 +11,30 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.processors.BehaviorProcessor
 import presentation.InputState
+import presentation.SavedStateHandleNullabeItem
+import presentation.SavedStateItem
 import java.security.InvalidParameterException
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseEditingViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    private val handle: SavedStateHandle,
     private val expensesInteractor: IExpensesInteractor,
 ) : ViewModel() {
 
     val selectedState: SelectedExpenseState by lazy {
-        savedStateHandle.get<Long>(EXPENSE_ID)
+        handle.get<Long>(EXPENSE_ID)
             ?.let(SelectedExpenseState::Defined)
             ?: SelectedExpenseState.NotDefined
     }
+
+    private var selected: Int by SavedStateItem(handle, "expenseType", )
+
+//    private val selectedType: BehaviorProcessor<Int> by SavedStateHandleItemProcessor(
+//        handle,
+//        "expenseType"
+//    )
 
     private val viewStateFlow = ExpenseEditingViewState(
         false,
