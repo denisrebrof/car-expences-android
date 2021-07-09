@@ -7,7 +7,7 @@ import com.upreality.car.common.data.database.RoomBaseDao
 import io.reactivex.Flowable
 
 @Dao
-interface ExpensesDao: RoomBaseDao<ExpenseEntity> {
+interface ExpensesDao : RoomBaseDao<ExpenseEntity> {
     @RawQuery(observedEntities = [ExpenseEntity::class])
     fun load(query: SupportSQLiteQuery): Flowable<List<ExpenseEntity>>
 }

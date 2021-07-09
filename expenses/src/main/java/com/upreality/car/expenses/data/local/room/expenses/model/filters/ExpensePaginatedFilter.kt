@@ -10,7 +10,7 @@ abstract class ExpensePaginatedFilter(private val cursor: Long, private val leng
 
     override fun getFilterExpression(): String {
         //TODO reimplement ascending/descending
-        val compareOperator = if(sortAscending) '>' else '<'
+        val compareOperator = if (sortAscending) '>' else '<'
         return "SELECT * FROM expenses" +
                 " ORDER BY $orderColumn" +
                 " LIMIT $length" +

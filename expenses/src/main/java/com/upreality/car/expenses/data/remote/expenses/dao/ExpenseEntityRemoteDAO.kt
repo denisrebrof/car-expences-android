@@ -49,9 +49,9 @@ class ExpenseEntityRemoteDAO @Inject constructor(
         return observeQueryRef(expensesCollection).map { snapshot ->
             snapshot.documents.map { document -> document.toObject(ExpenseEntityRemote::class.java)!! }
         }.doOnNext {
-            Log.d("","")
+            Log.d("", "")
         }.doOnError {
-            Log.d("","")
+            Log.d("", "")
         }
     }
 

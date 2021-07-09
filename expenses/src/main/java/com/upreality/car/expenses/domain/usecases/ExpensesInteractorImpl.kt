@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 class ExpensesInteractorImpl @Inject constructor(
     private val repository: IExpensesRepository
-): IExpensesInteractor {
+) : IExpensesInteractor {
 
     override fun createExpense(expense: Expense) = repository.create(expense)
 

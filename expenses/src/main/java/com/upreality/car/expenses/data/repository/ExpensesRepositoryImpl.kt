@@ -16,7 +16,7 @@ class ExpensesRepositoryImpl @Inject constructor(
 
     override fun create(expense: Expense): Completable {
         return expense.let(remoteDataSource::create).doOnError {
-            Log.d("error","")
+            Log.d("error", "")
         }
     }
 

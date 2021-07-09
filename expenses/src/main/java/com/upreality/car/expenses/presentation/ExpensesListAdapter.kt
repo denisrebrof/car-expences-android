@@ -2,11 +2,11 @@ package com.upreality.car.expenses.presentation
 
 import android.graphics.drawable.Drawable
 import android.util.Log
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.upreality.car.expenses.databinding.ExpenseListItemBinding
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.presentation.ExpensesListAdapter.ViewHolder

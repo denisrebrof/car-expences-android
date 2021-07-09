@@ -47,7 +47,7 @@ class ExpensesSyncServiceImpl @Inject constructor(
         }.onErrorComplete()
         val updateTimestampCompletable = syncTimestampProvider.set(syncRemoteModel.timestamp)
         return updateLocalInstance.andThen(updateTimestampCompletable).doOnComplete {
-            Log.e("Compl","Compl")
+            Log.e("Compl", "Compl")
         }
     }
 }

@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class RefreshExpensesEventProviderImpl @Inject constructor(
     private val timestampProvider: IExpensesSyncTimestampProvider
-): ExpensesListFragmentViewModel.IRefreshExpensesListEventProvider {
+) : ExpensesListFragmentViewModel.IRefreshExpensesListEventProvider {
     override fun getRefreshFlow(): Flowable<Unit> {
         return timestampProvider.get().map { }
     }

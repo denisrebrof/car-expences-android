@@ -56,7 +56,8 @@ class ExpenseOperationRemoteDAO @Inject constructor(
 
     private fun getCollectionFromTime(time: Long): Flowable<List<ExpenseRemoteOperation>> {
         val date = DateConverter.toDate(time)
-        val fromTimeQuery = operationsList.whereGreaterThan(ExpenseRemoteOperation::timestamp.name, date)
+        val fromTimeQuery =
+            operationsList.whereGreaterThan(ExpenseRemoteOperation::timestamp.name, date)
         return RxFirestore.observeQueryRef(fromTimeQuery, ExpenseRemoteOperation::class.java)
     }
 }

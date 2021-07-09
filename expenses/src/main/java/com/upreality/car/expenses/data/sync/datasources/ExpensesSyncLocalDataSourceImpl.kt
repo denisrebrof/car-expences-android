@@ -48,7 +48,7 @@ class ExpensesSyncLocalDataSourceImpl @Inject constructor(
                 .flatMapCompletable(expensesLocalDataSource::delete)
                 .andThen { expensesInfoLocalDataSource.delete(info) }
         }.doOnComplete {
-            Log.d("Compl","")
+            Log.d("Compl", "")
         }
     }
 

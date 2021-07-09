@@ -2,31 +2,33 @@
 package com.upreality.car.expenses.data.remote.expenseoperations.dao;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import dagger.internal.Factory;
+
 import javax.inject.Provider;
 
 @SuppressWarnings({
-    "unchecked",
-    "rawtypes"
+        "unchecked",
+        "rawtypes"
 })
 public final class ExpenseOperationFirestoreDAO_Factory implements Factory<ExpenseOperationRemoteDAO> {
-  private final Provider<FirebaseFirestore> remoteStorageProvider;
+    private final Provider<FirebaseFirestore> remoteStorageProvider;
 
-  public ExpenseOperationFirestoreDAO_Factory(Provider<FirebaseFirestore> remoteStorageProvider) {
-    this.remoteStorageProvider = remoteStorageProvider;
-  }
+    public ExpenseOperationFirestoreDAO_Factory(Provider<FirebaseFirestore> remoteStorageProvider) {
+        this.remoteStorageProvider = remoteStorageProvider;
+    }
 
-  @Override
-  public ExpenseOperationRemoteDAO get() {
-    return newInstance(remoteStorageProvider.get());
-  }
+    @Override
+    public ExpenseOperationRemoteDAO get() {
+        return newInstance(remoteStorageProvider.get());
+    }
 
-  public static ExpenseOperationFirestoreDAO_Factory create(
-      Provider<FirebaseFirestore> remoteStorageProvider) {
-    return new ExpenseOperationFirestoreDAO_Factory(remoteStorageProvider);
-  }
+    public static ExpenseOperationFirestoreDAO_Factory create(
+            Provider<FirebaseFirestore> remoteStorageProvider) {
+        return new ExpenseOperationFirestoreDAO_Factory(remoteStorageProvider);
+    }
 
-  public static ExpenseOperationRemoteDAO newInstance(FirebaseFirestore remoteStorage) {
-    return new ExpenseOperationRemoteDAO(remoteStorage);
-  }
+    public static ExpenseOperationRemoteDAO newInstance(FirebaseFirestore remoteStorage) {
+        return new ExpenseOperationRemoteDAO(remoteStorage);
+    }
 }

@@ -8,9 +8,12 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.button.MaterialButton
 import com.upreality.car.expenses.R
+import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
@@ -44,6 +47,7 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ViewModel by viewModels()
+    private lateinit var navController: NavController
 
     private val defaultFieldError: String = "Invalid input 2"
 
@@ -51,15 +55,21 @@ class ExpenseEditingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
         binding.costEt.addAfterTextChangedListener(viewModel::setCostInput)
+        binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked)
+                return@addOnButtonCheckedListener
+            when (checkedId) {
+                binding.fineTypeButton.id -> ExpenseType.Fines.let(viewModel::setTypeInput)
+                binding.fuelTypeButton.id -> ExpenseType.Fuel.let(viewModel::setTypeInput)
+            }
+        }
         (viewModel.selectedState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
             ?.let(this::setupSelectedExpense)
 
         val navHostId = binding.expenseDetailsContainer.id
         val navHostFragment = supportFragmentManager.findFragmentById(navHostId) as NavHostFragment
-        val navController = navHostFragment.navController
-        binding.button1.setOnClickListener { navController.navigate(R.id.action_global_expenseEditingFuelFragment) }
-        binding.button2.setOnClickListener { navController.navigate(R.id.action_global_expenseEditingFineFragment) }
+        navController = navHostFragment.navController
 
         binding.applyButton.text = when (viewModel.selectedState) {
             is SelectedExpenseState.Defined -> "Update Expense"
@@ -72,20 +82,41 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.getViewStateFlow()
+        val viewStateFlow = viewModel.getViewStateFlow()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWithLogError(this::applyViewState)
+
+        viewStateFlow
+            .subscribeWithLogError { applyInputState(it.inputState.costInputState, it.isValid) }
+            .disposeBy(lifecycle.disposers.onStop)
+
+        viewStateFlow
+            .map(ExpenseEditingViewState::inputState)
+            .map(ExpenseEditingInputState::typeInputState)
+            .ofType(InputState.Valid::class.java)
+            .map(InputState.Valid<*>::input)
+            .ofType(ExpenseType::class.java)
+            .subscribeWithLogError(this::applySelectedType)
             .disposeBy(lifecycle.disposers.onStop)
     }
 
-    private fun applyViewState(viewState: ExpenseEditingViewState) {
+    private fun applyInputState(costInputState: InputState<Float>, isValid: Boolean) {
         val setErrorIfDefined: (InputState<Float>, EditText) -> Unit = { inputState, editText ->
             val reason = (inputState as? InputState.Invalid)?.let { it.reason ?: defaultFieldError }
             editText.error = reason
         }
-        setErrorIfDefined(viewState.inputState.costInputState, binding.costEt)
-        binding.applyButton.isEnabled = viewState.isValid
+        setErrorIfDefined(costInputState, binding.costEt)
+        binding.applyButton.isEnabled = isValid
+    }
+
+    private fun applySelectedType(type: ExpenseType) {
+        val (selectedButton, action) = when (type) {
+            ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFuelFragment
+            ExpenseType.Fuel -> binding.fuelTypeButton to R.id.action_global_expenseEditingFineFragment
+            else -> null to null
+        }
+        (selectedButton as? MaterialButton)?.isChecked = true
+        action?.let(navController::navigate)
     }
 
     private fun onDeleteClicked(v: View) {

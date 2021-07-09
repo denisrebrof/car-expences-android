@@ -12,11 +12,11 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent ::class)
+@InstallIn(SingletonComponent::class)
 class ExpensesTimestampProviderModule {
     @Provides
     @Singleton
-    fun bindService(@ApplicationContext context: Context): IExpensesSyncTimestampProvider{
+    fun bindService(@ApplicationContext context: Context): IExpensesSyncTimestampProvider {
         return ExpensesSyncTimestampProvider(context)
     }
 }

@@ -72,13 +72,13 @@ class ExpensesLocalDAO @Inject constructor(
                 .andThen(
                     expenseDetailsDao.delete(details)
                 ).doOnComplete {
-                    Log.e("Compl","")
+                    Log.e("Compl", "")
                 }
                 .doOnError {
-                    Log.e("Error","")
+                    Log.e("Error", "")
                 }
                 .doFinally {
-                    Log.e("Fin","")
+                    Log.e("Fin", "")
                 }
         }
     }

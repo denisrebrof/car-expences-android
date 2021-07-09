@@ -8,19 +8,22 @@ import kotlin.reflect.KProperty
 class SavedStateHandleItemProcessor<
         in R : ViewModel,
         out T : BehaviorProcessor<VALUE_TYPE>,
-        VALUE_TYPE
+        VALUE_TYPE : Any,
         > constructor(
     private val savedStateHandle: SavedStateHandle,
     private val handleValueKey: String,
+    private val defaultValue: VALUE_TYPE? = null,
 ) {
     private var value: T? = null
+
+    private fun getSavedValue() = savedStateHandle.get<VALUE_TYPE>(handleValueKey)
 
     @Suppress("UNCHECKED_CAST")
     operator fun getValue(thisRef: R, property: KProperty<*>): T {
         if (value == null) {
-            val processor = savedStateHandle.get<VALUE_TYPE>(handleValueKey)?.let { savedValue ->
-                BehaviorProcessor.createDefault<VALUE_TYPE>(savedValue)
-            } ?: BehaviorProcessor.create<VALUE_TYPE>()
+            val processor = getSavedValue()?.let { savedValue ->
+                BehaviorProcessor.createDefault(savedValue)
+            } ?: BehaviorProcessor.createDefault<VALUE_TYPE>(defaultValue)
             value = processor.doOnNext { flowValue ->
                 savedStateHandle.set(handleValueKey, flowValue)
             } as T

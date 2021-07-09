@@ -56,7 +56,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
         lastSource?.invalidate()
     }
 
-    fun getExpensesCountFlow() : Flowable<Int> {
+    fun getExpensesCountFlow(): Flowable<Int> {
         return interactor.getExpensesFlow(ExpenseFilter.All).map {
             it.size
         }
