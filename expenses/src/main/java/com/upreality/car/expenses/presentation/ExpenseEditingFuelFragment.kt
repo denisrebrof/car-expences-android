@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
-import com.upreality.car.expenses.databinding.FragmentExpenseEditingFuelBinding
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
@@ -14,13 +13,12 @@ import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import presentation.addAfterTextChangedListener
+import com.upreality.car.expenses.databinding.FragmentExpenseEditingFuelBinding as ViewBinding
 
 @AndroidEntryPoint
 class ExpenseEditingFuelFragment : Fragment(R.layout.fragment_expense_editing_fuel) {
 
-    private val binding: FragmentExpenseEditingFuelBinding by viewBinding(
-        FragmentExpenseEditingFuelBinding::bind
-    )
+    private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ExpenseEditingViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

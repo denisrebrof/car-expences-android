@@ -33,7 +33,7 @@ class ExpensesListAdapter(
             expenseTypeCaption.text = provider.getTypeLabel(item)
             expenseDetailsShort.text = provider.getDetails(item)
             //Debug, replace with cost
-            expenseCost.text = item.id.toString()
+            expenseCost.text = item.cost.toInt().toString()
             root.setOnClickListener {
                 onItemClicked(item)
             }

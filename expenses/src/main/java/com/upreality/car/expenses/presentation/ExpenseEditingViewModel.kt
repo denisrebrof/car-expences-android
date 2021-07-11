@@ -74,6 +74,13 @@ class ExpenseEditingViewModel @Inject constructor(
         }
     }
 
+    fun setFineTypeInput(type: FinesCategories) {
+        val categoryState = InputState.Valid(type)
+        viewStateFlow.value?.inputState
+            ?.copy(fineTypeInputState = categoryState)
+            ?.let(this::updateInputState)
+    }
+
     fun getExpense(expenseId: Long): Maybe<Expense> {
         return expensesInteractor
             .getExpensesFlow(ExpenseFilter.Id(expenseId))
@@ -120,25 +127,24 @@ class ExpenseEditingViewModel @Inject constructor(
     }
 
     private fun getExpenseFromInput(inputState: ExpenseEditingInputState): Result<Expense> {
-        val ex = InvalidParameterException("Invalid input")
+        val exception = InvalidParameterException("Invalid input")
+        val failure = Result.failure<Expense>(exception)
 
-        val cost = inputState.costInputState as? InputState.Valid ?: return Result.failure(ex)
-
-        val type = inputState.typeInputState as? InputState.Valid ?: return Result.failure(ex)
+        val cost = inputState.costInputState.validOrNull() ?: return failure
+        val type = inputState.typeInputState.validOrNull() ?: return failure
 
         val expense = when (type.input) {
             ExpenseType.Fines -> {
+                val fineCategory = inputState.fineTypeInputState.validOrNull() ?: return failure
                 Expense.Fine(
                     date = Date(),
                     cost = cost.input,
-                    type = FinesCategories.Other
+                    type = fineCategory.input
                 )
             }
             ExpenseType.Fuel -> {
-                val liters =
-                    inputState.litersInputState as? InputState.Valid ?: return Result.failure(ex)
-                val mileage =
-                    inputState.mileageInputState as? InputState.Valid ?: return Result.failure(ex)
+                val liters = inputState.litersInputState.validOrNull() ?: return failure
+                val mileage = inputState.mileageInputState.validOrNull() ?: return failure
                 Expense.Fuel(
                     date = Date(),
                     cost = cost.input,
@@ -147,7 +153,7 @@ class ExpenseEditingViewModel @Inject constructor(
                 )
             }
             else -> null
-        } ?: return Result.failure(ex)
+        } ?: return failure
 
         return Result.success(expense)
     }
@@ -183,6 +189,7 @@ data class ExpenseEditingInputState(
     val typeInputState: InputState<ExpenseType> = InputState.Empty,
     val litersInputState: InputState<Float> = InputState.Empty,
     val mileageInputState: InputState<Float> = InputState.Empty,
+    val fineTypeInputState: InputState<FinesCategories> = InputState.Empty,
 )
 
 sealed class SelectedExpenseState {
