@@ -96,6 +96,7 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .ofType(InputState.Valid::class.java)
             .map(InputState.Valid<*>::input)
             .ofType(ExpenseType::class.java)
+            .distinctUntilChanged(ExpenseType::id)
             .subscribeWithLogError(this::applySelectedType)
             .disposeBy(lifecycle.disposers.onStop)
     }
@@ -111,8 +112,8 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {
-            ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFuelFragment
-            ExpenseType.Fuel -> binding.fuelTypeButton to R.id.action_global_expenseEditingFineFragment
+            ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFineFragment
+            ExpenseType.Fuel -> binding.fuelTypeButton to R.id.action_global_expenseEditingFuelFragment
             else -> null to null
         }
         (selectedButton as? MaterialButton)?.isChecked = true

@@ -32,7 +32,7 @@ open class ExpenseRealm : RealmObject() {
     var maintenanceType: MaintenanceType
         get() = MaintenanceTypeConverter.fromId(maintenanceTypeId)
         set(value) {
-            typeId = MaintenanceTypeConverter.toId(value)
+            maintenanceTypeId = MaintenanceTypeConverter.toId(value)
         }
 
     //Fines
@@ -40,6 +40,6 @@ open class ExpenseRealm : RealmObject() {
     var fineType: FinesCategories
         get() = FineTypeConverter.fromId(fineTypeId)
         set(value) {
-            typeId = FineTypeConverter.toId(value)
+            fineTypeId = FineTypeConverter.toId(value)
         }
 }

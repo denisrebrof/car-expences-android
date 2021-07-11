@@ -11,21 +11,21 @@ class SavedStateHandleItemProcessor<
         VALUE_TYPE : Any,
         > constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val handleValueKey: String,
+    private val handleValueKey: String? = null,
     private val defaultValue: VALUE_TYPE? = null,
 ) {
     private var value: T? = null
 
-    private fun getSavedValue() = savedStateHandle.get<VALUE_TYPE>(handleValueKey)
-
     @Suppress("UNCHECKED_CAST")
     operator fun getValue(thisRef: R, property: KProperty<*>): T {
         if (value == null) {
-            val processor = getSavedValue()?.let { savedValue ->
+            val key = handleValueKey ?: property.name
+            val defaultProcessorValue = savedStateHandle.get<VALUE_TYPE>(key) ?: defaultValue
+            val processor = defaultProcessorValue?.let { savedValue ->
                 BehaviorProcessor.createDefault(savedValue)
-            } ?: BehaviorProcessor.createDefault<VALUE_TYPE>(defaultValue)
+            } ?: BehaviorProcessor.create()
             value = processor.doOnNext { flowValue ->
-                savedStateHandle.set(handleValueKey, flowValue)
+                savedStateHandle.set(key, flowValue)
             } as T
         }
         return value!!

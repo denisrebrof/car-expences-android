@@ -1,41 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".presentation.ExpenseEditingFuelFragment">
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroup"
-        app:singleSelection="true"
-        app:selectionRequired="true"
-        app:checkedChip="@id/chip_fine_type_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp">
+        android:layout_margin="20dp"
+        app:checkedChip="@id/chip_fine_parking"
+        app:selectionRequired="true"
+        app:singleSelection="true">
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_fine_type_1"
+            android:id="@+id/chip_fine_parking"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Fine Type A" />
+            android:text="Parking" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_fine_type_2"
+            android:id="@+id/chip_fine_road_marking"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fine Type B" />
+            android:text="Road Marking" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_fine_type_3"
+            android:id="@+id/chip_fine_speed_limit"
             style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fine Type C" />
+            android:text="Speed Limit" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_fine_other"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Other" />
 
     </com.google.android.material.chip.ChipGroup>
 

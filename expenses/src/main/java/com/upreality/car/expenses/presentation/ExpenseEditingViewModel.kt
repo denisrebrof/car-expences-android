@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.ExpenseFilter
+import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.ExpenseEditingActivity.Companion.EXPENSE_ID
@@ -12,7 +13,8 @@ import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.processors.BehaviorProcessor
 import presentation.InputState
-import presentation.SavedStateHandleItemProcessor
+import presentation.SavedStateItemProcessorWrapper
+import presentation.SavedStateItemProcessorWrapperDelegate
 import java.security.InvalidParameterException
 import java.util.*
 import javax.inject.Inject
@@ -29,10 +31,10 @@ class ExpenseEditingViewModel @Inject constructor(
             ?: SelectedExpenseState.NotDefined
     }
 
-    private val selectedExpenseTypeId: BehaviorProcessor<Int>
-            by SavedStateHandleItemProcessor(handle, "expenseTypeId")
+    private val selectedExpenseTypeId: SavedStateItemProcessorWrapper<Int>
+            by SavedStateItemProcessorWrapperDelegate(handle, ExpenseType.Fuel.id)
 
-    private val initialInputState = selectedExpenseTypeId.value
+    private val initialInputState = selectedExpenseTypeId.getValue()
         ?.let(this::checkSelectedTypeInput) ?: InputState.Empty
     private val viewStateFlow = ExpenseEditingInputState(typeInputState = initialInputState)
         .let { ExpenseEditingViewState(false, it) }
@@ -119,15 +121,35 @@ class ExpenseEditingViewModel @Inject constructor(
 
     private fun getExpenseFromInput(inputState: ExpenseEditingInputState): Result<Expense> {
         val ex = InvalidParameterException("Invalid input")
+
         val cost = inputState.costInputState as? InputState.Valid ?: return Result.failure(ex)
-        val liters = inputState.litersInputState as? InputState.Valid ?: return Result.failure(ex)
-        val mileage = inputState.mileageInputState as? InputState.Valid ?: return Result.failure(ex)
-        return Expense.Fuel(
-            date = Date(),
-            cost = cost.input,
-            liters = liters.input,
-            mileage = mileage.input
-        ).let { Result.success(it) }
+
+        val type = inputState.typeInputState as? InputState.Valid ?: return Result.failure(ex)
+
+        val expense = when (type.input) {
+            ExpenseType.Fines -> {
+                Expense.Fine(
+                    date = Date(),
+                    cost = cost.input,
+                    type = FinesCategories.Other
+                )
+            }
+            ExpenseType.Fuel -> {
+                val liters =
+                    inputState.litersInputState as? InputState.Valid ?: return Result.failure(ex)
+                val mileage =
+                    inputState.mileageInputState as? InputState.Valid ?: return Result.failure(ex)
+                Expense.Fuel(
+                    date = Date(),
+                    cost = cost.input,
+                    liters = liters.input,
+                    mileage = mileage.input
+                )
+            }
+            else -> null
+        } ?: return Result.failure(ex)
+
+        return Result.success(expense)
     }
 
     private fun updateInputState(inputState: ExpenseEditingInputState) {

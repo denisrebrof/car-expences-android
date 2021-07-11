@@ -60,7 +60,7 @@
         android:layout_height="0dp"
         app:defaultNavHost="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toggle_button"
+        app:layout_constraintTop_toBottomOf="@id/expense_type_selector"
         app:navGraph="@navigation/expense_editing_navigation_graph" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
