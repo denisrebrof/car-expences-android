@@ -8,6 +8,7 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.ExpenseEditingActivity.Companion.EXPENSE_ID
+import com.upreality.car.expenses.presentation.SelectedExpenseState.Defined
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -32,13 +33,34 @@ class ExpenseEditingViewModel @Inject constructor(
     }
 
     private val selectedExpenseTypeId: SavedStateItemProcessorWrapper<Int>
-            by SavedStateItemProcessorWrapperDelegate(handle, ExpenseType.Fuel.id)
+            by SavedStateItemProcessorWrapperDelegate(handle)
 
-    private val initialInputState = selectedExpenseTypeId.getValue()
-        ?.let(this::checkSelectedTypeInput) ?: InputState.Empty
-    private val viewStateFlow = ExpenseEditingInputState(typeInputState = initialInputState)
-        .let { ExpenseEditingViewState(false, it) }
-        .let { BehaviorProcessor.createDefault(it) }
+    private val initialExpenseTypeMaybe = selectedExpenseTypeId.getValue()?.let { id ->
+        ExpenseType.values().firstOrNull { it.id == id }?.let { Maybe.just(it) }
+    } ?: (selectedState as? Defined)
+        ?.let(Defined::id)
+        ?.let(this::getExpense)
+        ?.map { expense ->
+            when (expense) {
+                is Expense.Fine -> ExpenseType.Fines
+                is Expense.Fuel -> ExpenseType.Fuel
+                is Expense.Maintenance -> ExpenseType.Maintenance
+            }
+        }
+
+    selectedExpenseTypeId.getValue()
+    ?.let(this::checkSelectedTypeInput) ?: InputState.Empty
+
+    private val viewStateFlow = initialExpenseTypeMaybe.map {
+        ExpenseEditingInputState(typeInputState = it)
+    }.map{
+        ExpenseEditingViewState(false, it)
+    }
+
+    .let
+    { ExpenseEditingViewState(false, it) }
+    .let
+    { BehaviorProcessor.createDefault(it) }
 
     fun getViewStateFlow(): Flowable<ExpenseEditingViewState> = viewStateFlow
 
@@ -91,7 +113,7 @@ class ExpenseEditingViewModel @Inject constructor(
 
     fun deleteExpense(): Maybe<Result<Unit>> {
         val stubExpense = Expense.Fuel(Date(), 0f, 0f, 0f)
-        val expenseId = (selectedState as? SelectedExpenseState.Defined)
+        val expenseId = (selectedState as? Defined)
             ?.id
             ?: return Maybe.just(Result.failure(java.lang.NullPointerException()))
         return stubExpense
@@ -104,7 +126,7 @@ class ExpenseEditingViewModel @Inject constructor(
     fun updateExpense(): Maybe<Result<Unit>> {
         val viewState = viewStateFlow.value
             ?: return Result.failure<Unit>(NullPointerException()).let { Maybe.just(it) }
-        val expenseId = (selectedState as? SelectedExpenseState.Defined)
+        val expenseId = (selectedState as? Defined)
             ?.id
             ?: return Maybe.just(Result.failure(java.lang.NullPointerException()))
         return getExpenseFromInput(viewState.inputState).getOrNull()
