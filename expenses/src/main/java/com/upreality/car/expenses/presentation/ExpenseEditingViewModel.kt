@@ -48,21 +48,19 @@ class ExpenseEditingViewModel @Inject constructor(
             }
         }
 
-    selectedExpenseTypeId.getValue()
-    ?.let(this::checkSelectedTypeInput) ?: InputState.Empty
+    private val initialExpenseTypeInputStateMaybe = initialExpenseTypeMaybe?.map { type ->
+        InputState.Valid(type)
+    } ?: InputState.Empty.let { Maybe.just(it) }
 
-    private val viewStateFlow = initialExpenseTypeMaybe.map {
-        ExpenseEditingInputState(typeInputState = it)
-    }.map{
-        ExpenseEditingViewState(false, it)
+    private val viewStateFlow = BehaviorProcessor.create<ExpenseEditingViewState>()
+
+    fun getViewStateFlow(): Flowable<ExpenseEditingViewState> {
+        return initialExpenseTypeInputStateMaybe.map {
+                ExpenseEditingInputState(typeInputState = it)
+            }.map {
+                ExpenseEditingViewState(false, it)
+            }.toFlowable().concatWith(viewStateFlow)
     }
-
-    .let
-    { ExpenseEditingViewState(false, it) }
-    .let
-    { BehaviorProcessor.createDefault(it) }
-
-    fun getViewStateFlow(): Flowable<ExpenseEditingViewState> = viewStateFlow
 
     fun setTypeInput(type: ExpenseType) {
         type.id.let(this::checkSelectedTypeInput).let { inputState ->
