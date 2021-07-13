@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/expense_editing_navigation_graph"
-    app:startDestination="@id/expenseEditingFuelFieldsFragment">
+    app:startDestination="@id/expenseEditingTypeUndefinedFragment">
+
+    <fragment
+        android:id="@+id/expenseEditingTypeUndefinedFragment"
+        android:name="com.upreality.car.expenses.presentation.ExpenseEditingTypeUndefinedFragment"
+        android:label="fragment_expense_editing_undefined"
+        tools:layout="@layout/fragment_expense_editing_undefined" />
 
     <fragment
         android:id="@+id/expenseEditingFuelFieldsFragment"

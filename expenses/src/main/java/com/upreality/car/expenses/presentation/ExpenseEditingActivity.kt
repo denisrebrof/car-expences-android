@@ -120,6 +120,8 @@ class ExpenseEditingActivity : AppCompatActivity() {
         action?.let(navController::navigate)
     }
 
+    override fun onBackPressed() = finish()
+
     private fun onDeleteClicked(v: View) {
         viewModel.deleteExpense()
             .subscribeWithLogError { finish() }

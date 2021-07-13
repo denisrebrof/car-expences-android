@@ -56,10 +56,10 @@ class ExpenseEditingViewModel @Inject constructor(
 
     fun getViewStateFlow(): Flowable<ExpenseEditingViewState> {
         return initialExpenseTypeInputStateMaybe.map {
-                ExpenseEditingInputState(typeInputState = it)
-            }.map {
-                ExpenseEditingViewState(false, it)
-            }.toFlowable().concatWith(viewStateFlow)
+            ExpenseEditingInputState(typeInputState = it)
+        }.map {
+            ExpenseEditingViewState(false, it)
+        }.flatMapPublisher(viewStateFlow::startWith)
     }
 
     fun setTypeInput(type: ExpenseType) {

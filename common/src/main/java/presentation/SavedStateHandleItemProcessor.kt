@@ -3,11 +3,15 @@ package presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import io.reactivex.processors.BehaviorProcessor
+import io.reactivex.processors.FlowableProcessor
+import io.sellmair.disposer.disposeBy
+import org.reactivestreams.Subscriber
+import org.reactivestreams.Subscription
 import kotlin.reflect.KProperty
 
 class SavedStateHandleItemProcessor<
         in R : ViewModel,
-        out T : BehaviorProcessor<VALUE_TYPE>,
+        out T : FlowableProcessor<VALUE_TYPE>,
         VALUE_TYPE : Any,
         > constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -24,37 +28,35 @@ class SavedStateHandleItemProcessor<
             val processor = defaultProcessorValue?.let { savedValue ->
                 BehaviorProcessor.createDefault(savedValue)
             } ?: BehaviorProcessor.create()
-            value = processor.doOnNext { flowValue ->
-                savedStateHandle.set(key, flowValue)
-            } as T
+            processor.getValues()
+            value = processor as T
         }
         return value!!
     }
 }
 
-class SavedStateItemNullable<in R : ViewModel, T : Any?> constructor(
+class SavedStateItemDelegate<in R : ViewModel, T : Any?> constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val handleValueKey: String,
+    private val default: T? = null,
 ) {
     operator fun getValue(thisRef: R, property: KProperty<*>): T? {
-        return savedStateHandle.get<T>(handleValueKey)
-    }
-
-    operator fun setValue(thisRef: R, property: KProperty<*>, value: T?) {
-        savedStateHandle.set<T>(handleValueKey, value)
-    }
-}
-
-class SavedStateItem<in R : ViewModel, T : Any> constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val handleValueKey: String,
-    private val default: T,
-) {
-    operator fun getValue(thisRef: R, property: KProperty<*>): T {
-        return savedStateHandle.get<T>(handleValueKey) ?: default
+        return savedStateHandle.get<T>(property.name) ?: default
     }
 
     operator fun setValue(thisRef: R, property: KProperty<*>, value: T) {
-        savedStateHandle.set<T>(handleValueKey, value)
+        savedStateHandle.set<T>(property.name, value)
+    }
+}
+
+class SavedStateRequireItemDelegate<in R : ViewModel, T : Any> constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val default: T
+) {
+    operator fun getValue(thisRef: R, property: KProperty<*>): T {
+        return savedStateHandle.get<T>(property.name) ?: default
+    }
+
+    operator fun setValue(thisRef: R, property: KProperty<*>, value: T) {
+        savedStateHandle.set<T>(property.name, value)
     }
 }

@@ -22,8 +22,8 @@ android {
         config {
             keyAlias 'keystore'
             keyPassword 'ekabz0ks'
-            storeFile file('C:\\Users\\User\\Desktop\\Car Expenses\\carExpensesKeystore.jks')
-//            storeFile file('C:\\Users\\d.rebrov\\carExpensesKeystore.jks')
+//            storeFile file('C:\\Users\\User\\Desktop\\Car Expenses\\carExpensesKeystore.jks')
+            storeFile file('C:\\Users\\d.rebrov\\carExpensesKeystore.jks')
             storePassword 'ekabz0ks'
         }
     }
