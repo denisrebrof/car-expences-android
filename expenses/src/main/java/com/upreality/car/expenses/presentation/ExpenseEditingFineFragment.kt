@@ -60,6 +60,6 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
             binding.chipFineParking -> FinesCategories.Parking
             binding.chipFineRoadMarking -> FinesCategories.RoadMarking
             else -> FinesCategories.Other
-        }.let(viewModel::setFineTypeInput)
+        }.let(ExpenseEditingIntent.SetInput::SetFineTypeInput).let(viewModel::executeIntent)
     }
 }

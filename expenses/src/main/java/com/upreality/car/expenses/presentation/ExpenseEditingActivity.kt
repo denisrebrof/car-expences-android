@@ -54,15 +54,19 @@ class ExpenseEditingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
-        binding.costEt.addAfterTextChangedListener(viewModel::setCostInput)
+        binding.costEt.addAfterTextChangedListener { costText ->
+            ExpenseEditingIntent.SetInput.SetCostInput(costText).let(viewModel::executeIntent)
+        }
         binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked)
                 return@addOnButtonCheckedListener
             when (checkedId) {
-                binding.fineTypeButton.id -> ExpenseType.Fines.let(viewModel::setTypeInput)
-                binding.fuelTypeButton.id -> ExpenseType.Fuel.let(viewModel::setTypeInput)
-            }
+                binding.fineTypeButton.id -> ExpenseType.Fines
+                binding.fuelTypeButton.id -> ExpenseType.Fuel
+                else -> return@addOnButtonCheckedListener
+            }.let(ExpenseEditingIntent.SetInput::SetTypeInput).let(viewModel::executeIntent)
         }
+
         (viewModel.selectedState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
             ?.let(this::setupSelectedExpense)

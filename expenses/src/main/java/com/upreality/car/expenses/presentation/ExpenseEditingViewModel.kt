@@ -8,12 +8,14 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.ExpenseEditingActivity.Companion.EXPENSE_ID
+import com.upreality.car.expenses.presentation.ExpenseEditingIntent.SetInput.*
 import com.upreality.car.expenses.presentation.SelectedExpenseState.Defined
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.processors.BehaviorProcessor
 import presentation.InputState
+import presentation.SavedStateItemDelegate
 import presentation.SavedStateItemProcessorWrapper
 import presentation.SavedStateItemProcessorWrapperDelegate
 import java.security.InvalidParameterException
@@ -26,14 +28,13 @@ class ExpenseEditingViewModel @Inject constructor(
     private val expensesInteractor: IExpensesInteractor,
 ) : ViewModel() {
 
-    val selectedState: SelectedExpenseState by lazy {
+    private val selectedState: SelectedExpenseState by lazy {
         handle.get<Long>(EXPENSE_ID)
             ?.let(SelectedExpenseState::Defined)
             ?: SelectedExpenseState.NotDefined
     }
 
-    private val selectedExpenseTypeId: SavedStateItemProcessorWrapper<Int>
-            by SavedStateItemProcessorWrapperDelegate(handle)
+    private val selectedExpenseTypeId: Int? by SavedStateItemDelegate(handle)
 
     private val initialExpenseTypeMaybe = selectedExpenseTypeId.getValue()?.let { id ->
         ExpenseType.values().firstOrNull { it.id == id }?.let { Maybe.just(it) }
@@ -48,13 +49,35 @@ class ExpenseEditingViewModel @Inject constructor(
             }
         }
 
+    private fun getExpense(expenseId: Long): Maybe<Expense> {
+        return expensesInteractor
+            .getExpensesFlow(ExpenseFilter.Id(expenseId))
+            .firstElement()
+            .filter(List<Expense>::isNotEmpty)
+            .map(List<Expense>::first)
+    }
+
     private val initialExpenseTypeInputStateMaybe = initialExpenseTypeMaybe?.map { type ->
         InputState.Valid(type)
     } ?: InputState.Empty.let { Maybe.just(it) }
 
-    private val viewStateFlow = BehaviorProcessor.create<ExpenseEditingViewState>()
+    private val viewStateFlow = BehaviorProcessor.createDefault(
+        ExpenseEditingViewState(
+            false,
+            ExpenseEditingInputState()
+        )
+    )
 
     fun getViewStateFlow(): Flowable<ExpenseEditingViewState> {
+        val inputState = selectedExpenseTypeId
+        val defaultViewStateFlow = ExpenseEditingViewState(
+            false,
+            ExpenseEditingInputState()
+        ).let { Flowable.just(it) }
+        val expenseId = (selectedState as? Defined)?.id ?: return defaultViewStateFlow
+        val expenseMaybe = getExpense(expenseId)
+        val expenseType = selectedExpenseTypeId
+
         return initialExpenseTypeInputStateMaybe.map {
             ExpenseEditingInputState(typeInputState = it)
         }.map {
@@ -62,51 +85,34 @@ class ExpenseEditingViewModel @Inject constructor(
         }.flatMapPublisher(viewStateFlow::startWith)
     }
 
-    fun setTypeInput(type: ExpenseType) {
-        type.id.let(this::checkSelectedTypeInput).let { inputState ->
-            viewStateFlow.value?.inputState
-                ?.copy(typeInputState = inputState)
-                ?.let(this::updateInputState)
+    fun executeIntent(intent: ExpenseEditingIntent) {
+        val inputState = when (intent) {
+            is ExpenseEditingIntent.SetInput -> executeSetInputIntent(intent)
+            else -> return //do nothing
         }
     }
 
-    fun setCostInput(text: String) {
-        checkFloatInput(text).let { inputState ->
-            viewStateFlow.value?.inputState
-                ?.copy(costInputState = inputState)
-                ?.let(this::updateInputState)
+    private fun executeSetInputIntent(intent: ExpenseEditingIntent.SetInput) {
+        val currentState = viewStateFlow.value?.inputState ?: return
+        val resultState = when (intent) {
+            is SetCostInput -> checkFloatInput(intent.input).let { inputState ->
+                currentState.copy(costInputState = inputState)
+            }
+            is SetFineTypeInput -> {
+                val categoryState = InputState.Valid(intent.input)
+                currentState.copy(fineTypeInputState = categoryState)
+            }
+            is SetLitersInput -> checkFloatInput(intent.input).let { inputState ->
+                currentState.copy(litersInputState = inputState)
+            }
+            is SetMileageInput -> checkFloatInput(intent.input).let { inputState ->
+                currentState.copy(mileageInputState = inputState)
+            }
+            is SetTypeInput -> intent.input.id.let(this::checkSelectedTypeInput).let { inputState ->
+                currentState.copy(typeInputState = inputState)
+            }
         }
-    }
-
-    fun setLitersInput(text: String) {
-        checkFloatInput(text).let { inputState ->
-            viewStateFlow.value?.inputState
-                ?.copy(litersInputState = inputState)
-                ?.let(this::updateInputState)
-        }
-    }
-
-    fun setMileageInput(text: String) {
-        checkFloatInput(text).let { inputState ->
-            viewStateFlow.value?.inputState
-                ?.copy(mileageInputState = inputState)
-                ?.let(this::updateInputState)
-        }
-    }
-
-    fun setFineTypeInput(type: FinesCategories) {
-        val categoryState = InputState.Valid(type)
-        viewStateFlow.value?.inputState
-            ?.copy(fineTypeInputState = categoryState)
-            ?.let(this::updateInputState)
-    }
-
-    fun getExpense(expenseId: Long): Maybe<Expense> {
-        return expensesInteractor
-            .getExpensesFlow(ExpenseFilter.Id(expenseId))
-            .firstElement()
-            .filter(List<Expense>::isNotEmpty)
-            .map(List<Expense>::first)
+        updateInputState(resultState)
     }
 
     fun deleteExpense(): Maybe<Result<Unit>> {
@@ -146,6 +152,11 @@ class ExpenseEditingViewModel @Inject constructor(
             ?: Result.success(Unit).let { Maybe.just(it) }
     }
 
+    private fun updateInputState(inputState: ExpenseEditingInputState) {
+        val inputStateValid = getExpenseFromInput(inputState).isSuccess
+        ExpenseEditingViewState(inputStateValid, inputState).let(viewStateFlow::onNext)
+    }
+
     private fun getExpenseFromInput(inputState: ExpenseEditingInputState): Result<Expense> {
         val exception = InvalidParameterException("Invalid input")
         val failure = Result.failure<Expense>(exception)
@@ -178,11 +189,6 @@ class ExpenseEditingViewModel @Inject constructor(
         return Result.success(expense)
     }
 
-    private fun updateInputState(inputState: ExpenseEditingInputState) {
-        val inputStateValid = getExpenseFromInput(inputState).isSuccess
-        ExpenseEditingViewState(inputStateValid, inputState).let(viewStateFlow::onNext)
-    }
-
     private fun checkFloatInput(text: String): InputState<Float> {
         return when {
             text.isEmpty() -> InputState.Empty
@@ -211,6 +217,16 @@ data class ExpenseEditingInputState(
     val mileageInputState: InputState<Float> = InputState.Empty,
     val fineTypeInputState: InputState<FinesCategories> = InputState.Empty,
 )
+
+sealed class ExpenseEditingIntent {
+    sealed class SetInput: ExpenseEditingIntent() {
+        data class SetTypeInput(val input: ExpenseType) : SetInput()
+        data class SetCostInput(val input: String) : SetInput()
+        data class SetLitersInput(val input: String) : SetInput()
+        data class SetMileageInput(val input: String) : SetInput()
+        data class SetFineTypeInput(val input: FinesCategories) : SetInput()
+    }
+}
 
 sealed class SelectedExpenseState {
     object NotDefined : SelectedExpenseState()

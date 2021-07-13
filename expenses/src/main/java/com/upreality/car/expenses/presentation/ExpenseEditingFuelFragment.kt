@@ -7,6 +7,7 @@ import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.expence.Expense
+import com.upreality.car.expenses.presentation.ExpenseEditingIntent.SetInput
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.schedulers.Schedulers
@@ -23,8 +24,12 @@ class ExpenseEditingFuelFragment : Fragment(R.layout.fragment_expense_editing_fu
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.litersEt.addAfterTextChangedListener(viewModel::setLitersInput)
-        binding.mileageEt.addAfterTextChangedListener(viewModel::setMileageInput)
+        binding.litersEt.addAfterTextChangedListener { litersText ->
+            SetInput.SetLitersInput(litersText).let(viewModel::executeIntent)
+        }
+        binding.mileageEt.addAfterTextChangedListener { mileageText ->
+            SetInput.SetMileageInput(mileageText).let(viewModel::executeIntent)
+        }
 
         (viewModel.selectedState as? SelectedExpenseState.Defined)
             ?.let(SelectedExpenseState.Defined::id)
