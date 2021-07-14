@@ -1,5 +1,6 @@
 package com.upreality.car.expenses.presentation
 
+import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
@@ -9,45 +10,40 @@ import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.ExpenseEditingActivity.Companion.EXPENSE_ID
 import com.upreality.car.expenses.presentation.ExpenseEditingIntent.SetInput.*
-import com.upreality.car.expenses.presentation.SelectedExpenseState.Defined
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.BehaviorProcessor
+import kotlinx.android.parcel.Parcelize
 import presentation.InputState
 import presentation.SavedStateItemDelegate
-import presentation.SavedStateItemProcessorWrapper
-import presentation.SavedStateItemProcessorWrapperDelegate
 import java.security.InvalidParameterException
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseEditingViewModel @Inject constructor(
-    private val handle: SavedStateHandle,
+    handle: SavedStateHandle,
     private val expensesInteractor: IExpensesInteractor,
 ) : ViewModel() {
 
-    private val selectedState: SelectedExpenseState by lazy {
-        handle.get<Long>(EXPENSE_ID)
-            ?.let(SelectedExpenseState::Defined)
-            ?: SelectedExpenseState.NotDefined
-    }
+    private val composite = CompositeDisposable()
+
+    private val selectedExpenseId = handle.get<Long>(EXPENSE_ID)
 
     private val selectedExpenseTypeId: Int? by SavedStateItemDelegate(handle)
 
-    private val initialExpenseTypeMaybe = selectedExpenseTypeId.getValue()?.let { id ->
+    private val initialExpenseTypeMaybe = selectedExpenseTypeId?.let { id ->
         ExpenseType.values().firstOrNull { it.id == id }?.let { Maybe.just(it) }
-    } ?: (selectedState as? Defined)
-        ?.let(Defined::id)
-        ?.let(this::getExpense)
-        ?.map { expense ->
-            when (expense) {
-                is Expense.Fine -> ExpenseType.Fines
-                is Expense.Fuel -> ExpenseType.Fuel
-                is Expense.Maintenance -> ExpenseType.Maintenance
-            }
+    } ?: selectedExpenseId?.let(this::getExpense)?.map { expense ->
+        when (expense) {
+            is Expense.Fine -> ExpenseType.Fines
+            is Expense.Fuel -> ExpenseType.Fuel
+            is Expense.Maintenance -> ExpenseType.Maintenance
         }
+    }
 
     private fun getExpense(expenseId: Long): Maybe<Expense> {
         return expensesInteractor
@@ -74,7 +70,7 @@ class ExpenseEditingViewModel @Inject constructor(
             false,
             ExpenseEditingInputState()
         ).let { Flowable.just(it) }
-        val expenseId = (selectedState as? Defined)?.id ?: return defaultViewStateFlow
+        val expenseId = selectedExpenseId ?: return defaultViewStateFlow
         val expenseMaybe = getExpense(expenseId)
         val expenseType = selectedExpenseTypeId
 
@@ -115,51 +111,34 @@ class ExpenseEditingViewModel @Inject constructor(
         updateInputState(resultState)
     }
 
-    fun deleteExpense(): Maybe<Result<Unit>> {
-        val stubExpense = Expense.Fuel(Date(), 0f, 0f, 0f)
-        val expenseId = (selectedState as? Defined)
-            ?.id
-            ?: return Maybe.just(Result.failure(java.lang.NullPointerException()))
-        return stubExpense
-            .also { it.id = expenseId }
-            .let(expensesInteractor::deleteExpense)
-            .andThen(Maybe.just(Result.success(Unit)))
-            .onErrorReturn { Result.failure(it) }
+    fun deleteExpense(): Completable {
+        val error = InvalidParameterException().let(Completable::error)
+        val expenseId = selectedExpenseId ?: return error
+        return expensesInteractor.deleteExpense(expenseId)
     }
 
-    fun updateExpense(): Maybe<Result<Unit>> {
-        val viewState = viewStateFlow.value
-            ?: return Result.failure<Unit>(NullPointerException()).let { Maybe.just(it) }
-        val expenseId = (selectedState as? Defined)
-            ?.id
-            ?: return Maybe.just(Result.failure(java.lang.NullPointerException()))
-        return getExpenseFromInput(viewState.inputState).getOrNull()
-            ?.also { it.id = expenseId }
-            ?.let(expensesInteractor::updateExpense)
-            ?.andThen(Maybe.just(Result.success(Unit)))
-            ?.onErrorReturn { Result.failure(it) }
-            ?: Result.success(Unit).let { Maybe.just(it) }
+    fun updateExpense(): Completable {
+        val error = InvalidParameterException().let(Completable::error)
+        val expenseId = selectedExpenseId ?: return error
+        val expense = getExpenseFromInput().getOrNull()?.also { it.id = expenseId } ?: return error
+        return expensesInteractor.updateExpense(expense)
     }
 
-    fun createExpense(): Maybe<Result<Unit>> {
-        val viewState = viewStateFlow.value
-            ?: return Result.failure<Unit>(NullPointerException()).let { Maybe.just(it) }
-
-        return getExpenseFromInput(viewState.inputState).getOrNull()
-            ?.let(expensesInteractor::createExpense)
-            ?.andThen(Maybe.just(Result.success(Unit)))
-            ?.onErrorReturn { Result.failure(it) }
-            ?: Result.success(Unit).let { Maybe.just(it) }
+    fun createExpense(): Completable {
+        val error = InvalidParameterException().let(Completable::error)
+        val expense = getExpenseFromInput().getOrNull() ?: return error
+        return expensesInteractor.createExpense(expense)
     }
 
     private fun updateInputState(inputState: ExpenseEditingInputState) {
-        val inputStateValid = getExpenseFromInput(inputState).isSuccess
+        val inputStateValid = getExpenseFromInput().isSuccess
         ExpenseEditingViewState(inputStateValid, inputState).let(viewStateFlow::onNext)
     }
 
-    private fun getExpenseFromInput(inputState: ExpenseEditingInputState): Result<Expense> {
+    private fun getExpenseFromInput(): Result<Expense> {
         val exception = InvalidParameterException("Invalid input")
         val failure = Result.failure<Expense>(exception)
+        val inputState = viewStateFlow.value?.inputState ?: return failure
 
         val cost = inputState.costInputState.validOrNull() ?: return failure
         val type = inputState.typeInputState.validOrNull() ?: return failure
@@ -203,6 +182,12 @@ class ExpenseEditingViewModel @Inject constructor(
             ?: return InputState.Invalid("Invalid input")
         return InputState.Valid(type)
     }
+
+    override fun onCleared() {
+        if (!composite.isDisposed)
+            composite.dispose()
+        super.onCleared()
+    }
 }
 
 data class ExpenseEditingViewState(
@@ -219,7 +204,7 @@ data class ExpenseEditingInputState(
 )
 
 sealed class ExpenseEditingIntent {
-    sealed class SetInput: ExpenseEditingIntent() {
+    sealed class SetInput : ExpenseEditingIntent() {
         data class SetTypeInput(val input: ExpenseType) : SetInput()
         data class SetCostInput(val input: String) : SetInput()
         data class SetLitersInput(val input: String) : SetInput()
@@ -228,7 +213,11 @@ sealed class ExpenseEditingIntent {
     }
 }
 
-sealed class SelectedExpenseState {
-    object NotDefined : SelectedExpenseState()
-    data class Defined(val id: Long) : SelectedExpenseState()
+@Parcelize
+data class ExpenseEditingType(var expenseTypeId: Int?) : Parcelable {
+    var expenseType: ExpenseType?
+        get() = ExpenseType.values().firstOrNull { it.id == expenseTypeId }
+        set(value) {
+            expenseTypeId = value?.id
+        }
 }

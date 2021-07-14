@@ -11,4 +11,7 @@ interface IExpensesInteractor {
     fun getExpensesFlow(filter: ExpenseFilter): Flowable<List<Expense>>
     fun deleteExpense(expense: Expense): Completable
     fun updateExpense(expense: Expense): Completable
+
+    fun getExpenseMaybe(id: Long): Maybe<Expense>
+    fun deleteExpense(id: Long): Completable
 }

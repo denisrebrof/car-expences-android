@@ -2,20 +2,17 @@ package presentation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.BehaviorProcessor
-import io.reactivex.processors.FlowableProcessor
-import io.sellmair.disposer.disposeBy
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
 import kotlin.reflect.KProperty
 
 class SavedStateHandleItemProcessor<
         in R : ViewModel,
-        out T : FlowableProcessor<VALUE_TYPE>,
+        out T : BehaviorProcessor<VALUE_TYPE>,
         VALUE_TYPE : Any,
         > constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val handleValueKey: String? = null,
+    private val compositeDisposable: CompositeDisposable,
     private val defaultValue: VALUE_TYPE? = null,
 ) {
     private var value: T? = null
@@ -23,12 +20,14 @@ class SavedStateHandleItemProcessor<
     @Suppress("UNCHECKED_CAST")
     operator fun getValue(thisRef: R, property: KProperty<*>): T {
         if (value == null) {
-            val key = handleValueKey ?: property.name
-            val defaultProcessorValue = savedStateHandle.get<VALUE_TYPE>(key) ?: defaultValue
+            val savedValue = savedStateHandle.get<VALUE_TYPE>(property.name)
+            val defaultProcessorValue = savedValue ?: defaultValue
             val processor = defaultProcessorValue?.let { savedValue ->
                 BehaviorProcessor.createDefault(savedValue)
             } ?: BehaviorProcessor.create()
-            processor.getValues()
+            processor.subscribe { item ->
+                savedStateHandle.set(property.name, item)
+            }.let(compositeDisposable::add)
             value = processor as T
         }
         return value!!
