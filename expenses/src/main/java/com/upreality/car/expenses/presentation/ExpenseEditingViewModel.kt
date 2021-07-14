@@ -82,7 +82,7 @@ class ExpenseEditingViewModel @Inject constructor(
     }
 
     fun executeIntent(intent: ExpenseEditingIntent) {
-        val inputState = when (intent) {
+        when (intent) {
             is ExpenseEditingIntent.SetInput -> executeSetInputIntent(intent)
             else -> return //do nothing
         }

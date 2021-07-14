@@ -26,7 +26,7 @@
 
     <fragment
         android:id="@+id/stats"
-        android:name="com.upreality.stats.StatsFragment"
+        android:name="com.upreality.stats.presentation.StatsFragment"
         android:label="Stats Fragment"
         tools:layout="@layout/fragment_stats" />
 </navigation>

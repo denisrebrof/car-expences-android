@@ -3,7 +3,6 @@ package com.upreality.car.expenses.presentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,7 +13,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.button.MaterialButton
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -67,10 +65,6 @@ class ExpenseEditingActivity : AppCompatActivity() {
             }.let(ExpenseEditingIntent.SetInput::SetTypeInput).let(viewModel::executeIntent)
         }
 
-        (viewModel.selectedState as? SelectedExpenseState.Defined)
-            ?.let(SelectedExpenseState.Defined::id)
-            ?.let(this::setupSelectedExpense)
-
         val navHostId = binding.expenseDetailsContainer.id
         val navHostFragment = supportFragmentManager.findFragmentById(navHostId) as NavHostFragment
         navController = navHostFragment.navController
@@ -114,6 +108,15 @@ class ExpenseEditingActivity : AppCompatActivity() {
         binding.applyButton.isEnabled = isValid
     }
 
+    override fun onBackPressed() = finish()
+
+    private fun setupViewState(viewState: ExpenseEditingViewState) {
+        val cost = (viewState.inputState.mileageInputState as? InputState.Valid<Float>)?.input
+        cost?.toString()?.let(binding.costEt::setText)
+        val type = (viewState.inputState.typeInputState as? InputState.Valid<ExpenseType>)?.input
+        type?.let(this::applySelectedType)
+    }
+
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {
             ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFineFragment
@@ -122,37 +125,6 @@ class ExpenseEditingActivity : AppCompatActivity() {
         }
         (selectedButton as? MaterialButton)?.isChecked = true
         action?.let(navController::navigate)
-    }
-
-    override fun onBackPressed() = finish()
-
-    private fun onDeleteClicked(v: View) {
-        viewModel.deleteExpense()
-            .subscribeWithLogError { finish() }
-            .disposeBy(lifecycle.disposers.onDestroy)
-    }
-
-    private fun onCreateOrUpdateClicked(v: View) {
-        val actionMaybe = when (viewModel.selectedState) {
-            is SelectedExpenseState.Defined -> viewModel.updateExpense()
-            is SelectedExpenseState.NotDefined -> viewModel.createExpense()
-        }
-        actionMaybe
-            .subscribeOn(Schedulers.io())
-            .subscribeWithLogError {
-                finish()
-            }.disposeBy(lifecycle.disposers.onDestroy)
-    }
-
-    private fun setupSelectedExpense(expenseId: Long) {
-        viewModel.getExpense(expenseId)
-            .subscribeOn(Schedulers.io())
-            .subscribeWithLogError(this::setupExpense)
-            .disposeBy(lifecycle.disposers.onDestroy)
-    }
-
-    private fun setupExpense(expense: Expense) {
-        expense.cost.toString().let(binding.costEt::setText)
     }
 
 //    private val lastFieldListener = TextView.OnEditorActionListener { view, actionId, event ->

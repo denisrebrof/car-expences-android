@@ -1,4 +1,4 @@
-package com.upreality.stats
+package com.upreality.stats.presentation
 
 import androidx.lifecycle.ViewModel
 

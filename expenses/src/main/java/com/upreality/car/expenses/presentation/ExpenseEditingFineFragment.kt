@@ -8,12 +8,13 @@ import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.FinesCategories
-import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
+import presentation.InputState
 import com.upreality.car.expenses.databinding.FragmentExpenseEditingFineBinding as ViewBinding
 
 @AndroidEntryPoint
@@ -28,28 +29,24 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
         binding.chipFineParking.setOnCheckedChangeListener(this::onChipSelected)
         binding.chipFineRoadMarking.setOnCheckedChangeListener(this::onChipSelected)
         binding.chipFineOther.setOnCheckedChangeListener(this::onChipSelected)
-
-        (viewModel.selectedState as? SelectedExpenseState.Defined)
-            ?.let(SelectedExpenseState.Defined::id)
-            ?.let(this::setupSelectedExpense)
-    }
-
-    private fun setupSelectedExpense(expenseId: Long) {
-        viewModel.getExpense(expenseId)
+        viewModel.getViewStateFlow()
+            .firstElement()
             .subscribeOn(Schedulers.io())
-            .subscribeWithLogError(this::setupExpense)
-            .disposeBy(lifecycle.disposers.onDestroy)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWithLogError { viewState ->
+                (viewState.inputState.fineTypeInputState as? InputState.Valid)
+                    ?.let(InputState.Valid<FinesCategories>::input)
+                    ?.let(this::setupFineCategory)
+            }.disposeBy(lifecycle.disposers.onDestroy)
     }
 
-    private fun setupExpense(expense: Expense) {
-        (expense as? Expense.Fine)?.let { fineExpense ->
-            when (fineExpense.type) {
-                FinesCategories.SpeedLimit -> binding.chipFineSpeedLimit
-                FinesCategories.Parking -> binding.chipFineParking
-                FinesCategories.RoadMarking -> binding.chipFineRoadMarking
-                FinesCategories.Other -> binding.chipFineOther
-            }.isSelected = true
-        }
+    private fun setupFineCategory(type: FinesCategories) {
+        when (type) {
+            FinesCategories.SpeedLimit -> binding.chipFineSpeedLimit
+            FinesCategories.Parking -> binding.chipFineParking
+            FinesCategories.RoadMarking -> binding.chipFineRoadMarking
+            FinesCategories.Other -> binding.chipFineOther
+        }.isSelected = true
     }
 
     private fun onChipSelected(buttonView: CompoundButton, isChecked: Boolean) {
