@@ -29,7 +29,7 @@ import javax.inject.Inject
 class ExpenseEditingViewModel @Inject constructor(
     handle: SavedStateHandle,
     private val expensesInteractor: IExpensesInteractor,
-) : ViewModel() {
+) : ViewModel(), IExpenseEditingViewModel {
 
     private val composite = CompositeDisposable()
 
@@ -75,8 +75,7 @@ class ExpenseEditingViewModel @Inject constructor(
             newExpenseCreation = true,
             inputState = ExpenseEditingInputState()
         ).let { Flowable.just(it) }
-        val expenseId = selectedExpenseId ?: return defaultViewStateFlow
-
+//        val expenseId = selectedExpenseId ?: return defaultViewStateFlow
         return initialExpenseTypeInputStateMaybe.map {
             ExpenseEditingInputState(typeInputState = it)
         }.map {

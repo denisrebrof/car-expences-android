@@ -89,6 +89,13 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .distinctUntilChanged(ExpenseType::id)
             .subscribeWithLogError(this::applySelectedType)
             .disposeBy(lifecycle.disposers.onStop)
+
+        viewModel.getCancellationEventFlow()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWithLogError{
+                finish()
+            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun applyViewState(viewState: ExpenseEditingViewState) {
