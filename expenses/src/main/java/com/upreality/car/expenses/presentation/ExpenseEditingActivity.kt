@@ -68,14 +68,6 @@ class ExpenseEditingActivity : AppCompatActivity() {
         val navHostId = binding.expenseDetailsContainer.id
         val navHostFragment = supportFragmentManager.findFragmentById(navHostId) as NavHostFragment
         navController = navHostFragment.navController
-
-        binding.applyButton.text = when (viewModel.selectedState) {
-            is SelectedExpenseState.Defined -> "Update Expense"
-            is SelectedExpenseState.NotDefined -> "Create Expense"
-        }
-        binding.deleteButton.isVisible = viewModel.selectedState is SelectedExpenseState.Defined
-        binding.applyButton.setOnClickListener(this::onCreateOrUpdateClicked)
-        binding.deleteButton.setOnClickListener(this::onDeleteClicked)
     }
 
     override fun onStart() {
@@ -85,7 +77,7 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
 
         viewStateFlow
-            .subscribeWithLogError { applyInputState(it.inputState.costInputState, it.isValid) }
+            .subscribeWithLogError(this::applyViewState)
             .disposeBy(lifecycle.disposers.onStop)
 
         viewStateFlow
@@ -99,23 +91,27 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .disposeBy(lifecycle.disposers.onStop)
     }
 
-    private fun applyInputState(costInputState: InputState<Float>, isValid: Boolean) {
+    private fun applyViewState(viewState: ExpenseEditingViewState) {
         val setErrorIfDefined: (InputState<Float>, EditText) -> Unit = { inputState, editText ->
             val reason = (inputState as? InputState.Invalid)?.let { it.reason ?: defaultFieldError }
             editText.error = reason
         }
-        setErrorIfDefined(costInputState, binding.costEt)
-        binding.applyButton.isEnabled = isValid
+
+        val cost = (viewState.inputState.mileageInputState as? InputState.Valid<Float>)?.input
+        cost?.toString()?.let(binding.costEt::setText)
+        setErrorIfDefined(viewState.inputState.costInputState, binding.costEt)
+
+        binding.applyButton.isEnabled = viewState.isValid
+        binding.deleteButton.isVisible = !viewState.newExpenseCreation
+        binding.applyButton.setOnClickListener {
+            ExpenseEditingIntent.Submit.let(viewModel::executeIntent)
+        }
+        binding.deleteButton.setOnClickListener {
+            ExpenseEditingIntent.Delete.let(viewModel::executeIntent)
+        }
     }
 
     override fun onBackPressed() = finish()
-
-    private fun setupViewState(viewState: ExpenseEditingViewState) {
-        val cost = (viewState.inputState.mileageInputState as? InputState.Valid<Float>)?.input
-        cost?.toString()?.let(binding.costEt::setText)
-        val type = (viewState.inputState.typeInputState as? InputState.Valid<ExpenseType>)?.input
-        type?.let(this::applySelectedType)
-    }
 
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {
