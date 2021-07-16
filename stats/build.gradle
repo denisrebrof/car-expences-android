@@ -65,7 +65,6 @@ dependencies {
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
 
-    api project(':stats')
     api project(":uikit")
     api project(":common")
 }

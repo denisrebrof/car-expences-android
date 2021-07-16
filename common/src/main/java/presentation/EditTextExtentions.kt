@@ -15,8 +15,8 @@ fun EditText.addAfterTextChangedListener(action: (String) -> Unit) {
         }
 
         override fun afterTextChanged(s: Editable?) {
-
-            s?.toString()?.let(action)
+            if (!this@addAfterTextChangedListener.isFocused)
+                s?.toString()?.let(action)
         }
     }.let(this::addTextChangedListener)
 }
