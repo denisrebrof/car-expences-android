@@ -1,5 +1,7 @@
 package presentation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
 import presentation.InputForm.IFormField.RequestInputStateResult.Success
@@ -16,31 +18,33 @@ sealed class InputState<out T : Any> {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
 fun <ValueType : Any, OutType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm<Key, OutType>.submitValue(
     value: ValueType,
     key: Key
-): InputForm.SubmitFieldValue {
+): InputForm.SubmitFieldValueResult {
     return this.submitValue(key, value)
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
 class InputForm<Key : InputForm.FieldKey, OutType : Any>(
-    private val formValidator: (Map<Key, IFormField>) -> OutType
+    fields: Map<Key, IFormField>
 ) {
 
-    private val fieldsMap = mutableMapOf<Key, IFormField>()
+    init {
+        fields.forEach { (key, value) -> fieldsMap[key] = value }
+    }
 
-//    fun getFormFlow(): Flowable<FormValue<Any>> {
-//
-//    }
+    private val fieldsMap = mutableMapOf<Key, IFormField>()
 
     internal fun <ValueType : Any> submitValue(
         key: Key,
         value: ValueType
-    ): SubmitFieldValue {
+    ): SubmitFieldValueResult {
         return fieldsMap.get(key.fieldId)
             ?.submitInput(value)
-            ?.let(SubmitFieldValue::Success)
-            ?: SubmitFieldValue.FieldNotFound
+            ?.let(SubmitFieldValueResult::Success)
+            ?: SubmitFieldValueResult.FieldNotFound
     }
 
     interface FieldKey {
@@ -52,14 +56,14 @@ class InputForm<Key : InputForm.FieldKey, OutType : Any>(
         internal fun <OutType : Any> submit(
             value: ValueType,
             form: InputForm<FieldKeys<ValueType>, OutType>
-        ): SubmitFieldValue {
+        ): SubmitFieldValueResult {
             return form.submitValue(this, value)
         }
     }
 
-    sealed class SubmitFieldValue {
-        data class Success(val result: IFormField.SubmitInputResult) : SubmitFieldValue()
-        object FieldNotFound : SubmitFieldValue()
+    sealed class SubmitFieldValueResult {
+        data class Success(val result: IFormField.SubmitInputResult) : SubmitFieldValueResult()
+        object FieldNotFound : SubmitFieldValueResult()
     }
 
     interface IFormField {
