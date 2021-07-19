@@ -2,22 +2,21 @@ package com.upreality.car.expenses.presentation
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.expence.Expense
-import presentation.InputState
 import java.security.InvalidParameterException
 import java.util.*
 
 object ExpenseEditingInputStateConverter {
 
-    fun toExpense(inputState: ExpenseEditingInputState): Result<Expense> {
+    fun toExpense(inputState: ExpenseEditingViewModel.ExpenseEditingViewState): Result<Expense> {
         val exception = InvalidParameterException("Invalid input")
         val failure = Result.failure<Expense>(exception)
 
-        val cost = inputState.costInputState.validOrNull() ?: return failure
-        val type = inputState.typeInputState.validOrNull() ?: return failure
+        val cost = inputState.costState.validOrNull() ?: return failure
+        val type = inputState.typeState.validOrNull() ?: return failure
 
         val expense = when (type.input) {
             ExpenseType.Fines -> {
-                val fineCategory = inputState.fineTypeInputState.validOrNull() ?: return failure
+                val fineCategory = inputState.fineTypeState.validOrNull() ?: return failure
                 Expense.Fine(
                     date = Date(),
                     cost = cost.input ?: return failure,
@@ -25,8 +24,8 @@ object ExpenseEditingInputStateConverter {
                 )
             }
             ExpenseType.Fuel -> {
-                val liters = inputState.litersInputState.validOrNull() ?: return failure
-                val mileage = inputState.mileageInputState.validOrNull() ?: return failure
+                val liters = inputState.litersState.validOrNull() ?: return failure
+                val mileage = inputState.mileageState.validOrNull() ?: return failure
                 Expense.Fuel(
                     date = Date(),
                     cost = cost.input ?: return failure,
@@ -39,27 +38,7 @@ object ExpenseEditingInputStateConverter {
         return Result.success(expense)
     }
 
-    fun fromExpense(expense: Expense): ExpenseEditingInputState {
-        val liters = (expense as? Expense.Fuel)?.liters
-        val litersInputState = liters?.let { InputState.Valid(it) } ?: InputState.Empty
-
-        val mileage = (expense as? Expense.Fuel)?.mileage
-            ?: (expense as? Expense.Maintenance)?.mileage
-        val mileageInputState = mileage?.let { InputState.Valid(it) } ?: InputState.Empty
-
-        val fineType = (expense as? Expense.Fine)?.type
-        val fineTypeInputState = fineType?.let { InputState.Valid(it) } ?: InputState.Empty
-
-        return ExpenseEditingInputState(
-            costInputState = InputState.Valid(expense.cost),
-            typeInputState = getExpenseType(expense).let { InputState.Valid(it) },
-            litersInputState = litersInputState,
-            mileageInputState = mileageInputState,
-            fineTypeInputState = fineTypeInputState
-        )
-    }
-
-    private fun getExpenseType(expense: Expense): ExpenseType {
+    fun getExpenseType(expense: Expense): ExpenseType {
         return when (expense) {
             is Expense.Fuel -> ExpenseType.Fuel
             is Expense.Fine -> ExpenseType.Fines

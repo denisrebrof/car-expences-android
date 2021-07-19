@@ -1,254 +1,114 @@
 package com.upreality.car.expenses.presentation
 
-import android.os.Parcelable
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
-import com.upreality.car.expenses.presentation.ExpenseEditingActivity.Companion.EXPENSE_ID
-import com.upreality.car.expenses.presentation.ExpenseEditingIntent.SetInput.*
-import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.Completable
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.*
 import io.reactivex.Flowable
 import io.reactivex.Maybe
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.processors.BehaviorProcessor
-import io.reactivex.processors.PublishProcessor
-import io.reactivex.schedulers.Schedulers
-import kotlinx.android.parcel.Parcelize
-import presentation.InputState
-import presentation.SavedStateItemDelegate
-import java.security.InvalidParameterException
+import presentation.*
+import presentation.InputForm.RequestFieldInputStateResult.Success
 import java.util.*
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
-@HiltViewModel
 class ExpenseEditingViewModel @Inject constructor(
     handle: SavedStateHandle,
     private val expensesInteractor: IExpensesInteractor,
-) : ViewModel(), IExpenseEditingViewModel {
+) : ViewModel() {
 
-    private val composite = CompositeDisposable()
+    private val selectedExpenseId = handle.get<Long>(ExpenseEditingActivity.EXPENSE_ID)
+    private val expenseMaybe = selectedExpenseId?.let(expensesInteractor::getExpenseMaybe)
 
-    private val selectedExpenseId = handle.get<Long>(EXPENSE_ID)
-
-    private var selectedExpenseTypeId: Int? by SavedStateItemDelegate(handle)
-
-    private val initialExpenseTypeMaybe = selectedExpenseTypeId?.let { id ->
-        ExpenseType.values().firstOrNull { it.id == id }?.let { Maybe.just(it) }
-    } ?: selectedExpenseId?.let(this::getExpense)?.map { expense ->
-        when (expense) {
-            is Expense.Fine -> ExpenseType.Fines
-            is Expense.Fuel -> ExpenseType.Fuel
-            is Expense.Maintenance -> ExpenseType.Maintenance
-        }
-    }
-
-    private val initialExpenseTypeInputStateMaybe = initialExpenseTypeMaybe?.map { type ->
-        InputState.Valid(type)
-    } ?: InputState.Empty.let { Maybe.just(it) }
-
-    private fun getExpense(expenseId: Long): Maybe<Expense> {
-        return expensesInteractor
-            .getExpensesFlow(ExpenseFilter.Id(expenseId))
-            .firstElement()
-            .filter(List<Expense>::isNotEmpty)
-            .map(List<Expense>::first)
-    }
-
-    private val viewStateFlow = BehaviorProcessor.createDefault(
-        ExpenseEditingViewState(
-            isValid = false,
-            newExpenseCreation = true,
-            ExpenseEditingInputState()
-        )
+    @RequiresApi(Build.VERSION_CODES.N)
+    private val form = InputForm(
+        Cost to Cost.createField(),
+        Type to Type.createField(),
+        Liters to Liters.createField(),
+        Mileage to Mileage.createField(),
+        FineType to FineType.createField(),
     )
 
-    private val cancellationFlow = PublishProcessor.create<Unit>()
-
-    override fun getViewStateFlow(): Flowable<ExpenseEditingViewState> {
-        val defaultViewStateFlow = ExpenseEditingViewState(
-            isValid = false,
-            newExpenseCreation = true,
-            inputState = ExpenseEditingInputState()
-        ).let { Flowable.just(it) }
-//        val expenseId = selectedExpenseId ?: return defaultViewStateFlow
-        return initialExpenseTypeInputStateMaybe.map {
-            ExpenseEditingInputState(typeInputState = it)
-        }.map {
-            ExpenseEditingViewState(false, false, it)
-        }.flatMapPublisher(viewStateFlow::startWith)
-    }
-
-    override fun getCancellationEventFlow(): Flowable<Unit> = cancellationFlow
-
-    override fun executeIntent(intent: ExpenseEditingIntent) {
-        when (intent) {
-            is ExpenseEditingIntent.SetInput -> executeSetInputIntent(intent)
-            is ExpenseEditingIntent.Submit -> {
-                val submitOperation = when (selectedExpenseId) {
-                    null -> createExpense()
-                    else -> updateExpense()
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun getViewState(): Flowable<ExpenseEditingViewState> {
+        val expenseMaybe = expenseMaybe ?: Maybe.just(Expense.Fuel(Date(), 0f, 0f, 0f))
+        return expenseMaybe.doOnSuccess { expense ->
+            form.submit(expense.cost, Cost)
+            form.submit(expense.let(ExpenseEditingInputStateConverter::getExpenseType), Type)
+            when (expense) {
+                is Expense.Fine -> {
+                    form.submit(expense.type, FineType)
                 }
-                submitOperation
-                    .subscribeOn(Schedulers.io())
-                    .onErrorComplete()
-                    .subscribe {
-                        cancellationFlow.onNext(Unit)
-                    }.let(composite::add)
-            }
-            is ExpenseEditingIntent.Delete -> {
-                if (selectedExpenseId != null) {
-                    deleteExpense()
-                        .subscribeOn(Schedulers.io())
-                        .onErrorComplete()
-                        .subscribe {
-                            cancellationFlow.onNext(Unit)
-                        }
-                        .let(composite::add)
+                is Expense.Fuel -> {
+                    form.submit(expense.liters, Liters)
+                    form.submit(expense.mileage, Mileage)
+                }
+                is Expense.Maintenance -> {
+                    form.submit(expense.mileage, Mileage)
                 }
             }
-        }
-    }
-
-    private fun executeSetInputIntent(intent: ExpenseEditingIntent.SetInput) {
-        val currentState = viewStateFlow.value?.inputState ?: return
-        val resultState = when (intent) {
-            is SetCostInput -> checkFloatInput(intent.input).let { inputState ->
-                currentState.copy(costInputState = inputState)
-            }
-            is SetFineTypeInput -> {
-                val categoryState = InputState.Valid(intent.input)
-                currentState.copy(fineTypeInputState = categoryState)
-            }
-            is SetLitersInput -> checkFloatInput(intent.input).let { inputState ->
-                currentState.copy(litersInputState = inputState)
-            }
-            is SetMileageInput -> checkFloatInput(intent.input).let { inputState ->
-                currentState.copy(mileageInputState = inputState)
-            }
-            is SetTypeInput -> intent.input.id.let(this::checkSelectedTypeInput).let { inputState ->
-                (inputState as? InputState.Valid)?.let { selectedExpenseTypeId = it.input!!.id }
-                currentState.copy(typeInputState = inputState)
-            }
-        }
-        updateInputState(resultState)
-    }
-
-    private fun deleteExpense(): Completable {
-        val error = InvalidParameterException().let(Completable::error)
-        val expenseId = selectedExpenseId ?: return error
-        return expensesInteractor.deleteExpense(expenseId)
-    }
-
-    private fun updateExpense(): Completable {
-        val error = InvalidParameterException().let(Completable::error)
-        val expenseId = selectedExpenseId ?: return error
-        val expense = getExpenseFromInput().getOrNull()?.also { it.id = expenseId } ?: return error
-        return expensesInteractor.updateExpense(expense)
-    }
-
-    private fun createExpense(): Completable {
-        val error = InvalidParameterException().let(Completable::error)
-        val expense = getExpenseFromInput().getOrNull() ?: return error
-        return expensesInteractor.createExpense(expense)
-    }
-
-    private fun updateInputState(inputState: ExpenseEditingInputState) {
-        val inputStateValid = getExpenseFromInput().isSuccess
-        val newInstance = selectedExpenseId == null
-        ExpenseEditingViewState(inputStateValid, newInstance, inputState).let(viewStateFlow::onNext)
-    }
-
-    private fun getExpenseFromInput(): Result<Expense> {
-        val exception = InvalidParameterException("Invalid input")
-        val failure = Result.failure<Expense>(exception)
-        val inputState = viewStateFlow.value?.inputState ?: return failure
-
-        val cost = inputState.costInputState.validOrNull() ?: return failure
-        val type = inputState.typeInputState.validOrNull() ?: return failure
-
-        val expense = when (type.input) {
-            ExpenseType.Fines -> {
-                val fineCategory = inputState.fineTypeInputState.validOrNull() ?: return failure
-                Expense.Fine(
-                    date = Date(),
-                    cost = cost.input  ?: return failure,
-                    type = fineCategory.input  ?: return failure
+        }.flatMapPublisher {
+            val inputStateFlows = arrayOf(
+                form.getStateFlow(Cost, Float::class) as Success,
+                form.getStateFlow(Type, ExpenseType::class) as Success,
+                form.getStateFlow(Liters, Float::class) as Success,
+                form.getStateFlow(Mileage, Float::class) as Success,
+                form.getStateFlow(FineType, FinesCategories::class) as Success,
+            ).map { it.result }
+            return@flatMapPublisher Flowable.combineLatest(inputStateFlows) { inputStates ->
+                val costState = inputStates[0] as InputState<Float>
+                val typeState = inputStates[1] as InputState<ExpenseType>
+                val litersState = inputStates[2] as InputState<Float>
+                val mileageState = inputStates[3] as InputState<Float>
+                val fineTypeState = inputStates[4] as InputState<FinesCategories>
+                return@combineLatest ExpenseEditingViewState(
+                    isValid = inputStates.all { it is InputState.Valid<*> },
+                    newExpenseCreation = selectedExpenseId != null,
+                    costState = costState,
+                    typeState = typeState,
+                    litersState = litersState,
+                    mileageState = mileageState,
+                    fineTypeState = fineTypeState
                 )
             }
-            ExpenseType.Fuel -> {
-                val liters = inputState.litersInputState.validOrNull() ?: return failure
-                val mileage = inputState.mileageInputState.validOrNull() ?: return failure
-                Expense.Fuel(
-                    date = Date(),
-                    cost = cost.input  ?: return failure,
-                    liters = liters.input  ?: return failure,
-                    mileage = mileage.input  ?: return failure
-                )
-            }
-            else -> null
-        } ?: return failure
-
-        return Result.success(expense)
-    }
-
-    private fun checkFloatInput(text: String): InputState<Float> {
-        return when {
-            text.isEmpty() -> InputState.Empty
-            text.toFloatOrNull() == null -> InputState.Invalid("Invalid input")
-            else -> InputState.Valid(text.toFloat())
         }
     }
 
-    private fun checkSelectedTypeInput(typeId: Int): InputState<ExpenseType> {
-        val type = ExpenseType.values()
-            .getOrNull(typeId)
-            ?: return InputState.Invalid("Invalid input")
-        return InputState.Valid(type)
-    }
-
-    override fun onCleared() {
-        if (!composite.isDisposed)
-            composite.dispose()
-        super.onCleared()
-    }
-}
-
-data class ExpenseEditingViewState(
-    val isValid: Boolean,
-    val newExpenseCreation: Boolean,
-    val inputState: ExpenseEditingInputState = ExpenseEditingInputState()
-)
-
-data class ExpenseEditingInputState(
-    val costInputState: InputState<Float> = InputState.Empty,
-    val typeInputState: InputState<ExpenseType> = InputState.Empty,
-    val litersInputState: InputState<Float> = InputState.Empty,
-    val mileageInputState: InputState<Float> = InputState.Empty,
-    val fineTypeInputState: InputState<FinesCategories> = InputState.Empty,
-)
-
-sealed class ExpenseEditingIntent {
-    object Submit : ExpenseEditingIntent()
-    object Delete : ExpenseEditingIntent()
-    sealed class SetInput : ExpenseEditingIntent() {
-        data class SetTypeInput(val input: ExpenseType) : SetInput()
-        data class SetCostInput(val input: String) : SetInput()
-        data class SetLitersInput(val input: String) : SetInput()
-        data class SetMileageInput(val input: String) : SetInput()
-        data class SetFineTypeInput(val input: FinesCategories) : SetInput()
-    }
-}
-
-@Parcelize
-data class ExpenseEditingType(var expenseTypeId: Int?) : Parcelable {
-    var expenseType: ExpenseType?
-        get() = ExpenseType.values().firstOrNull { it.id == expenseTypeId }
-        set(value) {
-            expenseTypeId = value?.id
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun execute(intent: ExpenseEditingIntent) {
+        when(intent){
+            is ExpenseEditingIntent.FillForm<*> -> form.submit(intent.value, intent.key)
         }
+    }
+
+    sealed class ExpenseEditingKeys<ValueType : Any>(id: Int, type: KClass<ValueType>) :
+        InputForm.FieldKeys<ValueType>(id, type) {
+        object Cost : ExpenseEditingKeys<Float>(0, Float::class)
+        object Type : ExpenseEditingKeys<ExpenseType>(1, ExpenseType::class)
+        object Liters : ExpenseEditingKeys<Float>(2, Float::class)
+        object Mileage : ExpenseEditingKeys<Float>(3, Float::class)
+        object FineType : ExpenseEditingKeys<FinesCategories>(4, FinesCategories::class)
+    }
+
+    sealed class ExpenseEditingIntent {
+        data class FillForm<ValueType : Any>(
+            val key: ExpenseEditingKeys<ValueType>,
+            val value: ValueType
+        ) : ExpenseEditingIntent()
+    }
+
+    data class ExpenseEditingViewState(
+        val isValid: Boolean,
+        val newExpenseCreation: Boolean,
+        val costState: InputState<Float>,
+        val typeState: InputState<ExpenseType>,
+        val litersState: InputState<Float>,
+        val mileageState: InputState<Float>,
+        val fineTypeState: InputState<FinesCategories>,
+    )
 }

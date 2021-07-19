@@ -19,51 +19,66 @@ sealed class InputState<out T : Any> {
 }
 
 @RequiresApi(Build.VERSION_CODES.N)
-fun <ValueType : Any, OutType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm<Key, OutType>.submitValue(
+fun <ValueType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm.submit(
     value: ValueType,
     key: Key
 ): InputForm.SubmitFieldValueResult {
     return this.submitValue(key, value)
 }
 
+
 @RequiresApi(Build.VERSION_CODES.N)
-class InputForm<Key : InputForm.FieldKey, OutType : Any>(
-    fields: Map<Key, IFormField>
+fun <ValueType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm.getStateFlow(
+    key: Key,
+    type: KClass<ValueType>
+): InputForm.RequestFieldInputStateResult<ValueType> {
+    return this.getStateFlow(key, type)
+}
+
+fun <ValueType : Any> InputForm.FieldKeys<ValueType>.createField(): ValidatedFormField<ValueType>{
+    return ValidatedFormField(type = this.type)
+}
+
+@RequiresApi(Build.VERSION_CODES.N)
+class InputForm(
+    vararg fields: Pair<FieldKey, IFormField>
 ) {
 
     init {
         fields.forEach { (key, value) -> fieldsMap[key] = value }
     }
 
-    private val fieldsMap = mutableMapOf<Key, IFormField>()
+    private val fieldsMap = mutableMapOf<FieldKey, IFormField>()
 
     internal fun <ValueType : Any> submitValue(
-        key: Key,
+        key: FieldKey,
         value: ValueType
     ): SubmitFieldValueResult {
-        return fieldsMap.get(key.fieldId)
+        return fieldsMap.get(key = key)
             ?.submitInput(value)
             ?.let(SubmitFieldValueResult::Success)
             ?: SubmitFieldValueResult.FieldNotFound
     }
 
-    interface FieldKey {
-        val fieldId: Int
-    }
-
-    abstract class FieldKeys<ValueType : Any>(val id: Int) : FieldKey {
-        override val fieldId: Int = id
-        internal fun <OutType : Any> submit(
-            value: ValueType,
-            form: InputForm<FieldKeys<ValueType>, OutType>
-        ): SubmitFieldValueResult {
-            return form.submitValue(this, value)
+    internal fun <ValueType : Any> getInputStateFlow(
+        key: FieldKey,
+        type: KClass<ValueType>
+    ): RequestFieldInputStateResult<ValueType> {
+        val field = fieldsMap.get(key = key) ?: return RequestFieldInputStateResult.FieldNotFound
+        return field.requestInputState(type).let { formRequestResult ->
+            when (formRequestResult) {
+                is IFormField.RequestInputStateResult.InvalidType -> RequestFieldInputStateResult.InvalidType(
+                    formRequestResult.inputType
+                )
+                is Success -> RequestFieldInputStateResult.Success(
+                    formRequestResult.value
+                )
+            }
         }
     }
 
-    sealed class SubmitFieldValueResult {
-        data class Success(val result: IFormField.SubmitInputResult) : SubmitFieldValueResult()
-        object FieldNotFound : SubmitFieldValueResult()
+    interface FieldKey {
+        val fieldId: Int
     }
 
     interface IFormField {
@@ -80,7 +95,7 @@ class InputForm<Key : InputForm.FieldKey, OutType : Any>(
             data class Success<ValueType : Any>(val value: Flowable<InputState<ValueType>>) :
                 RequestInputStateResult<ValueType>()
 
-            data class InvalidType<ValueType : Any>(val inputType: KClass<ValueType>) :
+            data class InvalidType(val inputType: KClass<out Any>) :
                 RequestInputStateResult<Nothing>()
         }
 
@@ -90,12 +105,30 @@ class InputForm<Key : InputForm.FieldKey, OutType : Any>(
         }
     }
 
-    sealed class FormValue<OutType> {
-        data class Valid<OutType>(val value: OutType) : FormValue<OutType>()
-        object Invalid : FormValue<Nothing>()
-        object Empty : FormValue<Nothing>()
+    abstract class FieldKeys<ValueType : Any>(val id: Int,val type: KClass<ValueType>) : FieldKey {
+        override val fieldId: Int = id
+        internal fun submit(
+            value: ValueType,
+            form: InputForm
+        ): SubmitFieldValueResult {
+            return form.submitValue(this, value)
+        }
     }
 
+    sealed class SubmitFieldValueResult {
+        data class Success(val result: IFormField.SubmitInputResult) : SubmitFieldValueResult()
+        object FieldNotFound : SubmitFieldValueResult()
+    }
+
+    sealed class RequestFieldInputStateResult<out ValueType : Any> {
+        data class Success<ValueType : Any>(val result: Flowable<InputState<ValueType>>) :
+            RequestFieldInputStateResult<ValueType>()
+
+        data class InvalidType(val inputType: KClass<out Any>) :
+            RequestFieldInputStateResult<Nothing>()
+
+        object FieldNotFound : RequestFieldInputStateResult<Nothing>()
+    }
 }
 
 class ValidatedFormField<ValueType : Any>(
