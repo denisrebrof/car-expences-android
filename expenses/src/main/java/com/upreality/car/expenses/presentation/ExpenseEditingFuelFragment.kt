@@ -1,12 +1,17 @@
 package com.upreality.car.expenses.presentation
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
-import com.upreality.car.expenses.presentation.ExpenseEditingIntent.SetInput
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.Liters
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.Mileage
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -23,29 +28,28 @@ class ExpenseEditingFuelFragment : Fragment(R.layout.fragment_expense_editing_fu
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ExpenseEditingViewModel by activityViewModels()
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.litersEt.addAfterTextChangedListener { litersText ->
-            SetInput.SetLitersInput(litersText).let(viewModel::executeIntent)
+            FillForm(Liters, litersText, String::class).let(viewModel::execute)
         }
         binding.mileageEt.addAfterTextChangedListener { mileageText ->
-            SetInput.SetMileageInput(mileageText).let(viewModel::executeIntent)
+            FillForm(Mileage, mileageText, String::class).let(viewModel::execute)
         }
 
-        viewModel.getViewStateFlow()
-            .firstElement()
+        viewModel.getViewState()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError { viewState ->
-                viewState.inputState.let(this::setupInputs)
+                trySetupInput(viewState.litersState, binding.litersEt)
+                trySetupInput(viewState.mileageState, binding.mileageEt)
             }.disposeBy(lifecycle.disposers.onDestroy)
 //        binding.mileageEt.setOnEditorActionListener(lastFieldListener)
     }
 
-    private fun setupInputs(inputState: ExpenseEditingInputState) {
-        val liters = (inputState.litersInputState as? InputState.Valid<Float>)?.input
-        val mileage = (inputState.mileageInputState as? InputState.Valid<Float>)?.input
-        liters?.toString()?.let(binding.litersEt::setText)
-        mileage?.toString()?.let(binding.mileageEt::setText)
+    private fun trySetupInput(state: InputState<String>, et: EditText) {
+        (state as? InputState.Valid)?.input.let(et::setText)
+        (state as? InputState.Invalid)?.reason.let(et::setError)
     }
 }

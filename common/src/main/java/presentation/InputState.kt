@@ -19,9 +19,9 @@ sealed class InputState<out T : Any> {
 }
 
 @RequiresApi(Build.VERSION_CODES.N)
-fun <ValueType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm.submit(
+fun <ValueType : Any> InputForm.submit(
     value: ValueType,
-    key: Key
+    key: InputForm.FieldKeys<ValueType>
 ): InputForm.SubmitFieldValueResult {
     return this.submitValue(key, value)
 }
@@ -32,23 +32,20 @@ fun <ValueType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm.getStateFl
     key: Key,
     type: KClass<ValueType>
 ): InputForm.RequestFieldInputStateResult<ValueType> {
-    return this.getStateFlow(key, type)
+    return this.getInputStateFlow(key, type)
 }
 
-fun <ValueType : Any> InputForm.FieldKeys<ValueType>.createField(): ValidatedFormField<ValueType>{
-    return ValidatedFormField(type = this.type)
-}
+fun <ValueType : Any> InputForm.FieldKeys<ValueType>.createFieldPair(type: KClass<ValueType>) =
+    this to ValidatedFormField(type = type)
 
 @RequiresApi(Build.VERSION_CODES.N)
 class InputForm(
     vararg fields: Pair<FieldKey, IFormField>
 ) {
 
-    init {
-        fields.forEach { (key, value) -> fieldsMap[key] = value }
+    private val fieldsMap = mutableMapOf<FieldKey, IFormField>().apply {
+        fields.forEach { (key, value) -> put(key, value) }
     }
-
-    private val fieldsMap = mutableMapOf<FieldKey, IFormField>()
 
     internal fun <ValueType : Any> submitValue(
         key: FieldKey,
@@ -105,14 +102,8 @@ class InputForm(
         }
     }
 
-    abstract class FieldKeys<ValueType : Any>(val id: Int,val type: KClass<ValueType>) : FieldKey {
+    abstract class FieldKeys<out ValueType : Any>(val id: Int) : FieldKey {
         override val fieldId: Int = id
-        internal fun submit(
-            value: ValueType,
-            form: InputForm
-        ): SubmitFieldValueResult {
-            return form.submitValue(this, value)
-        }
     }
 
     sealed class SubmitFieldValueResult {
@@ -131,8 +122,8 @@ class InputForm(
     }
 }
 
-class ValidatedFormField<ValueType : Any>(
-    private val validator: Validator<ValueType> = NotNullValidator(),
+class ValidatedFormField<in ValueType : Any>(
+    private val validator: Validator<ValueType> = NullableValidator(),
     private var value: ValueType? = null,
     private val type: KClass<ValueType>
 ) : InputForm.IFormField {
@@ -145,7 +136,7 @@ class ValidatedFormField<ValueType : Any>(
     }
 
     override fun <RequestValueType : Any> requestInputState(type: KClass<RequestValueType>): InputForm.IFormField.RequestInputStateResult<RequestValueType> {
-        if (!type.isInstance(value)) {
+        if (this.type != type) {
             val valueClass = if (value != null) value!!::class else Nothing::class
             return InputForm.IFormField.RequestInputStateResult.InvalidType(valueClass)
         }
@@ -167,7 +158,7 @@ class ValidatedFormField<ValueType : Any>(
     override fun <SubmitValueType : Any> submitInput(
         input: SubmitValueType
     ): InputForm.IFormField.SubmitInputResult {
-        if (!type.isInstance(value)) {
+        if (!type.isInstance(input)) {
             return InputForm.IFormField.SubmitInputResult.InvalidType
         }
 

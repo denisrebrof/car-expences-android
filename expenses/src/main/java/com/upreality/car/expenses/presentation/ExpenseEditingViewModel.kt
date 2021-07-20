@@ -1,6 +1,7 @@
 package com.upreality.car.expenses.presentation
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,14 +10,17 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
 import io.reactivex.Maybe
+import io.reactivex.processors.PublishProcessor
 import presentation.*
 import presentation.InputForm.RequestFieldInputStateResult.Success
 import java.util.*
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
+@HiltViewModel
 class ExpenseEditingViewModel @Inject constructor(
     handle: SavedStateHandle,
     private val expensesInteractor: IExpensesInteractor,
@@ -25,46 +29,37 @@ class ExpenseEditingViewModel @Inject constructor(
     private val selectedExpenseId = handle.get<Long>(ExpenseEditingActivity.EXPENSE_ID)
     private val expenseMaybe = selectedExpenseId?.let(expensesInteractor::getExpenseMaybe)
 
+    private val defaultExpense = Expense.Fuel(Date(), 0f, 0f, 0f)
+
     @RequiresApi(Build.VERSION_CODES.N)
     private val form = InputForm(
-        Cost to Cost.createField(),
-        Type to Type.createField(),
-        Liters to Liters.createField(),
-        Mileage to Mileage.createField(),
-        FineType to FineType.createField(),
+        Cost.createFieldPair(String::class),
+        Type.createFieldPair(ExpenseType::class),
+        Liters.createFieldPair(String::class),
+        Mileage.createFieldPair(String::class),
+        FineType.createFieldPair(FinesCategories::class),
     )
+
+    private val actionsProcessor = PublishProcessor.create<ExpenseEditingAction>()
+
+    fun getActionState(): Flowable<ExpenseEditingAction> = actionsProcessor
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun getViewState(): Flowable<ExpenseEditingViewState> {
-        val expenseMaybe = expenseMaybe ?: Maybe.just(Expense.Fuel(Date(), 0f, 0f, 0f))
-        return expenseMaybe.doOnSuccess { expense ->
-            form.submit(expense.cost, Cost)
-            form.submit(expense.let(ExpenseEditingInputStateConverter::getExpenseType), Type)
-            when (expense) {
-                is Expense.Fine -> {
-                    form.submit(expense.type, FineType)
-                }
-                is Expense.Fuel -> {
-                    form.submit(expense.liters, Liters)
-                    form.submit(expense.mileage, Mileage)
-                }
-                is Expense.Maintenance -> {
-                    form.submit(expense.mileage, Mileage)
-                }
-            }
-        }.flatMapPublisher {
+        val expenseMaybe = expenseMaybe ?: Maybe.just(defaultExpense)
+        return expenseMaybe.doOnSuccess(this::applyExpenseToForm).flatMapPublisher {
             val inputStateFlows = arrayOf(
-                form.getStateFlow(Cost, Float::class) as Success,
+                form.getStateFlow(Cost, String::class) as Success,
                 form.getStateFlow(Type, ExpenseType::class) as Success,
-                form.getStateFlow(Liters, Float::class) as Success,
-                form.getStateFlow(Mileage, Float::class) as Success,
+                form.getStateFlow(Liters, String::class) as Success,
+                form.getStateFlow(Mileage, String::class) as Success,
                 form.getStateFlow(FineType, FinesCategories::class) as Success,
             ).map { it.result }
             return@flatMapPublisher Flowable.combineLatest(inputStateFlows) { inputStates ->
-                val costState = inputStates[0] as InputState<Float>
+                val costState = inputStates[0] as InputState<String>
                 val typeState = inputStates[1] as InputState<ExpenseType>
-                val litersState = inputStates[2] as InputState<Float>
-                val mileageState = inputStates[3] as InputState<Float>
+                val litersState = inputStates[2] as InputState<String>
+                val mileageState = inputStates[3] as InputState<String>
                 val fineTypeState = inputStates[4] as InputState<FinesCategories>
                 return@combineLatest ExpenseEditingViewState(
                     isValid = inputStates.all { it is InputState.Valid<*> },
@@ -75,40 +70,90 @@ class ExpenseEditingViewModel @Inject constructor(
                     mileageState = mileageState,
                     fineTypeState = fineTypeState
                 )
+            }.doOnError {
+                Log.d("","")
+            }
+        }.distinctUntilChanged()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun applyExpenseToForm(expense: Expense) {
+//        val cost = expense.cost.toString()
+//        val liters = (expense as? Expense.Fuel)?.liters?.toString() ?: ""
+//        val fineType = (expense as? Expense.Fine)?.type ?: FinesCategories.Other
+//        val mileage = (expense as? Expense.Fuel)?.mileage?.toString()
+//            ?: (expense as? Expense.Maintenance)?.mileage?.toString()
+//            ?: String()
+//        val type = ExpenseEditingInputStateConverter.getExpenseType(expense)
+//        val action = ExpenseEditingAction.SetupExpense(cost, type, liters, mileage, fineType)
+//        actionsProcessor.onNext(action)
+
+        form.submit(expense.cost.toString(), Cost)
+        form.submit(expense.let(ExpenseEditingInputStateConverter::getExpenseType), Type)
+        when (expense) {
+            is Expense.Fine -> {
+                form.submit(expense.type, FineType)
+            }
+            is Expense.Fuel -> {
+                form.submit(expense.liters.toString(), Liters)
+                form.submit(expense.mileage.toString(), Mileage)
+            }
+            is Expense.Maintenance -> {
+                form.submit(expense.mileage.toString(), Mileage)
             }
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun execute(intent: ExpenseEditingIntent) {
-        when(intent){
-            is ExpenseEditingIntent.FillForm<*> -> form.submit(intent.value, intent.key)
+        when (intent) {
+            is ExpenseEditingIntent.FillForm<*> -> {
+                val submitRes = form.submit(intent.value, intent.key)
+                Log.d("subm res","")
+            }
+            ExpenseEditingIntent.Close -> actionsProcessor.onNext(ExpenseEditingAction.Finish)
         }
     }
 
-    sealed class ExpenseEditingKeys<ValueType : Any>(id: Int, type: KClass<ValueType>) :
-        InputForm.FieldKeys<ValueType>(id, type) {
-        object Cost : ExpenseEditingKeys<Float>(0, Float::class)
+    sealed class ExpenseEditingKeys<out ValueType : Any>(id: Int, type: KClass<ValueType>) :
+        InputForm.FieldKeys<ValueType>(id) {
+        object Cost : ExpenseEditingKeys<String>(0, String::class)
         object Type : ExpenseEditingKeys<ExpenseType>(1, ExpenseType::class)
-        object Liters : ExpenseEditingKeys<Float>(2, Float::class)
-        object Mileage : ExpenseEditingKeys<Float>(3, Float::class)
+        object Liters : ExpenseEditingKeys<String>(2, String::class)
+        object Mileage : ExpenseEditingKeys<String>(3, String::class)
         object FineType : ExpenseEditingKeys<FinesCategories>(4, FinesCategories::class)
+    }
+
+    sealed class ExpenseEditingAction {
+        object Finish : ExpenseEditingAction()
+//        data class SetupExpense(
+//            val costState: String,
+//            val typeState: ExpenseType,
+//            val litersState: String,
+//            val mileageState: String,
+//            val fineTypeState: FinesCategories,
+//        ) : ExpenseEditingAction()
     }
 
     sealed class ExpenseEditingIntent {
         data class FillForm<ValueType : Any>(
             val key: ExpenseEditingKeys<ValueType>,
-            val value: ValueType
+            val value: ValueType,
+            val type: KClass<ValueType>
         ) : ExpenseEditingIntent()
+
+        object Close : ExpenseEditingIntent()
+        object Submit : ExpenseEditingIntent()
+        object Delete : ExpenseEditingIntent()
     }
 
     data class ExpenseEditingViewState(
         val isValid: Boolean,
         val newExpenseCreation: Boolean,
-        val costState: InputState<Float>,
+        val costState: InputState<String>,
         val typeState: InputState<ExpenseType>,
-        val litersState: InputState<Float>,
-        val mileageState: InputState<Float>,
+        val litersState: InputState<String>,
+        val mileageState: InputState<String>,
         val fineTypeState: InputState<FinesCategories>,
     )
 }

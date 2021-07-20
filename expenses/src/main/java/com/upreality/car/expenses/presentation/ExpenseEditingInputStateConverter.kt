@@ -19,7 +19,7 @@ object ExpenseEditingInputStateConverter {
                 val fineCategory = inputState.fineTypeState.validOrNull() ?: return failure
                 Expense.Fine(
                     date = Date(),
-                    cost = cost.input ?: return failure,
+                    cost = cost.input?.toFloatOrNull() ?: return failure,
                     type = fineCategory.input ?: return failure
                 )
             }
@@ -28,9 +28,9 @@ object ExpenseEditingInputStateConverter {
                 val mileage = inputState.mileageState.validOrNull() ?: return failure
                 Expense.Fuel(
                     date = Date(),
-                    cost = cost.input ?: return failure,
-                    liters = liters.input ?: return failure,
-                    mileage = mileage.input ?: return failure
+                    cost = cost.input?.toFloatOrNull() ?: return failure,
+                    liters = liters.input?.toFloatOrNull() ?: return failure,
+                    mileage = mileage.input?.toFloatOrNull() ?: return failure
                 )
             }
             else -> null

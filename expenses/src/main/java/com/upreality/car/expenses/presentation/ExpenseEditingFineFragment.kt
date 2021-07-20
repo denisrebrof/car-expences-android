@@ -1,13 +1,17 @@
 package com.upreality.car.expenses.presentation
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.FinesCategories
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.FineType
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -23,18 +27,19 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ExpenseEditingViewModel by activityViewModels()
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.chipFineSpeedLimit.setOnCheckedChangeListener(this::onChipSelected)
         binding.chipFineParking.setOnCheckedChangeListener(this::onChipSelected)
         binding.chipFineRoadMarking.setOnCheckedChangeListener(this::onChipSelected)
         binding.chipFineOther.setOnCheckedChangeListener(this::onChipSelected)
-        viewModel.getViewStateFlow()
+        viewModel.getViewState()
             .firstElement()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError { viewState ->
-                (viewState.inputState.fineTypeInputState as? InputState.Valid)
+                (viewState.fineTypeState as? InputState.Valid)
                     ?.let(InputState.Valid<FinesCategories>::input)
                     ?.let(this::setupFineCategory)
             }.disposeBy(lifecycle.disposers.onDestroy)
@@ -52,11 +57,12 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
     private fun onChipSelected(buttonView: CompoundButton, isChecked: Boolean) {
         if (!isChecked)
             return
-        when (buttonView) {
+        val fineType = when (buttonView) {
             binding.chipFineSpeedLimit -> FinesCategories.SpeedLimit
             binding.chipFineParking -> FinesCategories.Parking
             binding.chipFineRoadMarking -> FinesCategories.RoadMarking
             else -> FinesCategories.Other
-        }.let(ExpenseEditingIntent.SetInput::SetFineTypeInput).let(viewModel::executeIntent)
+        }
+        FillForm(FineType, fineType, FinesCategories::class).let(viewModel::execute)
     }
 }

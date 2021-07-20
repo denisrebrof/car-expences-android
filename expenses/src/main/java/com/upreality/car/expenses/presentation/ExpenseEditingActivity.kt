@@ -2,9 +2,11 @@ package com.upreality.car.expenses.presentation
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
@@ -13,6 +15,8 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.button.MaterialButton
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.*
+import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -53,16 +57,17 @@ class ExpenseEditingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
         binding.costEt.addAfterTextChangedListener { costText ->
-            ExpenseEditingIntent.SetInput.SetCostInput(costText).let(viewModel::executeIntent)
+            FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
         }
         binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked)
                 return@addOnButtonCheckedListener
-            when (checkedId) {
+            val type = when (checkedId) {
                 binding.fineTypeButton.id -> ExpenseType.Fines
                 binding.fuelTypeButton.id -> ExpenseType.Fuel
                 else -> return@addOnButtonCheckedListener
-            }.let(ExpenseEditingIntent.SetInput::SetTypeInput).let(viewModel::executeIntent)
+            }
+            FillForm(ExpenseEditingKeys.Type, type, ExpenseType::class).let(viewModel::execute)
         }
 
         val navHostId = binding.expenseDetailsContainer.id
@@ -70,9 +75,10 @@ class ExpenseEditingActivity : AppCompatActivity() {
         navController = navHostFragment.navController
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onStart() {
         super.onStart()
-        val viewStateFlow = viewModel.getViewStateFlow()
+        val viewStateFlow = viewModel.getViewState()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
@@ -81,8 +87,7 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .disposeBy(lifecycle.disposers.onStop)
 
         viewStateFlow
-            .map(ExpenseEditingViewState::inputState)
-            .map(ExpenseEditingInputState::typeInputState)
+            .map(ExpenseEditingViewState::typeState)
             .ofType(InputState.Valid::class.java)
             .map(InputState.Valid<*>::input)
             .ofType(ExpenseType::class.java)
@@ -90,31 +95,37 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .subscribeWithLogError(this::applySelectedType)
             .disposeBy(lifecycle.disposers.onStop)
 
-        viewModel.getCancellationEventFlow()
+        viewModel.getActionState()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWithLogError{
-                finish()
+            .subscribeWithLogError { action ->
+                when (action) {
+                    ExpenseEditingAction.Finish -> finish()
+//                    is ExpenseEditingAction.SetupExpense -> setupExpense(action)
+                }
             }.disposeBy(lifecycle.disposers.onStop)
     }
 
+//    private fun setupExpense(action: ExpenseEditingAction.SetupExpense) {
+//        action.costState.let(binding.costEt::setText)
+//        applySelectedType(action.typeState)
+//    }
+
     private fun applyViewState(viewState: ExpenseEditingViewState) {
-        val setErrorIfDefined: (InputState<Float>, EditText) -> Unit = { inputState, editText ->
+        val setErrorIfDefined: (InputState<String>, EditText) -> Unit = { inputState, editText ->
             val reason = (inputState as? InputState.Invalid)?.let { it.reason ?: defaultFieldError }
             editText.error = reason
         }
 
-        val cost = (viewState.inputState.mileageInputState as? InputState.Valid<Float>)?.input
-        cost?.toString()?.let(binding.costEt::setText)
-        setErrorIfDefined(viewState.inputState.costInputState, binding.costEt)
+        setErrorIfDefined(viewState.costState, binding.costEt)
 
         binding.applyButton.isEnabled = viewState.isValid
         binding.deleteButton.isVisible = !viewState.newExpenseCreation
         binding.applyButton.setOnClickListener {
-            ExpenseEditingIntent.Submit.let(viewModel::executeIntent)
+            ExpenseEditingIntent.Submit.let(viewModel::execute)
         }
         binding.deleteButton.setOnClickListener {
-            ExpenseEditingIntent.Delete.let(viewModel::executeIntent)
+            ExpenseEditingIntent.Delete.let(viewModel::execute)
         }
     }
 
