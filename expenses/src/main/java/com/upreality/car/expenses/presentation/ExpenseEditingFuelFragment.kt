@@ -13,9 +13,9 @@ import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEd
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
+import presentation.AfterTextChangedWatcher
 import presentation.RxLifecycleExtentions.subscribeDefault
-import presentation.getAfterTextChangedWatcher
-import presentation.silentApplyText
+import presentation.applyWithDisabledTextWatcher
 import com.upreality.car.expenses.databinding.FragmentExpenseEditingFuelBinding as ViewBinding
 
 @AndroidEntryPoint
@@ -24,16 +24,12 @@ class ExpenseEditingFuelFragment : Fragment(R.layout.fragment_expense_editing_fu
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ExpenseEditingViewModel by activityViewModels()
 
-    private val litersWatcher by lazy {
-        binding.litersEt.getAfterTextChangedWatcher { litersText ->
-            FillForm(Liters, litersText, String::class).let(viewModel::execute)
-        }
+    private val litersWatcher = AfterTextChangedWatcher { litersText ->
+        FillForm(Liters, litersText, String::class).let(viewModel::execute)
     }
 
-    private val mileageWatcher by lazy {
-        binding.mileageEt.getAfterTextChangedWatcher { mileageText ->
-            FillForm(Mileage, mileageText, String::class).let(viewModel::execute)
-        }
+    private val mileageWatcher = AfterTextChangedWatcher { mileageText ->
+        FillForm(Mileage, mileageText, String::class).let(viewModel::execute)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -48,7 +44,13 @@ class ExpenseEditingFuelFragment : Fragment(R.layout.fragment_expense_editing_fu
     }
 
     private fun applyViewState(viewState: ExpenseEditingViewState) {
-        binding.litersEt.silentApplyText(viewState.litersState.input ?: "", litersWatcher)
-        binding.mileageEt.silentApplyText(viewState.mileageState.input ?: "", mileageWatcher)
+        binding.litersEt.applyWithDisabledTextWatcher(litersWatcher) {
+            if (text.toString() != viewState.litersState.input)
+                text = viewState.litersState.input ?: ""
+        }
+        binding.mileageEt.applyWithDisabledTextWatcher(mileageWatcher) {
+            if (text.toString() != viewState.mileageState.input)
+                text = viewState.mileageState.input ?: ""
+        }
     }
 }

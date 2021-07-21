@@ -17,6 +17,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import presentation.*
@@ -25,6 +26,7 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.reflect.KClass
 
+@RequiresApi(Build.VERSION_CODES.N)
 @HiltViewModel
 class ExpenseEditingViewModel @Inject constructor(
     handle: SavedStateHandle,
@@ -47,14 +49,18 @@ class ExpenseEditingViewModel @Inject constructor(
         FineType.createFieldPair(FinesCategories::class),
     )
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    private val viewStateProcessor = BehaviorProcessor.create<ExpenseEditingViewState>()
     private val actionsProcessor = PublishProcessor.create<ExpenseEditingAction>()
 
-    fun getActionState(): Flowable<ExpenseEditingAction> = actionsProcessor
+    init {
+        createViewStateFlow()
+    }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun getViewState(): Flowable<ExpenseEditingViewState> {
+    private fun createViewStateFlow() {
         val expenseMaybe = expenseMaybe ?: Maybe.just(defaultExpense)
-        return expenseMaybe.doOnSuccess(this::applyExpenseToForm).flatMapPublisher {
+        val flow = expenseMaybe.doOnSuccess(this::applyExpenseToForm).flatMapPublisher {
             val inputStateFlows = arrayOf(
                 form.getStateFlow(Cost, String::class) as Success,
                 form.getStateFlow(Type, ExpenseType::class) as Success,
@@ -89,26 +95,37 @@ class ExpenseEditingViewModel @Inject constructor(
             }.doOnError {
                 Log.d("", "")
             }
-        }.distinctUntilChanged()
+        }
+        flow.distinctUntilChanged()
+            .subscribeWithLogError(viewStateProcessor::onNext)
+            .let(composite::add)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
+    fun getViewState() = viewStateProcessor
+
+    fun getActionState(): Flowable<ExpenseEditingAction> = actionsProcessor
+
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun submit() {
-        getViewState().firstElement().subscribeOn(Schedulers.io()).flatMapCompletable { viewState ->
-            val operation = when (selectedExpenseId) {
-                null -> expensesInteractor::createExpense
-                else -> expensesInteractor::updateExpense
-            }
-            return@flatMapCompletable ExpenseEditingInputConverter.toExpense(
-                viewState.costState,
-                viewState.typeState,
-                viewState.litersState,
-                viewState.mileageState,
-                viewState.fineTypeState,
-            ).getOrNull()?.apply {
-                selectedExpenseId?.let { id = it }
-            }?.let(operation) ?: Completable.complete()
-        }.doOnComplete {
+        val viewState = viewStateProcessor.value ?: return
+
+        val operation = when (selectedExpenseId) {
+            null -> expensesInteractor::createExpense
+            else -> expensesInteractor::updateExpense
+        }
+
+        val execute = ExpenseEditingInputConverter.toExpense(
+            viewState.costState,
+            viewState.typeState,
+            viewState.litersState,
+            viewState.mileageState,
+            viewState.fineTypeState,
+        ).getOrNull()?.apply {
+            selectedExpenseId?.let { id = it }
+        }?.let(operation) ?: Completable.complete()
+
+        execute.subscribeOn(Schedulers.io()).doOnComplete {
             actionsProcessor.onNext(ExpenseEditingAction.Finish)
         }.subscribeWithLogError().let(composite::add)
     }

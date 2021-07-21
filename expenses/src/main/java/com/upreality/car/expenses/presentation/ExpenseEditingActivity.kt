@@ -18,10 +18,10 @@ import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEd
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
+import presentation.AfterTextChangedWatcher
 import presentation.InputState
 import presentation.RxLifecycleExtentions.subscribeDefault
-import presentation.getAfterTextChangedWatcher
-import presentation.silentApplyText
+import presentation.applyWithDisabledTextWatcher
 import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as ViewBinding
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel as ViewModel
 
@@ -34,10 +34,8 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     private val defaultFieldError: String = "Invalid input 2"
 
-    private val costWatcher by lazy {
-        binding.costEt.getAfterTextChangedWatcher { costText ->
-            FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
-        }
+    private val costWatcher = AfterTextChangedWatcher { costText ->
+        FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,12 +92,15 @@ class ExpenseEditingActivity : AppCompatActivity() {
     private fun applyViewState(viewState: ExpenseEditingViewState) {
         val setErrorIfDefined: (InputState<String>, EditText) -> Unit = { inputState, editText ->
             val reason = (inputState as? InputState.Invalid)?.let { it.reason ?: defaultFieldError }
-            editText.error = reason
+            reason?.let(editText::setError)
         }
 
         setErrorIfDefined(viewState.costState, binding.costEt)
 
-        binding.costEt.silentApplyText(viewState.costState.input ?: "", costWatcher)
+        binding.costEt.applyWithDisabledTextWatcher(costWatcher) {
+            if (text.toString() != viewState.costState.input)
+                text = viewState.costState.input ?: ""
+        }
 
         binding.applyButton.isEnabled = viewState.isValid
         binding.deleteButton.isVisible = !viewState.newExpenseCreation
