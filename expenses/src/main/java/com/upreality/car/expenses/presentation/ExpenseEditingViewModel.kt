@@ -79,7 +79,7 @@ class ExpenseEditingViewModel @Inject constructor(
 
                 return@combineLatest ExpenseEditingViewState(
                     isValid = parseResult.isSuccess,
-                    newExpenseCreation = selectedExpenseId != null,
+                    newExpenseCreation = selectedExpenseId == null,
                     costState = costState,
                     typeState = typeState,
                     litersState = litersState,
@@ -96,8 +96,8 @@ class ExpenseEditingViewModel @Inject constructor(
     private fun submit() {
         getViewState().firstElement().subscribeOn(Schedulers.io()).flatMapCompletable { viewState ->
             val operation = when (selectedExpenseId) {
-                null -> expensesInteractor::updateExpense
-                else -> expensesInteractor::createExpense
+                null -> expensesInteractor::createExpense
+                else -> expensesInteractor::updateExpense
             }
             return@flatMapCompletable ExpenseEditingInputConverter.toExpense(
                 viewState.costState,
@@ -117,8 +117,9 @@ class ExpenseEditingViewModel @Inject constructor(
         selectedExpenseId ?: return
         selectedExpenseId.let(expensesInteractor::deleteExpense)
             .subscribeOn(Schedulers.io())
-            .subscribeWithLogError()
-            .let(composite::add)
+            .doOnComplete {
+                actionsProcessor.onNext(ExpenseEditingAction.Finish)
+            }.subscribeWithLogError().let(composite::add)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
