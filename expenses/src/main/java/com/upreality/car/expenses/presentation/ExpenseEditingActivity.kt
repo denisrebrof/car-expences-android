@@ -104,6 +104,10 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
         binding.applyButton.isEnabled = viewState.isValid
         binding.deleteButton.isVisible = !viewState.newExpenseCreation
+        binding.applyButton.text = when (viewState.newExpenseCreation) {
+            true -> "Create expense"
+            else -> "Update expense"
+        }
         binding.applyButton.setOnClickListener {
             ExpenseEditingIntent.Submit.let(viewModel::execute)
         }

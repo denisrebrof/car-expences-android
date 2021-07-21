@@ -1,12 +1,12 @@
 package com.upreality.car.expenses.presentation
 
 import android.os.Build
-import android.os.Bundle
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.chip.Chip
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
@@ -34,7 +34,6 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
         binding.chipFineRoadMarking.setOnClickListener(this::onChipSelected)
         binding.chipFineOther.setOnClickListener(this::onChipSelected)
         viewModel.getViewState()
-            .firstElement()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError { viewState ->
@@ -50,7 +49,7 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
             FinesCategories.Parking -> binding.chipFineParking
             FinesCategories.RoadMarking -> binding.chipFineRoadMarking
             FinesCategories.Other -> binding.chipFineOther
-        }.isSelected = true
+        }.let(Chip::getId).let(binding.chipGroup::check)
     }
 
     private fun onChipSelected(buttonView: View) {
