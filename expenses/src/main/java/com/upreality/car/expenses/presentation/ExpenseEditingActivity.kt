@@ -41,6 +41,10 @@ class ExpenseEditingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
+        binding.editingToolbar.let(this::setSupportActionBar)
+        binding.editingToolbar.setNavigationOnClickListener { onBackPressed() }
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
         binding.costEt.addTextChangedListener(costWatcher)
         binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked)
@@ -114,9 +118,15 @@ class ExpenseEditingActivity : AppCompatActivity() {
         binding.deleteButton.setOnClickListener {
             ExpenseEditingIntent.Delete.let(viewModel::execute)
         }
+
+        supportActionBar?.apply{
+            setDisplayShowTitleEnabled(true)
+            title = if(viewState.newExpenseCreation) "New Expense" else "Update Expense"
+        }
+
     }
 
-    override fun onBackPressed() = finish()
+    override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
 
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {

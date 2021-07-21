@@ -5,11 +5,11 @@
     <application>
         <activity
             android:name=".presentation.ExpenseEditingActivity"
-            android:theme="@style/AppThemeM"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".presentation.ExpensesActivity"
-            android:theme="@style/AppThemeM">
+            android:theme="@style/AppTheme">
             <intent-filter>
 
                 <!-- <action android:name="android.intent.action.MAIN" /> -->
