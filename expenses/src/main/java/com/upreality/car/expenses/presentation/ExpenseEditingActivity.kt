@@ -1,7 +1,5 @@
 package com.upreality.car.expenses.presentation
 
-import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
@@ -18,34 +16,17 @@ import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.*
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
 import dagger.hilt.android.AndroidEntryPoint
-import domain.subscribeWithLogError
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import presentation.InputState
-import presentation.addAfterTextChangedListener
+import presentation.RxLifecycleExtentions.subscribeDefault
+import presentation.getAfterTextChangedWatcher
+import presentation.silentApplyText
 import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as ViewBinding
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel as ViewModel
 
 @AndroidEntryPoint
 class ExpenseEditingActivity : AppCompatActivity() {
-
-    companion object {
-
-        const val EXPENSE_ID = "EXPENSE_ID"
-
-        fun openInEditMode(context: Context, expenseId: Long) {
-            val intent = Intent(context, ExpenseEditingActivity::class.java)
-            intent.putExtra(EXPENSE_ID, expenseId)
-            context.startActivity(intent)
-        }
-
-        fun openInCreateMode(context: Context) {
-            val intent = Intent(context, ExpenseEditingActivity::class.java)
-            context.startActivity(intent)
-        }
-    }
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ViewModel by viewModels()
@@ -53,12 +34,16 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     private val defaultFieldError: String = "Invalid input 2"
 
+    private val costWatcher by lazy {
+        binding.costEt.getAfterTextChangedWatcher { costText ->
+            FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
-        binding.costEt.addAfterTextChangedListener { costText ->
-            FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
-        }
+        binding.costEt.addTextChangedListener(costWatcher)
         binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked)
                 return@addOnButtonCheckedListener
@@ -79,11 +64,9 @@ class ExpenseEditingActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         val viewStateFlow = viewModel.getViewState()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
 
         viewStateFlow
-            .subscribeWithLogError(this::applyViewState)
+            .subscribeDefault(this::applyViewState)
             .disposeBy(lifecycle.disposers.onStop)
 
         viewStateFlow
@@ -92,18 +75,15 @@ class ExpenseEditingActivity : AppCompatActivity() {
             .map(InputState.Valid<*>::input)
             .ofType(ExpenseType::class.java)
             .distinctUntilChanged(ExpenseType::id)
-            .subscribeWithLogError(this::applySelectedType)
+            .subscribeDefault(this::applySelectedType)
             .disposeBy(lifecycle.disposers.onStop)
 
-        viewModel.getActionState()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWithLogError { action ->
-                when (action) {
-                    ExpenseEditingAction.Finish -> finish()
+        viewModel.getActionState().subscribeDefault { action ->
+            when (action) {
+                ExpenseEditingAction.Finish -> finish()
 //                    is ExpenseEditingAction.SetupExpense -> setupExpense(action)
-                }
-            }.disposeBy(lifecycle.disposers.onStop)
+            }
+        }.disposeBy(lifecycle.disposers.onStop)
     }
 
 //    private fun setupExpense(action: ExpenseEditingAction.SetupExpense) {
@@ -118,6 +98,8 @@ class ExpenseEditingActivity : AppCompatActivity() {
         }
 
         setErrorIfDefined(viewState.costState, binding.costEt)
+
+        binding.costEt.silentApplyText(viewState.costState.input ?: "", costWatcher)
 
         binding.applyButton.isEnabled = viewState.isValid
         binding.deleteButton.isVisible = !viewState.newExpenseCreation
@@ -140,11 +122,4 @@ class ExpenseEditingActivity : AppCompatActivity() {
         (selectedButton as? MaterialButton)?.isChecked = true
         action?.let(navController::navigate)
     }
-
-//    private val lastFieldListener = TextView.OnEditorActionListener { view, actionId, event ->
-//        if (actionId == EditorInfo.IME_ACTION_DONE)
-//            onCreateOrUpdateClicked(view)
-//
-//        actionId == EditorInfo.IME_ACTION_NEXT
-//    }
 }

@@ -3,7 +3,6 @@ package com.upreality.car.expenses.presentation
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.CompoundButton
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -28,12 +27,12 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
     private val viewModel: ExpenseEditingViewModel by activityViewModels()
 
     @RequiresApi(Build.VERSION_CODES.N)
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.chipFineSpeedLimit.setOnCheckedChangeListener(this::onChipSelected)
-        binding.chipFineParking.setOnCheckedChangeListener(this::onChipSelected)
-        binding.chipFineRoadMarking.setOnCheckedChangeListener(this::onChipSelected)
-        binding.chipFineOther.setOnCheckedChangeListener(this::onChipSelected)
+    override fun onStart() {
+        super.onStart()
+        binding.chipFineSpeedLimit.setOnClickListener(this::onChipSelected)
+        binding.chipFineParking.setOnClickListener(this::onChipSelected)
+        binding.chipFineRoadMarking.setOnClickListener(this::onChipSelected)
+        binding.chipFineOther.setOnClickListener(this::onChipSelected)
         viewModel.getViewState()
             .firstElement()
             .subscribeOn(Schedulers.io())
@@ -42,7 +41,7 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
                 (viewState.fineTypeState as? InputState.Valid)
                     ?.let(InputState.Valid<FinesCategories>::input)
                     ?.let(this::setupFineCategory)
-            }.disposeBy(lifecycle.disposers.onDestroy)
+            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun setupFineCategory(type: FinesCategories) {
@@ -54,9 +53,7 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
         }.isSelected = true
     }
 
-    private fun onChipSelected(buttonView: CompoundButton, isChecked: Boolean) {
-        if (!isChecked)
-            return
+    private fun onChipSelected(buttonView: View) {
         val fineType = when (buttonView) {
             binding.chipFineSpeedLimit -> FinesCategories.SpeedLimit
             binding.chipFineParking -> FinesCategories.Parking

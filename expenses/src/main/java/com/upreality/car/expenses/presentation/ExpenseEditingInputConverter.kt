@@ -1,22 +1,30 @@
 package com.upreality.car.expenses.presentation
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
+import presentation.InputState
 import java.security.InvalidParameterException
 import java.util.*
 
-object ExpenseEditingInputStateConverter {
+object ExpenseEditingInputConverter {
 
-    fun toExpense(inputState: ExpenseEditingViewModel.ExpenseEditingViewState): Result<Expense> {
+    fun toExpense(
+        costState: InputState<String>,
+        typeState: InputState<ExpenseType>,
+        litersState: InputState<String>,
+        mileageState: InputState<String>,
+        fineTypeState: InputState<FinesCategories>,
+    ): Result<Expense> {
         val exception = InvalidParameterException("Invalid input")
         val failure = Result.failure<Expense>(exception)
 
-        val cost = inputState.costState.validOrNull() ?: return failure
-        val type = inputState.typeState.validOrNull() ?: return failure
+        val cost = costState.validOrNull() ?: return failure
+        val type = typeState.validOrNull() ?: return failure
 
         val expense = when (type.input) {
             ExpenseType.Fines -> {
-                val fineCategory = inputState.fineTypeState.validOrNull() ?: return failure
+                val fineCategory = fineTypeState.validOrNull() ?: return failure
                 Expense.Fine(
                     date = Date(),
                     cost = cost.input?.toFloatOrNull() ?: return failure,
@@ -24,8 +32,8 @@ object ExpenseEditingInputStateConverter {
                 )
             }
             ExpenseType.Fuel -> {
-                val liters = inputState.litersState.validOrNull() ?: return failure
-                val mileage = inputState.mileageState.validOrNull() ?: return failure
+                val liters = litersState.validOrNull() ?: return failure
+                val mileage = mileageState.validOrNull() ?: return failure
                 Expense.Fuel(
                     date = Date(),
                     cost = cost.input?.toFloatOrNull() ?: return failure,

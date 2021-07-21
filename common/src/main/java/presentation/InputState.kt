@@ -8,10 +8,10 @@ import presentation.InputForm.IFormField.RequestInputStateResult.Success
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
-sealed class InputState<out T : Any> {
+sealed class InputState<out T : Any>(val input: T? = null) {
     object Empty : InputState<Nothing>()
-    data class Invalid<out T : Any>(val reason: String? = null, val input: T?) : InputState<T>()
-    data class Valid<out T : Any>(val input: T?) : InputState<T>()
+    data class Invalid<out T : Any>(val reason: String? = null, val inp: T?) : InputState<T>(inp)
+    data class Valid<out T : Any>(val inp: T?) : InputState<T>(inp)
 
     fun validOrNull(): Valid<T>? {
         return this as? Valid
@@ -25,7 +25,6 @@ fun <ValueType : Any> InputForm.submit(
 ): InputForm.SubmitFieldValueResult {
     return this.submitValue(key, value)
 }
-
 
 @RequiresApi(Build.VERSION_CODES.N)
 fun <ValueType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm.getStateFlow(
@@ -131,6 +130,8 @@ class ValidatedFormField<in ValueType : Any>(
     private val inputState = BehaviorProcessor.createDefault(defaultInputState)
 
     private fun submitValue(value: ValueType) {
+        if (this.value == value)
+            return
         this.value = value
         validator.validate(value).let(inputState::onNext)
     }
@@ -146,10 +147,10 @@ class ValidatedFormField<in ValueType : Any>(
                 InputState.Empty -> InputState.Empty
                 is InputState.Invalid -> InputState.Invalid(
                     inputState.reason,
-                    type.cast(inputState)
+                    inputState.input?.let(type::cast)
                 )
                 is InputState.Valid -> InputState.Valid(
-                    type.cast(inputState)
+                    inputState.input?.let(type::cast)
                 )
             }
         }.let { Success(it) }
@@ -171,7 +172,7 @@ class ValidatedFormField<in ValueType : Any>(
         fun validate(value: ValueType?): InputState<ValueType> = when {
             isEmpty(value) -> InputState.Empty
             isValid(value) -> InputState.Valid(value)
-            else -> InputState.Invalid(input = value)
+            else -> InputState.Invalid(inp = value)
         }
 
         protected abstract fun isEmpty(value: ValueType?): Boolean
@@ -179,7 +180,7 @@ class ValidatedFormField<in ValueType : Any>(
     }
 
     class NullableValidator<ValueType : Any> : Validator<ValueType>() {
-        override fun isEmpty(value: ValueType?) = value != null
+        override fun isEmpty(value: ValueType?) = value == null
         override fun isValid(value: ValueType?) = true
     }
 

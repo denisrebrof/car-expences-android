@@ -41,11 +41,6 @@ class ExpensesListFragmentViewModel @Inject constructor(
         }.flowable.cachedIn(viewModelScope)
     }
 
-    fun createDebugExpense(): Completable {
-        val expense = Expense.Fuel(Date(), 200f, 20f, 2F)
-        return interactor.createExpense(expense)
-    }
-
     fun getRefreshFlow(): Flowable<Unit> {
         return refreshEventProvider.getRefreshFlow().doOnNext {
             refresh()
@@ -54,12 +49,6 @@ class ExpensesListFragmentViewModel @Inject constructor(
 
     fun refresh() {
         lastSource?.invalidate()
-    }
-
-    fun getExpensesCountFlow(): Flowable<Int> {
-        return interactor.getExpensesFlow(ExpenseFilter.All).map {
-            it.size
-        }
     }
 
     fun deleteExpense(expense: Expense): Completable {

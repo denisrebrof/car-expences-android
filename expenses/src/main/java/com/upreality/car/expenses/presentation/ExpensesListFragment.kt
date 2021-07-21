@@ -1,7 +1,6 @@
 package com.upreality.car.expenses.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +17,7 @@ import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ExpensesListFragment : Fragment() {
@@ -30,15 +30,15 @@ class ExpensesListFragment : Fragment() {
     lateinit var adapter: ExpensesListAdapter
     lateinit var layoutManager: LinearLayoutManager
 
+    @Inject
+    lateinit var editingNavigator: ExpenseEditingNavigator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //TODO: implement with di
         val provider = requireContext().let(::ExpensesListAdapterExpenseTypeDataProviderImpl)
         adapter = ExpensesListAdapter(provider) { clickedExpense ->
-//            viewModel.deleteExpense(clickedExpense).subscribe({}) { error ->
-//                Log.e("Error", "Delete expense error: $error")
-//            }.disposeBy(lifecycle.disposers.onDestroy)
-            ExpenseEditingActivity.openInEditMode(requireContext(), clickedExpense.id)
+            editingNavigator.openEditing(requireContext(), clickedExpense.id)
         }
         adapter.stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
     }
@@ -68,14 +68,6 @@ class ExpensesListFragment : Fragment() {
 //            layoutManager.scrollToPosition(0)
             }.disposeBy(lifecycle.disposers.onDestroy)
         return requireBinding.root
-
-//        conversationAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-//            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-//                if (positionStart == 0) {
-//                    manager.scrollToPosition(0)
-//                }
-//            }
-//        })
     }
 
     private fun getItemTouchHelper(): ItemTouchHelper {
@@ -90,29 +82,12 @@ class ExpensesListFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         requireBinding.expensesListFab.setOnClickListener {
-//            viewModel.createDebugExpense()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe({
-//                    Log.d("", "Created")
-//                }) {
-//                    Log.e("Create Error", it.toString())
-//                }.disposeBy(lifecycle.disposers.onStop)
-            activity?.let(ExpenseEditingActivity::openInCreateMode)
+            activity?.let(editingNavigator::openCreation)
         }
 
         requireBinding.expensesListRefresh.setOnClickListener {
             adapter.refresh()
         }
-
-        viewModel.getExpensesCountFlow()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                Log.d("", "Get $it exp")
-            }) {
-                Log.e("Get All Error", it.toString())
-            }.disposeBy(lifecycle.disposers.onStop)
     }
 
     override fun onDestroy() {
