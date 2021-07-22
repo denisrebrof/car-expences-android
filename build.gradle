@@ -89,6 +89,7 @@ ext {
     paging_rx_java = "androidx.paging:paging-rxjava2-ktx:$paging_version"
 
     google_auth = 'com.google.android.gms:play-services-auth:19.0.0'
+    inputmask = 'com.redmadrobot:input-mask-android:6.0.0'
 }
 
 task clean(type: Delete) {

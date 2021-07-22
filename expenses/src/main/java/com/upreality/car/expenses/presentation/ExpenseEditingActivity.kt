@@ -1,7 +1,9 @@
 package com.upreality.car.expenses.presentation
 
+import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
+import android.widget.DatePicker
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
@@ -26,13 +28,13 @@ import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as V
 import com.upreality.car.expenses.presentation.ExpenseEditingViewModel as ViewModel
 
 @AndroidEntryPoint
-class ExpenseEditingActivity : AppCompatActivity() {
+class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener {
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ViewModel by viewModels()
     private lateinit var navController: NavController
 
-    private val defaultFieldError: String = "Invalid input 2"
+    private val defaultFieldError: String = "Invalid input"
 
     private val costWatcher = AfterTextChangedWatcher { costText ->
         FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
@@ -41,11 +43,13 @@ class ExpenseEditingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
+
         binding.editingToolbar.let(this::setSupportActionBar)
         binding.editingToolbar.setNavigationOnClickListener { onBackPressed() }
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.costEt.addTextChangedListener(costWatcher)
+
         binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (!isChecked)
                 return@addOnButtonCheckedListener
@@ -55,6 +59,16 @@ class ExpenseEditingActivity : AppCompatActivity() {
                 else -> return@addOnButtonCheckedListener
             }
             FillForm(ExpenseEditingKeys.Type, type, ExpenseType::class).let(viewModel::execute)
+        }
+
+        binding.dateInputLayout.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked)
+                return@addOnButtonCheckedListener
+            when (checkedId) {
+                binding.dateSelectorToday.id ->
+                binding.dateSelectorYesterday.id ->
+                else ->
+            }
         }
 
         val navHostId = binding.expenseDetailsContainer.id
@@ -83,15 +97,9 @@ class ExpenseEditingActivity : AppCompatActivity() {
         viewModel.getActionState().subscribeDefault { action ->
             when (action) {
                 ExpenseEditingAction.Finish -> finish()
-//                    is ExpenseEditingAction.SetupExpense -> setupExpense(action)
             }
         }.disposeBy(lifecycle.disposers.onStop)
     }
-
-//    private fun setupExpense(action: ExpenseEditingAction.SetupExpense) {
-//        action.costState.let(binding.costEt::setText)
-//        applySelectedType(action.typeState)
-//    }
 
     private fun applyViewState(viewState: ExpenseEditingViewState) {
         val setErrorIfDefined: (InputState<String>, EditText) -> Unit = { inputState, editText ->
@@ -119,11 +127,10 @@ class ExpenseEditingActivity : AppCompatActivity() {
             ExpenseEditingIntent.Delete.let(viewModel::execute)
         }
 
-        supportActionBar?.apply{
+        supportActionBar?.apply {
             setDisplayShowTitleEnabled(true)
-            title = if(viewState.newExpenseCreation) "New Expense" else "Update Expense"
+            title = if (viewState.newExpenseCreation) "New Expense" else "Update Expense"
         }
-
     }
 
     override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
@@ -136,5 +143,9 @@ class ExpenseEditingActivity : AppCompatActivity() {
         }
         (selectedButton as? MaterialButton)?.isChecked = true
         action?.let(navController::navigate)
+    }
+
+    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+
     }
 }
