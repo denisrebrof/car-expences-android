@@ -164,7 +164,12 @@ class ExpenseEditingViewModel @Inject constructor(
     private fun applyExpenseToForm(expense: Expense) {
         form.submit(expense.cost.toString(), Cost)
         form.submit(expense.let(converter::getExpenseType), Type)
-        form.submit(expense.date, SpendDate)
+        val dateInput = when {
+            dateTimeInteractor.isToday(expense.date) -> DateInputValue.Today
+            dateTimeInteractor.isYesterday(expense.date) -> DateInputValue.Yesterday
+            else -> DateInputValue.Custom(expense.date)
+        }
+        form.submit(dateInput, SpendDate)
         when (expense) {
             is Expense.Fine -> {
                 form.submit(expense.type, FineType)

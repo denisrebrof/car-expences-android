@@ -24,6 +24,7 @@ import presentation.AfterTextChangedWatcher
 import presentation.InputState
 import presentation.RxLifecycleExtentions.subscribeDefault
 import presentation.applyWithDisabledTextWatcher
+import java.text.SimpleDateFormat
 import java.util.*
 import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as ViewBinding
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
@@ -112,9 +113,14 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         viewModel.getActionState().subscribeDefault { action ->
             when (action) {
                 ExpenseEditingAction.Finish -> finish()
-                is ExpenseEditingAction.ShowDatePicker -> TODO()
+                is ExpenseEditingAction.ShowDatePicker -> showDatePicker(action)
             }
         }.disposeBy(lifecycle.disposers.onStop)
+    }
+
+    private fun showDatePicker(action: ExpenseEditingAction.ShowDatePicker) {
+        val style = android.R.style.Theme_Holo_Light_Dialog_NoActionBar
+        DatePickerDialog(this, style, this, action.year, action.month, action.day).show()
     }
 
     private fun applyViewState(viewState: ExpenseEditingViewState) {
@@ -165,6 +171,14 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
             DateInputValue.Yesterday -> binding.dateSelectorYesterday
             else -> binding.dateSelectorSelect
         }.isChecked = true
+        binding.dateSelectorSelect.text = when (state) {
+            is DateInputValue.Custom -> state.date.getSelectorText()
+            else -> "Select"
+        }
+    }
+
+    private fun Date.getSelectorText(): String {
+        return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(this)
     }
 
     override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
