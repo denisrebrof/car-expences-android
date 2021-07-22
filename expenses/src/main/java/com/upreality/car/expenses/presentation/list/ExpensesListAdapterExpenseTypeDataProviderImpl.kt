@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.list
 
 import android.content.Context
 import android.graphics.drawable.Drawable

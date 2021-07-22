@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.editing.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -6,10 +6,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.Liters
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.Mileage
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingViewState
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent.FillForm
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.Liters
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.Mileage
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers

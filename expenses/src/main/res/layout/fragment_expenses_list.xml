@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layoutAnimation="@anim/layout_animation"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".presentation.ExpensesListFragment"
+        tools:context=".presentation.list.ExpensesListFragment"
         tools:listitem="@layout/expense_list_item" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

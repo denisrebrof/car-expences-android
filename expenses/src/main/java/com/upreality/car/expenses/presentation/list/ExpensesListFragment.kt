@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.list
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy
 import com.upreality.car.expenses.databinding.FragmentExpensesListBinding
+import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers

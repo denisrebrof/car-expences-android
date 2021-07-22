@@ -1,8 +1,8 @@
 package com.upreality.car.expenses.presentation.di
 
 import android.content.Context
-import com.upreality.car.expenses.presentation.ExpensesListAdapter
-import com.upreality.car.expenses.presentation.ExpensesListAdapterExpenseTypeDataProviderImpl
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapterExpenseTypeDataProviderImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

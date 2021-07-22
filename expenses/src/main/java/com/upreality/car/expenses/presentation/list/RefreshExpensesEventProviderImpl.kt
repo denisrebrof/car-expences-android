@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.list
 
 import com.upreality.car.expenses.data.sync.IExpensesSyncTimestampProvider
 import io.reactivex.Flowable

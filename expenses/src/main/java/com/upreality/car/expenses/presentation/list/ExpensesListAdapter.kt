@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.list
 
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.upreality.car.expenses.databinding.ExpenseListItemBinding
 import com.upreality.car.expenses.domain.model.expence.Expense
-import com.upreality.car.expenses.presentation.ExpensesListAdapter.ViewHolder
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ViewHolder
 import javax.inject.Singleton
 
 @Singleton

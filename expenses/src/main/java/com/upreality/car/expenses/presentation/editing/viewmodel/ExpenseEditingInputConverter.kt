@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.editing.viewmodel
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
@@ -7,7 +7,7 @@ import domain.DateTimeInteractor
 import presentation.InputState
 import java.security.InvalidParameterException
 import javax.inject.Inject
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingDateSelectorState as DateSelectorState
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
 
 class ExpenseEditingInputConverter @Inject constructor(
     private val dateTimeInteractor: DateTimeInteractor
@@ -15,7 +15,7 @@ class ExpenseEditingInputConverter @Inject constructor(
 
     fun toExpense(
         costState: InputState<String>,
-        dateState: InputState<DateSelectorState>,
+        dateState: InputState<DateInputValue>,
         typeState: InputState<ExpenseType>,
         litersState: InputState<String>,
         mileageState: InputState<String>,
@@ -27,10 +27,10 @@ class ExpenseEditingInputConverter @Inject constructor(
         val cost = costState.validOrNull()?.input?.toFloatOrNull() ?: return failure
         val type = typeState.validOrNull() ?: return failure
         val dateSelectorState = dateState.validOrNull() ?: return failure
-        val date = when(dateSelectorState.inp!!){
-            DateSelectorState.Today -> dateTimeInteractor.getToday()
-            DateSelectorState.Yesterday -> dateTimeInteractor.getYesterday()
-            is DateSelectorState.Custom -> (dateSelectorState.inp as DateSelectorState.Custom).date
+        val date = when (dateSelectorState.inp!!) {
+            DateInputValue.Today -> dateTimeInteractor.getToday()
+            DateInputValue.Yesterday -> dateTimeInteractor.getYesterday()
+            is DateInputValue.Custom -> (dateSelectorState.inp as DateInputValue.Custom).date
         }
 
         val expense = when (type.input) {

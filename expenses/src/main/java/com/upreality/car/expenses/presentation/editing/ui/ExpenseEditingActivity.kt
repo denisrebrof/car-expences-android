@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.editing.ui
 
 import android.app.DatePickerDialog
 import android.os.Build
@@ -12,11 +12,11 @@ import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
-import com.google.android.material.button.MaterialButton
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.*
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
+import com.upreality.car.expenses.presentation.editing.viewmodel.*
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent.FillForm
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel.*
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
@@ -24,8 +24,10 @@ import presentation.AfterTextChangedWatcher
 import presentation.InputState
 import presentation.RxLifecycleExtentions.subscribeDefault
 import presentation.applyWithDisabledTextWatcher
+import java.util.*
 import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as ViewBinding
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel as ViewModel
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel as ViewModel
 
 @AndroidEntryPoint
 class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener {
@@ -37,7 +39,11 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
     private val defaultFieldError: String = "Invalid input"
 
     private val costWatcher = AfterTextChangedWatcher { costText ->
-        FillForm(ExpenseEditingKeys.Cost, costText, String::class).let(viewModel::execute)
+        FillForm(
+            ExpenseEditingKeys.Cost,
+            costText,
+            String::class
+        ).let(viewModel::execute)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,10 +71,10 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
             if (!isChecked)
                 return@addOnButtonCheckedListener
             when (checkedId) {
-                binding.dateSelectorToday.id ->
-                binding.dateSelectorYesterday.id ->
-                else ->
-            }
+                binding.dateSelectorToday.id -> ExpenseEditingDateSelectionType.Today
+                binding.dateSelectorYesterday.id -> ExpenseEditingDateSelectionType.Yesterday
+                else -> ExpenseEditingDateSelectionType.Custom
+            }.let(ExpenseEditingIntent::SelectDate).let(viewModel::execute)
         }
 
         val navHostId = binding.expenseDetailsContainer.id
@@ -94,9 +100,19 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
             .subscribeDefault(this::applySelectedType)
             .disposeBy(lifecycle.disposers.onStop)
 
+        viewStateFlow
+            .map(ExpenseEditingViewState::dateState)
+            .ofType(InputState.Valid::class.java)
+            .map(InputState.Valid<*>::input)
+            .ofType(DateInputValue::class.java)
+            .distinctUntilChanged()
+            .subscribeDefault(this::applySelectedDateState)
+            .disposeBy(lifecycle.disposers.onStop)
+
         viewModel.getActionState().subscribeDefault { action ->
             when (action) {
                 ExpenseEditingAction.Finish -> finish()
+                is ExpenseEditingAction.ShowDatePicker -> TODO()
             }
         }.disposeBy(lifecycle.disposers.onStop)
     }
@@ -133,19 +149,34 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         }
     }
 
-    override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
-
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {
             ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFineFragment
             ExpenseType.Fuel -> binding.fuelTypeButton to R.id.action_global_expenseEditingFuelFragment
             else -> null to null
         }
-        (selectedButton as? MaterialButton)?.isChecked = true
+        selectedButton?.isChecked = true
         action?.let(navController::navigate)
     }
 
+    private fun applySelectedDateState(state: DateInputValue) {
+        when (state) {
+            DateInputValue.Today -> binding.dateSelectorToday
+            DateInputValue.Yesterday -> binding.dateSelectorYesterday
+            else -> binding.dateSelectorSelect
+        }.isChecked = true
+    }
+
+    override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
+
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+        Calendar.getInstance()
+            .apply { set(year, month, dayOfMonth) }
+            .let(Calendar::getTime)
+            .let(DateInputValue::Custom)
+            .let { state ->
+                FillForm(ExpenseEditingKeys.SpendDate, state, DateInputValue::class)
+            }.let(viewModel::execute)
 
     }
 }

@@ -1,7 +1,8 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.editing
 
 import android.content.Context
 import android.content.Intent
+import com.upreality.car.expenses.presentation.editing.ui.ExpenseEditingActivity
 import javax.inject.Inject
 
 class ExpenseEditingNavigator @Inject constructor() {

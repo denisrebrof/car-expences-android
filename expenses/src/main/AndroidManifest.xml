@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name=".presentation.ExpenseEditingActivity"
+            android:name=".presentation.editing.ui.ExpenseEditingActivity"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize" />
         <activity

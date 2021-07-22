@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.editing.ui
 
 import androidx.fragment.app.Fragment
 import by.kirich1409.viewbindingdelegate.viewBinding

@@ -114,9 +114,6 @@ dependencies {
     //Google OAuth
     implementation rootProject.ext.google_auth
 
-    //Inputmask
-    implementation rootProject.ext.inputmask
-
     api project(':common')
     api project(":uikit")
 

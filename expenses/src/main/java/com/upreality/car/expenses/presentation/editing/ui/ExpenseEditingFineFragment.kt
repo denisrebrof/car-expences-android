@@ -1,4 +1,4 @@
-package com.upreality.car.expenses.presentation
+package com.upreality.car.expenses.presentation.editing.ui
 
 import android.os.Build
 import android.view.View
@@ -9,8 +9,11 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.FinesCategories
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingIntent.FillForm
-import com.upreality.car.expenses.presentation.ExpenseEditingViewModel.ExpenseEditingKeys.FineType
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent.*
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.FineType
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers

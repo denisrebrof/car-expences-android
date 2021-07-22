@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.data.di
 
 import com.upreality.car.expenses.data.paging.ExpensesPagingSourceFactoryImpl
-import com.upreality.car.expenses.presentation.ExpensesListFragmentViewModel.IExpensesPagingSourceFactory
+import com.upreality.car.expenses.presentation.list.ExpensesListFragmentViewModel.IExpensesPagingSourceFactory
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
