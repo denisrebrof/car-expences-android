@@ -32,7 +32,8 @@ class ExpenseEditingViewModel @Inject constructor(
     handle: SavedStateHandle,
     private val expensesInteractor: IExpensesInteractor,
     private val dateTimeInteractor: DateTimeInteractor,
-    private val converter: ExpenseEditingInputConverter
+    private val converter: ExpenseEditingInputConverter,
+    factory: ExpenseEditingInpFormFactory
 ) : ViewModel() {
 
     private val composite = CompositeDisposable()
@@ -43,9 +44,6 @@ class ExpenseEditingViewModel @Inject constructor(
     private val defaultExpenseType = ExpenseType.Fuel
     private val defaultFineType = FinesCategories.Other
     private val defaultDateSelectorState = Today
-
-    @Inject
-    lateinit var factory: ExpenseEditingInpFormFactory
 
     @RequiresApi(Build.VERSION_CODES.N)
     private val form = factory.create()
