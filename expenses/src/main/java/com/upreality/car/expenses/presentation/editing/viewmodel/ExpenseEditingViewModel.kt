@@ -69,12 +69,12 @@ class ExpenseEditingViewModel @Inject constructor(
             ?: Completable.fromCallable(this::initializeFieldsDefault)
 
         val inputStateFlows = arrayOf(
-            form.getStateFlow(Cost, String::class) as Success,
-            form.getStateFlow(SpendDate, DateInputValue::class) as Success,
-            form.getStateFlow(Type, ExpenseType::class) as Success,
-            form.getStateFlow(Liters, String::class) as Success,
-            form.getStateFlow(Mileage, String::class) as Success,
-            form.getStateFlow(FineType, FinesCategories::class) as Success,
+            form.getFieldStateFlow(Cost, String::class) as Success,
+            form.getFieldStateFlow(SpendDate, DateInputValue::class) as Success,
+            form.getFieldStateFlow(Type, ExpenseType::class) as Success,
+            form.getFieldStateFlow(Liters, String::class) as Success,
+            form.getFieldStateFlow(Mileage, String::class) as Success,
+            form.getFieldStateFlow(FineType, FinesCategories::class) as Success,
         ).map { it.result }
 
         val viewStateFlow = Flowable.combineLatest(inputStateFlows) { inputStates ->
@@ -209,7 +209,7 @@ class ExpenseEditingViewModel @Inject constructor(
     }
 
     private fun submitDatePicker() {
-        val dateSelectorStateRequest = form.getStateFlow(SpendDate, DateInputValue::class)
+        val dateSelectorStateRequest = form.getFieldStateFlow(SpendDate, DateInputValue::class)
         val dateSelectorInputState = dateSelectorStateRequest as? Success ?: return
         dateSelectorInputState.result.firstElement().subscribeWithLogError { inputState ->
             val dateSelectorState = (inputState as? InputState.Valid)
