@@ -3,58 +3,35 @@ package com.upreality.car.expenses.presentation.editing.viewmodel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
-import domain.DateTimeInteractor
-import presentation.InputState
-import java.security.InvalidParameterException
+import presentation.ValidationResult
+import java.util.*
 import javax.inject.Inject
-import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
 
-class ExpenseEditingInputConverter @Inject constructor(
-    private val dateTimeInteractor: DateTimeInteractor
-) {
-
+class ExpenseEditingInputConverter @Inject constructor() {
     fun toExpense(
-        costState: InputState<String>,
-        dateState: InputState<DateInputValue>,
-        typeState: InputState<ExpenseType>,
-        litersState: InputState<String>,
-        mileageState: InputState<String>,
-        fineTypeState: InputState<FinesCategories>,
-    ): Result<Expense> {
-        val exception = InvalidParameterException("Invalid input")
-        val failure = Result.failure<Expense>(exception)
-
-        val cost = costState.validOrNull()?.input?.toFloatOrNull() ?: return failure
-        val type = typeState.validOrNull() ?: return failure
-        val dateSelectorState = dateState.validOrNull() ?: return failure
-        val date = when (dateSelectorState.inp!!) {
-            DateInputValue.Today -> dateTimeInteractor.getToday()
-            DateInputValue.Yesterday -> dateTimeInteractor.getYesterday()
-            is DateInputValue.Custom -> (dateSelectorState.inp as DateInputValue.Custom).date
-        }
-
-        val expense = when (type.input) {
-            ExpenseType.Fines -> {
-                val fineCategory = fineTypeState.validOrNull() ?: return failure
-                Expense.Fine(
-                    date = date,
-                    cost = cost,
-                    type = fineCategory.input ?: return failure
-                )
-            }
+        costState: ValidationResult<*, Float>,
+        dateState: ValidationResult<*, Date>,
+        typeState: ValidationResult<*, ExpenseType>,
+        litersState: ValidationResult<*, Float>,
+        mileageState: ValidationResult<*, Float>,
+        fineTypeState: ValidationResult<*, FinesCategories>
+    ): Result<Expense> = kotlin.runCatching {
+        return@runCatching when (typeState.validValueOrNull()) {
+            ExpenseType.Fines -> Expense.Fine(
+                date = dateState.requireValid(),
+                cost = costState.requireValid(),
+                type = fineTypeState.requireValid()
+            )
             ExpenseType.Fuel -> {
-                val liters = litersState.validOrNull() ?: return failure
-                val mileage = mileageState.validOrNull() ?: return failure
                 Expense.Fuel(
-                    date = date,
-                    cost = cost,
-                    liters = liters.input?.toFloatOrNull() ?: return failure,
-                    mileage = mileage.input?.toFloatOrNull() ?: return failure
+                    date = dateState.requireValid(),
+                    cost = costState.requireValid(),
+                    liters = litersState.requireValid(),
+                    mileage = mileageState.requireValid(),
                 )
             }
             else -> null
-        } ?: return failure
-        return Result.success(expense)
+        }!!
     }
 
     fun getExpenseType(expense: Expense): ExpenseType {

@@ -9,6 +9,8 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator.Companion.EXPENSE_ID
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue.Today
+import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue.Yesterday
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import domain.DateTimeInteractor
@@ -20,7 +22,6 @@ import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import presentation.*
-import presentation.InputForm.RequestFieldInputStateResult.Success
 import java.util.*
 import javax.inject.Inject
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
@@ -41,17 +42,13 @@ class ExpenseEditingViewModel @Inject constructor(
 
     private val defaultExpenseType = ExpenseType.Fuel
     private val defaultFineType = FinesCategories.Other
-    private val defaultDateSelectorState = DateInputValue.Today
+    private val defaultDateSelectorState = Today
+
+    @Inject
+    lateinit var factory: ExpenseEditingInpFormFactory
 
     @RequiresApi(Build.VERSION_CODES.N)
-    private val form = InputForm(
-        Cost.createFieldPair(String::class),
-        Type.createFieldPair(ExpenseType::class),
-        SpendDate.createFieldPair(DateInputValue::class),
-        Liters.createFieldPair(String::class),
-        Mileage.createFieldPair(String::class),
-        FineType.createFieldPair(FinesCategories::class),
-    )
+    private val form = factory.create()
 
     @RequiresApi(Build.VERSION_CODES.N)
     private val viewStateProcessor = BehaviorProcessor.create<ExpenseEditingViewState>()
@@ -68,42 +65,24 @@ class ExpenseEditingViewModel @Inject constructor(
             ?.ignoreElement()
             ?: Completable.fromCallable(this::initializeFieldsDefault)
 
-        val inputStateFlows = arrayOf(
-            form.getFieldStateFlow(Cost, String::class) as Success,
-            form.getFieldStateFlow(SpendDate, DateInputValue::class) as Success,
-            form.getFieldStateFlow(Type, ExpenseType::class) as Success,
-            form.getFieldStateFlow(Liters, String::class) as Success,
-            form.getFieldStateFlow(Mileage, String::class) as Success,
-            form.getFieldStateFlow(FineType, FinesCategories::class) as Success,
-        ).map { it.result }
-
-        val viewStateFlow = Flowable.combineLatest(inputStateFlows) { inputStates ->
-            val iterator = inputStates.iterator()
-            val costState = iterator.next() as InputState<String>
-            val dateState = iterator.next() as InputState<DateInputValue>
-            val typeState = iterator.next() as InputState<ExpenseType>
-            val litersState = iterator.next() as InputState<String>
-            val mileageState = iterator.next() as InputState<String>
-            val fineTypeState = iterator.next() as InputState<FinesCategories>
-
+        val viewStateFlow = form.getStateMapFlow().map { stateMap ->
             val parseResult = converter.toExpense(
-                costState,
-                dateState,
-                typeState,
-                litersState,
-                mileageState,
-                fineTypeState,
+                stateMap.getFieldState(Cost).getOrNull()!!,
+                stateMap.getFieldState(SpendDate).getOrNull()!!,
+                stateMap.getFieldState(Type).getOrNull()!!,
+                stateMap.getFieldState(Liters).getOrNull()!!,
+                stateMap.getFieldState(Mileage).getOrNull()!!,
+                stateMap.getFieldState(FineType).getOrNull()!!,
             )
-
-            return@combineLatest ExpenseEditingViewState(
+            return@map ExpenseEditingViewState(
                 isValid = parseResult.isSuccess,
                 newExpenseCreation = selectedExpenseId == null,
-                costState = costState,
-                dateState = dateState,
-                typeState = typeState,
-                litersState = litersState,
-                mileageState = mileageState,
-                fineTypeState = fineTypeState
+                costState = stateMap.getFieldState(Cost).getOrNull()!!,
+                dateState = stateMap.getFieldState(SpendDate).getOrNull()!!,
+                typeState = stateMap.getFieldState(Type).getOrNull()!!,
+                litersState = stateMap.getFieldState(Liters).getOrNull()!!,
+                mileageState = stateMap.getFieldState(Mileage).getOrNull()!!,
+                fineTypeState = stateMap.getFieldState(FineType).getOrNull()!!,
             )
         }
 
@@ -155,31 +134,31 @@ class ExpenseEditingViewModel @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.N)
     private fun initializeFieldsDefault() {
-        form.submit(defaultExpenseType, Type)
-        form.submit(defaultFineType, FineType)
-        form.submit(defaultDateSelectorState, SpendDate)
+        form.submit(Type, defaultExpenseType)
+        form.submit(FineType, defaultFineType)
+        form.submit(SpendDate, defaultDateSelectorState)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
     private fun applyExpenseToForm(expense: Expense) {
-        form.submit(expense.cost.toString(), Cost)
-        form.submit(expense.let(converter::getExpenseType), Type)
+        form.submit(Cost, expense.cost.toString())
+        form.submit(Type, expense.let(converter::getExpenseType))
         val dateInput = when {
-            dateTimeInteractor.isToday(expense.date) -> DateInputValue.Today
-            dateTimeInteractor.isYesterday(expense.date) -> DateInputValue.Yesterday
+            dateTimeInteractor.isToday(expense.date) -> Today
+            dateTimeInteractor.isYesterday(expense.date) -> Yesterday
             else -> DateInputValue.Custom(expense.date)
         }
-        form.submit(dateInput, SpendDate)
+        form.submit(SpendDate, dateInput)
         when (expense) {
             is Expense.Fine -> {
-                form.submit(expense.type, FineType)
+                form.submit(FineType, expense.type)
             }
             is Expense.Fuel -> {
-                form.submit(expense.liters.toString(), Liters)
-                form.submit(expense.mileage.toString(), Mileage)
+                form.submit(Liters, expense.liters.toString())
+                form.submit(Mileage, expense.mileage.toString())
             }
             is Expense.Maintenance -> {
-                form.submit(expense.mileage.toString(), Mileage)
+                form.submit(Mileage, expense.mileage.toString())
             }
         }
     }
@@ -187,7 +166,6 @@ class ExpenseEditingViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.N)
     fun execute(intent: ExpenseEditingIntent) {
         when (intent) {
-            is ExpenseEditingIntent.FillForm<*> -> form.submit(intent.value, intent.key)
             ExpenseEditingIntent.Close -> actionsProcessor.onNext(
                 ExpenseEditingAction.Finish
             )
@@ -197,52 +175,37 @@ class ExpenseEditingViewModel @Inject constructor(
         }
     }
 
+    fun <ValueType : Any, OutType : Any> fillForm(
+        key: ExpenseEditingKeys<ValueType, OutType>,
+        value: ValueType
+    ) {
+        form.submit(key, value)
+    }
+
     private fun selectDate(type: ExpenseEditingDateSelectionType) {
         when (type) {
-            ExpenseEditingDateSelectionType.Today -> form.submit(DateInputValue.Today, SpendDate)
-            ExpenseEditingDateSelectionType.Yesterday -> form.submit(
-                DateInputValue.Yesterday,
-                SpendDate
-            )
+            ExpenseEditingDateSelectionType.Today -> form.submit(SpendDate, Today)
+            ExpenseEditingDateSelectionType.Yesterday -> form.submit(SpendDate, Yesterday)
             ExpenseEditingDateSelectionType.Custom -> submitDatePicker()
         }
     }
 
     private fun submitDatePicker() {
-        val dateSelectorStateRequest = form.getFieldStateFlow(SpendDate, DateInputValue::class)
-        val dateSelectorInputState = dateSelectorStateRequest as? Success ?: return
-        dateSelectorInputState.result.firstElement().subscribeWithLogError { inputState ->
-            val dateSelectorState = (inputState as? InputState.Valid)
-                ?.inp
-                ?: DateInputValue.Today
-            val startCalendar = when (dateSelectorState) {
-                is DateInputValue.Custom -> dateSelectorState.date
-                DateInputValue.Today -> dateTimeInteractor.getToday()
-                DateInputValue.Yesterday -> dateTimeInteractor.getYesterday()
-            }.let { startDate -> Calendar.getInstance().apply { time = startDate } }
-
+        form.getStateMapFlow().map { stateMap ->
+            stateMap.getFieldState(SpendDate)
+        }.subscribeWithLogError { inputState ->
+            val date = inputState.getOrNull()?.validValueOrNull() ?: dateTimeInteractor.getToday()
+            val startCalendar = Calendar.getInstance().apply { time = date }
             ExpenseEditingAction.ShowDatePicker(
                 startCalendar.get(Calendar.YEAR),
                 startCalendar.get(Calendar.MONTH),
                 startCalendar.get(Calendar.DAY_OF_MONTH)
             ).let(actionsProcessor::onNext)
-        }
+        }.let(composite::add)
     }
 
     override fun onCleared() {
         super.onCleared()
         composite.dispose()
-    }
-
-    private fun submitExpenseAction(expense: Expense) {
-        val cost = expense.cost.toString()
-        val liters = (expense as? Expense.Fuel)?.liters?.toString() ?: ""
-        val fineType = (expense as? Expense.Fine)?.type ?: FinesCategories.Other
-        val mileage = (expense as? Expense.Fuel)?.mileage?.toString()
-            ?: (expense as? Expense.Maintenance)?.mileage?.toString()
-            ?: String()
-        val type = converter.getExpenseType(expense)
-//        val action = ExpenseEditingAction.SetupExpense(cost, type, liters, mileage, fineType)
-//        actionsProcessor.onNext(action)
     }
 }

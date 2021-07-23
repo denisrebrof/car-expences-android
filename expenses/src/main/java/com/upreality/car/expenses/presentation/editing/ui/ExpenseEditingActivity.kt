@@ -15,7 +15,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.presentation.editing.viewmodel.*
-import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent.FillForm
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel.*
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
@@ -23,6 +22,7 @@ import io.sellmair.disposer.disposers
 import presentation.AfterTextChangedWatcher
 import presentation.InputState
 import presentation.RxLifecycleExtentions.subscribeDefault
+import presentation.ValidationResult
 import presentation.applyWithDisabledTextWatcher
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,14 +39,12 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
 
     private val defaultFieldError: String = "Invalid input"
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private val costWatcher = AfterTextChangedWatcher { costText ->
-        FillForm(
-            ExpenseEditingKeys.Cost,
-            costText,
-            String::class
-        ).let(viewModel::execute)
+        viewModel.fillForm(ExpenseEditingKeys.Cost, costText)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
@@ -65,7 +63,7 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
                 binding.fuelTypeButton.id -> ExpenseType.Fuel
                 else -> return@addOnButtonCheckedListener
             }
-            FillForm(ExpenseEditingKeys.Type, type, ExpenseType::class).let(viewModel::execute)
+            viewModel.fillForm(ExpenseEditingKeys.Type, type)
         }
 
         binding.dateInputLayout.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -123,11 +121,14 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         DatePickerDialog(this, style, this, action.year, action.month, action.day).show()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun applyViewState(viewState: ExpenseEditingViewState) {
-        val setErrorIfDefined: (InputState<String>, EditText) -> Unit = { inputState, editText ->
-            val reason = (inputState as? InputState.Invalid)?.let { it.reason ?: defaultFieldError }
-            reason?.let(editText::setError)
-        }
+        val setErrorIfDefined: (ValidationResult<*, *>, EditText) -> Unit =
+            { inputState, editText ->
+                val reason = (inputState as? ValidationResult.Invalid)
+                    ?.let { it.reason ?: defaultFieldError }
+                reason?.let(editText::setError)
+            }
 
         setErrorIfDefined(viewState.costState, binding.costEt)
 
@@ -183,14 +184,12 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
 
     override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
         Calendar.getInstance()
             .apply { set(year, month, dayOfMonth) }
             .let(Calendar::getTime)
             .let(DateInputValue::Custom)
-            .let { state ->
-                FillForm(ExpenseEditingKeys.SpendDate, state, DateInputValue::class)
-            }.let(viewModel::execute)
-
+            .let { state -> viewModel.fillForm(ExpenseEditingKeys.SpendDate, state) }
     }
 }

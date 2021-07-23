@@ -9,9 +9,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.chip.Chip
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.FinesCategories
-import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent
-import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent.*
-import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.FineType
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,7 +17,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
-import presentation.InputState
 import com.upreality.car.expenses.databinding.FragmentExpenseEditingFineBinding as ViewBinding
 
 @AndroidEntryPoint
@@ -40,9 +36,7 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError { viewState ->
-                (viewState.fineTypeState as? InputState.Valid)
-                    ?.let(InputState.Valid<FinesCategories>::input)
-                    ?.let(this::setupFineCategory)
+                (viewState.fineTypeState.validValueOrNull())?.let(this::setupFineCategory)
             }.disposeBy(lifecycle.disposers.onStop)
     }
 
@@ -55,6 +49,7 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
         }.let(Chip::getId).let(binding.chipGroup::check)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun onChipSelected(buttonView: View) {
         val fineType = when (buttonView) {
             binding.chipFineSpeedLimit -> FinesCategories.SpeedLimit
@@ -62,6 +57,6 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
             binding.chipFineRoadMarking -> FinesCategories.RoadMarking
             else -> FinesCategories.Other
         }
-        FillForm(FineType, fineType, FinesCategories::class).let(viewModel::execute)
+        viewModel.fillForm(FineType, fineType)
     }
 }

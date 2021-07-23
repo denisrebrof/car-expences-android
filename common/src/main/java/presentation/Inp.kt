@@ -2,38 +2,57 @@ package presentation
 
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
-import kotlin.reflect.KClass
 
-sealed class InpState<out INPUT_TYPE : Any, out OUT_TYPE : Any>(val input: INPUT_TYPE? = null) {
-    object Empty : InpState<Nothing, Nothing>()
+sealed class ValidationResult<out INPUT_TYPE : Any?, out OUT_TYPE : Any>(val input: INPUT_TYPE? = null) {
+    object Empty : ValidationResult<Nothing, Nothing>()
 
     data class Invalid<out INPUT_TYPE : Any>(
-        val reason: String? = null,
-        val inp: INPUT_TYPE?
-    ) : InpState<INPUT_TYPE, Nothing>(inp)
-
-    data class Valid<out INPUT_TYPE : Any, out OUT_TYPE : Any>(
         val inp: INPUT_TYPE?,
+        val reason: String? = null
+    ) : ValidationResult<INPUT_TYPE, Nothing>(inp)
+
+    data class Valid<out INPUT_TYPE : Any?, out OUT_TYPE : Any>(
+        val inp: INPUT_TYPE,
         val out: OUT_TYPE
-    ) : InpState<INPUT_TYPE, OUT_TYPE>(inp)
+    ) : ValidationResult<INPUT_TYPE, OUT_TYPE>(inp)
 
-    fun validOrNull(): Valid<INPUT_TYPE, OUT_TYPE>? {
-        return this as? Valid
+    fun validValueOrNull(): OUT_TYPE? {
+        return (this as? Valid)?.out
     }
-}
 
-sealed class TypedInpState<out INPUT_TYPE : Any> : InpState<INPUT_TYPE, INPUT_TYPE>()
+    fun requireValid() = validValueOrNull()!!
+}
 
 class InpForm {
 
+    companion object {
+        fun <ValueType : Any> validateNotNull(
+            value: ValueType?
+        ): ValidationResult<ValueType, ValueType> {
+            if (value == null)
+                return ValidationResult.Empty
+            return ValidationResult.Valid(value, value)
+        }
+    }
+
     private var fieldsSet = hashSetOf<FieldMapEntry<*, *>>()
+
+    fun <ValueType : Any, OutType : Any> createField(
+        key: FieldKey<ValueType, OutType>,
+        validator: (ValueType?) -> ValidationResult<ValueType, OutType>,
+        defaultValue: ValueType? = null
+    ) = FieldMapEntry(
+        key,
+        FormField(validator, defaultValue)
+    ).let(fieldsSet::add)
 
     fun getStateMapFlow(): Flowable<FormStateMap> {
         val keysToStatesFlows = fieldsSet.map { entry ->
             entry.field.getInputStateFlow().map { entry.key to it }
         }
         return Flowable.combineLatest(keysToStatesFlows) {
-            val keysToStates = (it as? Array<Pair<FieldKey<*, *>, InpState<*, *>>>) ?: emptyArray()
+            val keysToStates =
+                (it as? Array<Pair<FieldKey<*, *>, ValidationResult<*, *>>>) ?: emptyArray()
             val stateToKeysMap = mapOf(*keysToStates)
             object : FormStateMap {
                 override fun <ValueType : Any, OutType : Any> getFieldState(
@@ -42,14 +61,14 @@ class InpForm {
                     if (!stateToKeysMap.containsKey(key))
                         return FormStateMap.FieldStateRequestResult.FieldNotFound()
 
-                    val inputState = stateToKeysMap[key] as InpState<ValueType, OutType>
+                    val inputState = stateToKeysMap[key] as ValidationResult<ValueType, OutType>
                     return FormStateMap.FieldStateRequestResult.Success(inputState)
                 }
             }
         }
     }
 
-    fun <ValueType : Any, OutType : Any> submitValue(
+    fun <ValueType : Any, OutType : Any> submit(
         key: FieldKey<ValueType, OutType>,
         value: ValueType
     ): SubmitFieldValueResult {
@@ -72,15 +91,17 @@ class InpForm {
 
         sealed class FieldStateRequestResult<out ValueType : Any, out OutType : Any> {
             data class Success<out ValueType : Any, out OutType : Any>(
-                val state: InpState<ValueType, OutType>
+                val state: ValidationResult<ValueType, OutType>
             ) : FieldStateRequestResult<ValueType, OutType>()
 
             class FieldNotFound<out ValueType : Any, out OutType : Any> :
                 FieldStateRequestResult<ValueType, OutType>()
+
+            fun getOrNull() = (this as? Success)?.state
         }
     }
 
-    abstract class FieldKey<ValueType : Any, out OutType : Any>
+    abstract class FieldKey<in ValueType : Any, in OutType : Any>
 
     private class FieldMapEntry<ValueType : Any, OutType : Any>(
         val key: FieldKey<ValueType, OutType>,
@@ -90,12 +111,11 @@ class InpForm {
     }
 }
 
-class FormField<ValueType : Any, OutType : Any>(
-    private val validator: (ValueType) -> InpState<ValueType, OutType>,
-    private var value: ValueType? = null,
-    private val type: KClass<ValueType>
+internal class FormField<ValueType : Any?, OutType : Any>(
+    private val validator: (ValueType) -> ValidationResult<ValueType, OutType>,
+    private var value: ValueType? = null
 ) {
-    private val defaultInputState = value?.let(validator) ?: InpState.Empty
+    private val defaultInputState = value?.let(validator) ?: ValidationResult.Empty
     private val inputState = BehaviorProcessor.createDefault(defaultInputState)
 
     fun submitInput(input: ValueType) {
@@ -105,7 +125,7 @@ class FormField<ValueType : Any, OutType : Any>(
         validator(input).let(inputState::onNext)
     }
 
-    fun getInputStateFlow(): Flowable<InpState<ValueType, OutType>> {
+    fun getInputStateFlow(): Flowable<ValidationResult<ValueType, OutType>> {
         return inputState
     }
 }
