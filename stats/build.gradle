@@ -65,6 +65,10 @@ dependencies {
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
 
+    //Navigation
+    implementation rootProject.ext.navigation_fragment_ktx
+    implementation rootProject.ext.navigation_ui_ktx
+
     api project(":uikit")
     api project(":common")
 }
