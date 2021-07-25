@@ -12,6 +12,6 @@ class StatsFragment : Fragment() {
     private val viewModel: StatsFragmentViewModel by viewModels()
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
 
-    
+
 
 }

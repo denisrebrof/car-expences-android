@@ -90,6 +90,8 @@ ext {
 
     google_auth = 'com.google.android.gms:play-services-auth:19.0.0'
     inputmask = 'com.redmadrobot:input-mask-android:6.0.0'
+
+    mpandroidchart = 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }
 
 task clean(type: Delete) {
