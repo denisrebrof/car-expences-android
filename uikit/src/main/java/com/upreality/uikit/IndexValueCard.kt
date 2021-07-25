@@ -1,60 +1,24 @@
 package com.upreality.uikit
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.drawable.Drawable
-import android.text.TextPaint
 import android.util.AttributeSet
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+
 
 /**
  * TODO: document your custom view class.
  */
-class IndexValueCard : View {
+class IndexValueCard : LinearLayout  {
 
-    private var _exampleString: String? = null // TODO: use a default from R.string...
-    private var _exampleColor: Int = Color.RED // TODO: use a default from R.color...
-    private var _exampleDimension: Float = 0f // TODO: use a default from R.dimen...
+    private var mValue: View? = null
+    private var mImage: ImageView? = null
 
-    private lateinit var textPaint: TextPaint
-    private var textWidth: Float = 0f
-    private var textHeight: Float = 0f
-
-    /**
-     * The text to draw
-     */
-    var exampleString: String?
-        get() = _exampleString
-        set(value) {
-            _exampleString = value
-            invalidateTextPaintAndMeasurements()
-        }
-
-    /**
-     * The font color
-     */
-    var exampleColor: Int
-        get() = _exampleColor
-        set(value) {
-            _exampleColor = value
-            invalidateTextPaintAndMeasurements()
-        }
-
-    /**
-     * In the example view, this dimension is the font size.
-     */
-    var exampleDimension: Float
-        get() = _exampleDimension
-        set(value) {
-            _exampleDimension = value
-            invalidateTextPaintAndMeasurements()
-        }
-
-    /**
-     * In the example view, this drawable is drawn above the text.
-     */
     var exampleDrawable: Drawable? = null
 
     constructor(context: Context) : super(context) {
@@ -74,83 +38,30 @@ class IndexValueCard : View {
     }
 
     private fun init(attrs: AttributeSet?, defStyle: Int) {
-        // Load attributes
         val a = context.obtainStyledAttributes(
-            attrs, R.styleable.IndexValueCard, defStyle, 0
+            attrs,
+            R.styleable.IndexValueCard, 0, 0
         )
-
-        _exampleString = a.getString(
-            R.styleable.IndexValueCard_exampleString
+        val titleText = a.getString(R.styleable.IndexValueCard_titleText)
+        val valueColor = a.getColor(
+            R.styleable.IndexValueCard_valueColor,
+            0
         )
-        _exampleColor = a.getColor(
-            R.styleable.IndexValueCard_exampleColor,
-            exampleColor
-        )
-        // Use getDimensionPixelSize or getDimensionPixelOffset when dealing with
-        // values that should fall on pixel boundaries.
-        _exampleDimension = a.getDimension(
-            R.styleable.IndexValueCard_exampleDimension,
-            exampleDimension
-        )
-
-        if (a.hasValue(R.styleable.IndexValueCard_exampleDrawable)) {
-            exampleDrawable = a.getDrawable(
-                R.styleable.IndexValueCard_exampleDrawable
-            )
-            exampleDrawable?.callback = this
-        }
-
         a.recycle()
 
-        // Set up a default TextPaint object
-        textPaint = TextPaint().apply {
-            flags = Paint.ANTI_ALIAS_FLAG
-            textAlign = Paint.Align.LEFT
-        }
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
 
-        // Update TextPaint and text measurements from attributes
-        invalidateTextPaintAndMeasurements()
-    }
+        val inflater = context
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        inflater.inflate(R.layout.index_value_card, this, true)
 
-    private fun invalidateTextPaintAndMeasurements() {
-        textPaint.let {
-            it.textSize = exampleDimension
-            it.color = exampleColor
-            textWidth = it.measureText(exampleString)
-            textHeight = it.fontMetrics.bottom
-        }
-    }
+        val title = getChildAt(0) as TextView
+        title.text = titleText
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
+        mValue = getChildAt(1)
+        mImage?.setBackgroundColor(valueColor)
 
-        // TODO: consider storing these as member variables to reduce
-        // allocations per draw cycle.
-        val paddingLeft = paddingLeft
-        val paddingTop = paddingTop
-        val paddingRight = paddingRight
-        val paddingBottom = paddingBottom
-
-        val contentWidth = width - paddingLeft - paddingRight
-        val contentHeight = height - paddingTop - paddingBottom
-
-        exampleString?.let {
-            // Draw the text.
-            canvas.drawText(
-                it,
-                paddingLeft + (contentWidth - textWidth) / 2,
-                paddingTop + (contentHeight + textHeight) / 2,
-                textPaint
-            )
-        }
-
-        // Draw the example drawable on top of the text.
-        exampleDrawable?.let {
-            it.setBounds(
-                paddingLeft, paddingTop,
-                paddingLeft + contentWidth, paddingTop + contentHeight
-            )
-            it.draw(canvas)
-        }
+        mImage = getChildAt(2) as ImageView
     }
 }
