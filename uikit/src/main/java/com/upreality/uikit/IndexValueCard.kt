@@ -71,7 +71,7 @@ class IndexValueCard : CardView {
         try {
             AppCompatResources
                 .getDrawable(context, iconId)
-                .let(binding.icon::setBackground)
+                .let(binding.icon::setImageDrawable)
         } catch (exception: Throwable) {
             //skip
         }
