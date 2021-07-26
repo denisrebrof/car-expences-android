@@ -12,17 +12,19 @@ import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.button.MaterialButtonToggleGroup.OnButtonCheckedListener
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.presentation.editing.viewmodel.*
-import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingIntent.FillForm
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel.*
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import presentation.AfterTextChangedWatcher
-import presentation.InputState
 import presentation.RxLifecycleExtentions.subscribeDefault
+import presentation.ValidationResult
+import presentation.applyWithDisabledOnButtonCheckedListener
 import presentation.applyWithDisabledTextWatcher
 import java.text.SimpleDateFormat
 import java.util.*
@@ -39,14 +41,46 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
 
     private val defaultFieldError: String = "Invalid input"
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private val costWatcher = AfterTextChangedWatcher { costText ->
-        FillForm(
-            ExpenseEditingKeys.Cost,
-            costText,
-            String::class
-        ).let(viewModel::execute)
+        viewModel.fillForm(ExpenseEditingKeys.Cost, costText)
     }
 
+    private val dateCheckedListener = object : OnButtonCheckedListener {
+        override fun onButtonChecked(
+            group: MaterialButtonToggleGroup?,
+            checkedId: Int,
+            isChecked: Boolean
+        ) {
+            if (!isChecked)
+                return
+            when (checkedId) {
+                binding.dateSelectorToday.id -> ExpenseEditingDateSelectionType.Today
+                binding.dateSelectorYesterday.id -> ExpenseEditingDateSelectionType.Yesterday
+                else -> ExpenseEditingDateSelectionType.Custom
+            }.let(ExpenseEditingIntent::SelectDate).let(viewModel::execute)
+        }
+    }
+
+    private val typeCheckedListener = object : OnButtonCheckedListener {
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun onButtonChecked(
+            group: MaterialButtonToggleGroup?,
+            checkedId: Int,
+            isChecked: Boolean
+        ) {
+            if (!isChecked)
+                return
+            val type = when (checkedId) {
+                binding.fineTypeButton.id -> ExpenseType.Fines
+                binding.fuelTypeButton.id -> ExpenseType.Fuel
+                else -> return
+            }
+            viewModel.fillForm(ExpenseEditingKeys.Type, type)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense_editing)
@@ -56,27 +90,8 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         binding.costEt.addTextChangedListener(costWatcher)
-
-        binding.expenseTypeSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked)
-                return@addOnButtonCheckedListener
-            val type = when (checkedId) {
-                binding.fineTypeButton.id -> ExpenseType.Fines
-                binding.fuelTypeButton.id -> ExpenseType.Fuel
-                else -> return@addOnButtonCheckedListener
-            }
-            FillForm(ExpenseEditingKeys.Type, type, ExpenseType::class).let(viewModel::execute)
-        }
-
-        binding.dateInputLayout.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked)
-                return@addOnButtonCheckedListener
-            when (checkedId) {
-                binding.dateSelectorToday.id -> ExpenseEditingDateSelectionType.Today
-                binding.dateSelectorYesterday.id -> ExpenseEditingDateSelectionType.Yesterday
-                else -> ExpenseEditingDateSelectionType.Custom
-            }.let(ExpenseEditingIntent::SelectDate).let(viewModel::execute)
-        }
+        binding.expenseTypeSelector.addOnButtonCheckedListener(typeCheckedListener)
+        binding.dateInputLayout.addOnButtonCheckedListener(dateCheckedListener)
 
         val navHostId = binding.expenseDetailsContainer.id
         val navHostFragment = supportFragmentManager.findFragmentById(navHostId) as NavHostFragment
@@ -94,8 +109,8 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
 
         viewStateFlow
             .map(ExpenseEditingViewState::typeState)
-            .ofType(InputState.Valid::class.java)
-            .map(InputState.Valid<*>::input)
+            .ofType(ValidationResult.Valid::class.java)
+            .map(ValidationResult.Valid<*, *>::input)
             .ofType(ExpenseType::class.java)
             .distinctUntilChanged(ExpenseType::id)
             .subscribeDefault(this::applySelectedType)
@@ -103,8 +118,8 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
 
         viewStateFlow
             .map(ExpenseEditingViewState::dateState)
-            .ofType(InputState.Valid::class.java)
-            .map(InputState.Valid<*>::input)
+            .ofType(ValidationResult.Valid::class.java)
+            .map(ValidationResult.Valid<*, *>::input)
             .ofType(DateInputValue::class.java)
             .distinctUntilChanged()
             .subscribeDefault(this::applySelectedDateState)
@@ -123,11 +138,14 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         DatePickerDialog(this, style, this, action.year, action.month, action.day).show()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun applyViewState(viewState: ExpenseEditingViewState) {
-        val setErrorIfDefined: (InputState<String>, EditText) -> Unit = { inputState, editText ->
-            val reason = (inputState as? InputState.Invalid)?.let { it.reason ?: defaultFieldError }
-            reason?.let(editText::setError)
-        }
+        val setErrorIfDefined: (ValidationResult<*, *>, EditText) -> Unit =
+            { inputState, editText ->
+                val reason = (inputState as? ValidationResult.Invalid)
+                    ?.let { it.reason ?: defaultFieldError }
+                reason?.let(editText::setError)
+            }
 
         setErrorIfDefined(viewState.costState, binding.costEt)
 
@@ -158,19 +176,23 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {
             ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFineFragment
-            ExpenseType.Fuel -> binding.fuelTypeButton to R.id.action_global_expenseEditingFuelFragment
-            else -> null to null
+            else -> binding.fuelTypeButton to R.id.action_global_expenseEditingFuelFragment
         }
-        selectedButton?.isChecked = true
-        action?.let(navController::navigate)
+        binding.expenseTypeSelector.applyWithDisabledOnButtonCheckedListener(typeCheckedListener) {
+            check(selectedButton.id)
+        }
+        action.let(navController::navigate)
     }
 
     private fun applySelectedDateState(state: DateInputValue) {
-        when (state) {
+        val selectedButton = when (state) {
             DateInputValue.Today -> binding.dateSelectorToday
             DateInputValue.Yesterday -> binding.dateSelectorYesterday
             else -> binding.dateSelectorSelect
-        }.isChecked = true
+        }
+        binding.dateInputLayout.applyWithDisabledOnButtonCheckedListener(dateCheckedListener) {
+            check(selectedButton.id)
+        }
         binding.dateSelectorSelect.text = when (state) {
             is DateInputValue.Custom -> state.date.getSelectorText()
             else -> "Select"
@@ -183,14 +205,12 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
 
     override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
         Calendar.getInstance()
             .apply { set(year, month, dayOfMonth) }
             .let(Calendar::getTime)
             .let(DateInputValue::Custom)
-            .let { state ->
-                FillForm(ExpenseEditingKeys.SpendDate, state, DateInputValue::class)
-            }.let(viewModel::execute)
-
+            .let { state -> viewModel.fillForm(ExpenseEditingKeys.SpendDate, state) }
     }
 }

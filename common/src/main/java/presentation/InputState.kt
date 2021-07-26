@@ -27,20 +27,18 @@ fun <ValueType : Any> InputForm.submit(
 }
 
 @RequiresApi(Build.VERSION_CODES.N)
-fun <ValueType : Any, Key : InputForm.FieldKeys<ValueType>> InputForm.getStateFlow(
-    key: Key,
+fun <ValueType : Any> InputForm.getFieldStateFlow(
+    key: InputForm.FieldKeys<ValueType>,
     type: KClass<ValueType>
 ): InputForm.RequestFieldInputStateResult<ValueType> {
-    return this.getInputStateFlow(key, type)
+    return this.getFieldInputStateFlow(key, type)
 }
 
 fun <ValueType : Any> InputForm.FieldKeys<ValueType>.createFieldPair(type: KClass<ValueType>) =
     this to ValidatedFormField(type = type)
 
 @RequiresApi(Build.VERSION_CODES.N)
-class InputForm(
-    vararg fields: Pair<FieldKey, IFormField>
-) {
+class InputForm(vararg fields: Pair<FieldKey, IFormField>) {
 
     private val fieldsMap = mutableMapOf<FieldKey, IFormField>().apply {
         fields.forEach { (key, value) -> put(key, value) }
@@ -56,7 +54,7 @@ class InputForm(
             ?: SubmitFieldValueResult.FieldNotFound
     }
 
-    internal fun <ValueType : Any> getInputStateFlow(
+    internal fun <ValueType : Any> getFieldInputStateFlow(
         key: FieldKey,
         type: KClass<ValueType>
     ): RequestFieldInputStateResult<ValueType> {
