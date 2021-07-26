@@ -71,6 +71,7 @@ class ExpenseEditingViewModel @Inject constructor(
                 stateMap.getFieldState(Liters).getOrNull()!!,
                 stateMap.getFieldState(Mileage).getOrNull()!!,
                 stateMap.getFieldState(FineType).getOrNull()!!,
+                stateMap.getFieldState(Maintenance).getOrNull()!!,
             )
             return@map ExpenseEditingViewState(
                 isValid = parseResult.isSuccess,
@@ -81,6 +82,7 @@ class ExpenseEditingViewModel @Inject constructor(
                 litersState = stateMap.getFieldState(Liters).getOrNull()!!,
                 mileageState = stateMap.getFieldState(Mileage).getOrNull()!!,
                 fineTypeState = stateMap.getFieldState(FineType).getOrNull()!!,
+                maintenanceTypeState = stateMap.getFieldState(Maintenance).getOrNull()!!,
             )
         }
 
@@ -112,6 +114,7 @@ class ExpenseEditingViewModel @Inject constructor(
             viewState.litersState,
             viewState.mileageState,
             viewState.fineTypeState,
+            viewState.maintenanceTypeState
         ).getOrNull()?.apply {
             selectedExpenseId?.let { id = it }
         }?.let(operation) ?: Completable.complete()

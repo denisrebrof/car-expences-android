@@ -3,6 +3,7 @@ package com.upreality.car.expenses.presentation.editing.ui
 import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.DatePicker
 import android.widget.EditText
 import androidx.activity.viewModels
@@ -14,6 +15,7 @@ import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.button.MaterialButtonToggleGroup.OnButtonCheckedListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.presentation.editing.viewmodel.*
@@ -73,6 +75,7 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
                 return
             val type = when (checkedId) {
                 binding.fineTypeButton.id -> ExpenseType.Fines
+                binding.maintenanceTypeButton.id -> ExpenseType.Maintenance
                 binding.fuelTypeButton.id -> ExpenseType.Fuel
                 else -> return
             }
@@ -163,9 +166,7 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         binding.applyButton.setOnClickListener {
             ExpenseEditingIntent.Submit.let(viewModel::execute)
         }
-        binding.deleteButton.setOnClickListener {
-            ExpenseEditingIntent.Delete.let(viewModel::execute)
-        }
+        binding.deleteButton.setOnClickListener(this::showDeleteConfirmationDialog)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(true)
@@ -173,10 +174,22 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
         }
     }
 
+    private fun showDeleteConfirmationDialog(source: View) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Confirm deletion")
+            .setMessage("Delete expense permanently?")
+            .setNegativeButton("Cancel") { dialog, which ->
+                //do nothing
+            }.setPositiveButton("Confirm") { dialog, which ->
+                ExpenseEditingIntent.Delete.let(viewModel::execute)
+            }.show()
+    }
+
     private fun applySelectedType(type: ExpenseType) {
         val (selectedButton, action) = when (type) {
             ExpenseType.Fines -> binding.fineTypeButton to R.id.action_global_expenseEditingFineFragment
-            else -> binding.fuelTypeButton to R.id.action_global_expenseEditingFuelFragment
+            ExpenseType.Fuel -> binding.fuelTypeButton to R.id.action_global_expenseEditingFuelFragment
+            ExpenseType.Maintenance -> binding.maintenanceTypeButton to R.id.action_global_expenseEditingMaintenanceFragment
         }
         binding.expenseTypeSelector.applyWithDisabledOnButtonCheckedListener(typeCheckedListener) {
             check(selectedButton.id)

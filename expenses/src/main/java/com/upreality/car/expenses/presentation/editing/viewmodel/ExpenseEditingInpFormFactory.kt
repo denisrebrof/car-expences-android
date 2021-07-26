@@ -2,7 +2,7 @@ package com.upreality.car.expenses.presentation.editing.viewmodel
 
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.*
 import domain.DateTimeInteractor
-import presentation.InpForm
+import presentation.InputForm
 import presentation.ValidationResult
 import java.util.*
 import javax.inject.Inject
@@ -12,16 +12,17 @@ class ExpenseEditingInpFormFactory @Inject constructor(
     private val dateTimeInteractor: DateTimeInteractor
 ) {
 
-    fun create(): InpForm {
+    fun create(): InputForm {
         val numValidator = this::validatePositiveFloatInput
         val dateValidator = this::validateSpendDate
-        return InpForm().apply {
+        return InputForm().apply {
             createField(Cost, numValidator)
             createField(SpendDate, dateValidator)
-            createField(Type, InpForm.Companion::validateNotNull)
+            createField(Type, InputForm.Companion::validateNotNull)
             createField(Liters, numValidator)
             createField(Mileage, numValidator)
-            createField(FineType, InpForm.Companion::validateNotNull)
+            createField(FineType, InputForm.Companion::validateNotNull)
+            createField(Maintenance, InputForm.Companion::validateNotNull)
         }
     }
 

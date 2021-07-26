@@ -12,11 +12,9 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.FineType
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import domain.subscribeWithLogError
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
+import presentation.RxLifecycleExtentions.subscribeDefault
 import presentation.ValidationResult
 import com.upreality.car.expenses.databinding.FragmentExpenseEditingFineBinding as ViewBinding
 
@@ -33,17 +31,14 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
         binding.chipFineParking.setOnClickListener(this::onChipSelected)
         binding.chipFineRoadMarking.setOnClickListener(this::onChipSelected)
         binding.chipFineOther.setOnClickListener(this::onChipSelected)
-        viewModel.getViewState()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWithLogError { viewState ->
-                viewState.fineTypeState.let(this::setupFineCategory)
-            }.disposeBy(lifecycle.disposers.onStop)
+        viewModel.getViewState().subscribeDefault { viewState ->
+            viewState.fineTypeState.let(this::setupFineCategory)
+        }.disposeBy(lifecycle.disposers.onStop)
     }
 
     private fun setupFineCategory(validationResult: ValidationResult<FinesCategories, FinesCategories>) {
         binding.chipGroup.isSelectionRequired = validationResult !is ValidationResult.Empty
-        if(validationResult is ValidationResult.Empty)
+        if (validationResult is ValidationResult.Empty)
             binding.chipGroup.clearCheck()
         when (validationResult.validValueOrNull()) {
             FinesCategories.SpeedLimit -> binding.chipFineSpeedLimit

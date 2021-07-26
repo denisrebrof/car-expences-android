@@ -1,67 +1,91 @@
 package com.upreality.uikit
 
 import android.content.Context
-import android.graphics.drawable.Drawable
+import android.content.res.ColorStateList
+import android.content.res.TypedArray
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import com.upreality.uikit.databinding.IndexValueCardBinding
 
+class IndexValueCard : CardView {
 
-/**
- * TODO: document your custom view class.
- */
-class IndexValueCard : LinearLayout  {
+    private lateinit var binding: IndexValueCardBinding
 
-    private var mValue: View? = null
-    private var mImage: ImageView? = null
-
-    var exampleDrawable: Drawable? = null
-
-    constructor(context: Context) : super(context) {
-        init(null, 0)
+    companion object {
+        private const val DEF_VALUE_TEXT = "0"
+        private const val DEF_TITLE_TEXT = "Title"
+        private val DEF_ICON = R.drawable.ic_credit_card
+        private val DEF_COLOR = R.color.colorPrimary
     }
 
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(attrs, 0)
-    }
+    private var valueText = DEF_VALUE_TEXT
+    private var title = DEF_TITLE_TEXT
+    private var iconId = DEF_ICON
+    private var iconTint = DEF_COLOR
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
+    constructor(context: Context) : this(context, null, 0)
+
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
         context,
         attrs,
         defStyle
     ) {
-        init(attrs, defStyle)
+        if (attrs != null) {
+            val styleable = R.styleable.IndexValueCard
+            val attrArray = context.theme.obtainStyledAttributes(attrs, styleable, 0, 0)
+            attrArray.also(this::fillAttributes).recycle()
+        }
+        setUpView(context)
     }
 
-    private fun init(attrs: AttributeSet?, defStyle: Int) {
-        val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.IndexValueCard, 0, 0
-        )
-        val titleText = a.getString(R.styleable.IndexValueCard_titleText)
-        val valueColor = a.getColor(
-            R.styleable.IndexValueCard_valueColor,
-            0
-        )
-        a.recycle()
+    private fun fillAttributes(attrs: TypedArray) {
+        valueText = attrs.getString(R.styleable.IndexValueCard_valueText) ?: DEF_VALUE_TEXT
+        title = attrs.getString(R.styleable.IndexValueCard_titleText) ?: DEF_TITLE_TEXT
+        iconId = attrs.getResourceId(R.styleable.IndexValueCard_icon, DEF_ICON)
 
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL
+        iconTint = attrs.getColor(R.styleable.IndexValueCard_iconColor, DEF_COLOR)
+    }
 
-        val inflater = context
-            .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        inflater.inflate(R.layout.index_value_card, this, true)
+    private fun setUpView(context: Context) {
+        val inflater = LayoutInflater.from(context)
+        binding = IndexValueCardBinding.inflate(inflater, this, true)
+        applyIcon(iconId)
+        applyIconTint(iconTint)
+        applyTitle(title)
+        applyValueText(valueText)
+    }
 
-        val title = getChildAt(0) as TextView
-        title.text = titleText
+    fun setValue(text: String) {
+        valueText = text.also(this::setValue)
+    }
 
-        mValue = getChildAt(1)
-        mImage?.setBackgroundColor(valueColor)
+    private fun applyIcon(iconId: Int) {
+        try {
+            AppCompatResources
+                .getDrawable(context, iconId)
+                .let(binding.icon::setBackground)
+        } catch (exception: Throwable) {
+            //skip
+        }
+    }
 
-        mImage = getChildAt(2) as ImageView
+    private fun applyIconTint(@ColorRes color: Int) {
+        binding.icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN)
+    }
+
+    private fun applyValueText(text: String) {
+        binding.value.text = text
+    }
+
+    private fun applyTitle(text: String) {
+        binding.title.text = text
     }
 }

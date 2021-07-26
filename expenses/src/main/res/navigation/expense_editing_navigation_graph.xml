@@ -21,10 +21,19 @@
         android:name="com.upreality.car.expenses.presentation.editing.ui.ExpenseEditingFineFragment"
         android:label="ExpenseEditingFineFragment"
         tools:layout="@layout/fragment_expense_editing_fine" />
+    <fragment
+        android:id="@+id/expenseEditingMaintenanceFragment"
+        android:name="com.upreality.car.expenses.presentation.editing.ui.ExpenseEditingMaintenanceFragment"
+        android:label="ExpenseEditingMaintenanceFragment"
+        tools:layout="@layout/fragment_expense_editing_maintenance" />
+
     <action
         android:id="@+id/action_global_expenseEditingFineFragment"
         app:destination="@id/expenseEditingFineFragment" />
     <action
         android:id="@+id/action_global_expenseEditingFuelFragment"
         app:destination="@id/expenseEditingFuelFieldsFragment" />
+    <action
+        android:id="@+id/action_global_expenseEditingMaintenanceFragment"
+        app:destination="@id/expenseEditingMaintenanceFragment" />
 </navigation>

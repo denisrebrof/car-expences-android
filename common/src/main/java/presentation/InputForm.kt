@@ -23,7 +23,7 @@ sealed class ValidationResult<out INPUT_TYPE : Any?, out OUT_TYPE : Any>(val inp
     fun requireValid() = validValueOrNull()!!
 }
 
-class InpForm {
+class InputForm {
 
     companion object {
         fun <ValueType : Any> validateNotNull(

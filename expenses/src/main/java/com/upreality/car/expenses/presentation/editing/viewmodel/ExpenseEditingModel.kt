@@ -2,19 +2,21 @@ package com.upreality.car.expenses.presentation.editing.viewmodel
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
-import presentation.InpForm
+import com.upreality.car.expenses.domain.model.MaintenanceType
+import presentation.InputForm
 import presentation.ValidationResult
 import java.util.*
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
 
 sealed class ExpenseEditingKeys<in ValueType : Any, in OutType : Any> :
-    InpForm.FieldKey<ValueType, OutType>() {
+    InputForm.FieldKey<ValueType, OutType>() {
     object Cost : ExpenseEditingKeys<String, Float>()
     object SpendDate : ExpenseEditingKeys<DateInputValue, Date>()
     object Type : ExpenseEditingKeys<ExpenseType, ExpenseType>()
     object Liters : ExpenseEditingKeys<String, Float>()
     object Mileage : ExpenseEditingKeys<String, Float>()
     object FineType : ExpenseEditingKeys<FinesCategories, FinesCategories>()
+    object Maintenance : ExpenseEditingKeys<MaintenanceType, MaintenanceType>()
 }
 
 sealed class ExpenseEditingAction {
@@ -49,6 +51,7 @@ data class ExpenseEditingViewState(
     val litersState: ValidationResult<String, Float>,
     val mileageState: ValidationResult<String, Float>,
     val fineTypeState: ValidationResult<FinesCategories, FinesCategories>,
+    val maintenanceTypeState: ValidationResult<MaintenanceType, MaintenanceType>
 )
 
 sealed class ExpenseEditingDateInputValue {

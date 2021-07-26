@@ -4,14 +4,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import io.reactivex.Flowable
 import io.reactivex.processors.BehaviorProcessor
-import presentation.InputForm.IFormField.RequestInputStateResult.Success
+import presentation.InputFormLegacy.IFormField.RequestInputStateResult.Success
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
-sealed class InputState<out T : Any>(val input: T? = null) {
-    object Empty : InputState<Nothing>()
-    data class Invalid<out T : Any>(val reason: String? = null, val inp: T?) : InputState<T>(inp)
-    data class Valid<out T : Any>(val inp: T?) : InputState<T>(inp)
+sealed class InputStateLegacy<out T : Any>(val input: T? = null) {
+    object Empty : InputStateLegacy<Nothing>()
+    data class Invalid<out T : Any>(val reason: String? = null, val inp: T?) : InputStateLegacy<T>(inp)
+    data class Valid<out T : Any>(val inp: T?) : InputStateLegacy<T>(inp)
 
     fun validOrNull(): Valid<T>? {
         return this as? Valid
@@ -19,26 +19,26 @@ sealed class InputState<out T : Any>(val input: T? = null) {
 }
 
 @RequiresApi(Build.VERSION_CODES.N)
-fun <ValueType : Any> InputForm.submit(
+fun <ValueType : Any> InputFormLegacy.submit(
     value: ValueType,
-    key: InputForm.FieldKeys<ValueType>
-): InputForm.SubmitFieldValueResult {
+    key: InputFormLegacy.FieldKeys<ValueType>
+): InputFormLegacy.SubmitFieldValueResult {
     return this.submitValue(key, value)
 }
 
 @RequiresApi(Build.VERSION_CODES.N)
-fun <ValueType : Any> InputForm.getFieldStateFlow(
-    key: InputForm.FieldKeys<ValueType>,
+fun <ValueType : Any> InputFormLegacy.getFieldStateFlow(
+    key: InputFormLegacy.FieldKeys<ValueType>,
     type: KClass<ValueType>
-): InputForm.RequestFieldInputStateResult<ValueType> {
+): InputFormLegacy.RequestFieldInputStateResult<ValueType> {
     return this.getFieldInputStateFlow(key, type)
 }
 
-fun <ValueType : Any> InputForm.FieldKeys<ValueType>.createFieldPair(type: KClass<ValueType>) =
-    this to ValidatedFormField(type = type)
+fun <ValueType : Any> InputFormLegacy.FieldKeys<ValueType>.createFieldPair(type: KClass<ValueType>) =
+    this to ValidatedFormFieldLegacy(type = type)
 
 @RequiresApi(Build.VERSION_CODES.N)
-class InputForm(vararg fields: Pair<FieldKey, IFormField>) {
+class InputFormLegacy(vararg fields: Pair<FieldKey, IFormField>) {
 
     private val fieldsMap = mutableMapOf<FieldKey, IFormField>().apply {
         fields.forEach { (key, value) -> put(key, value) }
@@ -86,7 +86,7 @@ class InputForm(vararg fields: Pair<FieldKey, IFormField>) {
         ): SubmitInputResult
 
         sealed class RequestInputStateResult<out ValueType : Any> {
-            data class Success<ValueType : Any>(val value: Flowable<InputState<ValueType>>) :
+            data class Success<ValueType : Any>(val value: Flowable<InputStateLegacy<ValueType>>) :
                 RequestInputStateResult<ValueType>()
 
             data class InvalidType(val inputType: KClass<out Any>) :
@@ -109,7 +109,7 @@ class InputForm(vararg fields: Pair<FieldKey, IFormField>) {
     }
 
     sealed class RequestFieldInputStateResult<out ValueType : Any> {
-        data class Success<ValueType : Any>(val result: Flowable<InputState<ValueType>>) :
+        data class Success<ValueType : Any>(val result: Flowable<InputStateLegacy<ValueType>>) :
             RequestFieldInputStateResult<ValueType>()
 
         data class InvalidType(val inputType: KClass<out Any>) :
@@ -119,11 +119,11 @@ class InputForm(vararg fields: Pair<FieldKey, IFormField>) {
     }
 }
 
-class ValidatedFormField<in ValueType : Any>(
-    private val validator: Validator<ValueType> = NullableValidator(),
+class ValidatedFormFieldLegacy<in ValueType : Any>(
+    private val validator: ValidatorLegacy<ValueType> = NullableValidator(),
     private var value: ValueType? = null,
     private val type: KClass<ValueType>
-) : InputForm.IFormField {
+) : InputFormLegacy.IFormField {
     private val defaultInputState = validator.validate(value)
     private val inputState = BehaviorProcessor.createDefault(defaultInputState)
 
@@ -134,20 +134,20 @@ class ValidatedFormField<in ValueType : Any>(
         validator.validate(value).let(inputState::onNext)
     }
 
-    override fun <RequestValueType : Any> requestInputState(type: KClass<RequestValueType>): InputForm.IFormField.RequestInputStateResult<RequestValueType> {
+    override fun <RequestValueType : Any> requestInputState(type: KClass<RequestValueType>): InputFormLegacy.IFormField.RequestInputStateResult<RequestValueType> {
         if (this.type != type) {
             val valueClass = if (value != null) value!!::class else Nothing::class
-            return InputForm.IFormField.RequestInputStateResult.InvalidType(valueClass)
+            return InputFormLegacy.IFormField.RequestInputStateResult.InvalidType(valueClass)
         }
 
         return inputState.map { inputState ->
             when (inputState) {
-                InputState.Empty -> InputState.Empty
-                is InputState.Invalid -> InputState.Invalid(
+                InputStateLegacy.Empty -> InputStateLegacy.Empty
+                is InputStateLegacy.Invalid -> InputStateLegacy.Invalid(
                     inputState.reason,
                     inputState.input?.let(type::cast)
                 )
-                is InputState.Valid -> InputState.Valid(
+                is InputStateLegacy.Valid -> InputStateLegacy.Valid(
                     inputState.input?.let(type::cast)
                 )
             }
@@ -156,33 +156,33 @@ class ValidatedFormField<in ValueType : Any>(
 
     override fun <SubmitValueType : Any> submitInput(
         input: SubmitValueType
-    ): InputForm.IFormField.SubmitInputResult {
+    ): InputFormLegacy.IFormField.SubmitInputResult {
         if (!type.isInstance(input)) {
-            return InputForm.IFormField.SubmitInputResult.InvalidType
+            return InputFormLegacy.IFormField.SubmitInputResult.InvalidType
         }
 
         submitValue(type.cast(input))
-        return InputForm.IFormField.SubmitInputResult.Success
+        return InputFormLegacy.IFormField.SubmitInputResult.Success
     }
 
-    abstract class Validator<ValueType : Any> {
+    abstract class ValidatorLegacy<ValueType : Any> {
 
-        fun validate(value: ValueType?): InputState<ValueType> = when {
-            isEmpty(value) -> InputState.Empty
-            isValid(value) -> InputState.Valid(value)
-            else -> InputState.Invalid(inp = value)
+        fun validate(value: ValueType?): InputStateLegacy<ValueType> = when {
+            isEmpty(value) -> InputStateLegacy.Empty
+            isValid(value) -> InputStateLegacy.Valid(value)
+            else -> InputStateLegacy.Invalid(inp = value)
         }
 
         protected abstract fun isEmpty(value: ValueType?): Boolean
         protected abstract fun isValid(value: ValueType?): Boolean
     }
 
-    class NullableValidator<ValueType : Any> : Validator<ValueType>() {
+    class NullableValidator<ValueType : Any> : ValidatorLegacy<ValueType>() {
         override fun isEmpty(value: ValueType?) = value == null
         override fun isValid(value: ValueType?) = true
     }
 
-    class NotNullValidator<ValueType : Any> : Validator<ValueType>() {
+    class NotNullValidator<ValueType : Any> : ValidatorLegacy<ValueType>() {
         override fun isEmpty(value: ValueType?) = true
         override fun isValid(value: ValueType?) = value != null
     }
