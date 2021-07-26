@@ -51,8 +51,9 @@ class InpForm {
             entry.field.getInputStateFlow().map { entry.key to it }
         }
         return Flowable.combineLatest(keysToStatesFlows) {
-            val keysToStates =
-                (it as? Array<Pair<FieldKey<*, *>, ValidationResult<*, *>>>) ?: emptyArray()
+            val keysToStates = it.map { pair ->
+                pair as Pair<FieldKey<*, *>, ValidationResult<*, *>>
+            }.toTypedArray()
             val stateToKeysMap = mapOf(*keysToStates)
             object : FormStateMap {
                 override fun <ValueType : Any, OutType : Any> getFieldState(

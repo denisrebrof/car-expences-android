@@ -17,6 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
+import presentation.ValidationResult
 import com.upreality.car.expenses.databinding.FragmentExpenseEditingFineBinding as ViewBinding
 
 @AndroidEntryPoint
@@ -36,17 +37,21 @@ class ExpenseEditingFineFragment : Fragment(R.layout.fragment_expense_editing_fi
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError { viewState ->
-                (viewState.fineTypeState.validValueOrNull())?.let(this::setupFineCategory)
+                viewState.fineTypeState.let(this::setupFineCategory)
             }.disposeBy(lifecycle.disposers.onStop)
     }
 
-    private fun setupFineCategory(type: FinesCategories) {
-        when (type) {
+    private fun setupFineCategory(validationResult: ValidationResult<FinesCategories, FinesCategories>) {
+        binding.chipGroup.isSelectionRequired = validationResult !is ValidationResult.Empty
+        if(validationResult is ValidationResult.Empty)
+            binding.chipGroup.clearCheck()
+        when (validationResult.validValueOrNull()) {
             FinesCategories.SpeedLimit -> binding.chipFineSpeedLimit
             FinesCategories.Parking -> binding.chipFineParking
             FinesCategories.RoadMarking -> binding.chipFineRoadMarking
             FinesCategories.Other -> binding.chipFineOther
-        }.let(Chip::getId).let(binding.chipGroup::check)
+            else -> null
+        }?.let(Chip::getId)?.let(binding.chipGroup::check)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
