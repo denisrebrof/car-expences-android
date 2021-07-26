@@ -50,7 +50,6 @@ class IndexValueCard : CardView {
         valueText = attrs.getString(R.styleable.IndexValueCard_valueText) ?: DEF_VALUE_TEXT
         title = attrs.getString(R.styleable.IndexValueCard_titleText) ?: DEF_TITLE_TEXT
         iconId = attrs.getResourceId(R.styleable.IndexValueCard_icon, DEF_ICON)
-
         iconTint = attrs.getColor(R.styleable.IndexValueCard_iconColor, DEF_COLOR)
     }
 
