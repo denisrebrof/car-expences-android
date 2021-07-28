@@ -48,6 +48,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
             ExpenseFilter.Maintenance -> filterQueryByType(expensesQuery, ExpenseType.Maintenance)
             is ExpenseFilter.Paged -> expensesQuery
             is ExpenseFilter.Id -> expensesQuery.equalTo(ExpenseRealmFields._ID, filter.id)
+            is ExpenseFilter.DateRange -> expensesQuery.between(ExpenseRealmFields.DATE, filter.from, filter.to)
         }.findAllAsync()
             .asFlowable()
             .filter(RealmResults<ExpenseRealm>::isLoaded)

@@ -39,12 +39,4 @@ class ExpenseEditingInputConverter @Inject constructor() {
             else -> null
         }!!
     }
-
-    fun getExpenseType(expense: Expense): ExpenseType {
-        return when (expense) {
-            is Expense.Fuel -> ExpenseType.Fuel
-            is Expense.Fine -> ExpenseType.Fines
-            is Expense.Maintenance -> ExpenseType.Maintenance
-        }
-    }
 }

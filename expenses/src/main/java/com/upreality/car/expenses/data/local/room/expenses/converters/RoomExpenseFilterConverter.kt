@@ -1,11 +1,8 @@
 package com.upreality.car.expenses.data.local.room.expenses.converters
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseEmptyFilter
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseTypeFilter
 import com.upreality.car.common.data.database.IDatabaseFilter
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseIdFilter
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseTimePaginatedFilter
+import com.upreality.car.expenses.data.local.room.expenses.model.filters.*
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 
 object RoomExpenseFilterConverter {
@@ -21,6 +18,7 @@ object RoomExpenseFilterConverter {
                 filter.pageSize
             )
             is ExpenseFilter.Id -> ExpenseIdFilter(filter.id)
+            is ExpenseFilter.DateRange -> ExpenseDateFilter(filter.from, filter.to)
         }
     }
 

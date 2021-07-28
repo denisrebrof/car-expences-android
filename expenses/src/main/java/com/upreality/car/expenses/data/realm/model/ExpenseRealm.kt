@@ -5,11 +5,13 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
+import io.realm.annotations.Required
 import java.util.*
 
 open class ExpenseRealm : RealmObject() {
     @PrimaryKey
     var _id: Long = 0L
+    @Required
     var date: Date = Date()
     var cost: Float = 0f
 

@@ -73,4 +73,5 @@ dependencies {
 
     api project(":uikit")
     api project(":common")
+    api project(":expenses")
 }

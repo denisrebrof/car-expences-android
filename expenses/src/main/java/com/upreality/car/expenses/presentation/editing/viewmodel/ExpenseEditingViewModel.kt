@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
@@ -143,7 +144,7 @@ class ExpenseEditingViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.N)
     private fun applyExpenseToForm(expense: Expense) {
         form.submit(Cost, expense.cost.toString())
-        form.submit(Type, expense.let(converter::getExpenseType))
+        form.submit(Type, expense.let(ExpenseToTypeConverter::toType))
         val dateInput = when {
             dateTimeInteractor.isToday(expense.date) -> Today
             dateTimeInteractor.isYesterday(expense.date) -> Yesterday

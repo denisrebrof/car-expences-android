@@ -63,7 +63,7 @@ class IndexValueCard : CardView {
     }
 
     fun setValue(text: String) {
-        valueText = text.also(this::setValue)
+        valueText = text.also(this::applyValueText)
     }
 
     private fun applyIcon(iconId: Int) {
