@@ -73,7 +73,7 @@ object MainChartSetup {
         val start = 1
 
         for (i in start until start + 5) {
-            val `val` = (Math.random() * (2 + 1)) as Float
+            val `val` = (Math.random() * (2 + 1)).toFloat()
             values.add(BarEntry(i.toFloat(), `val`))
         }
 

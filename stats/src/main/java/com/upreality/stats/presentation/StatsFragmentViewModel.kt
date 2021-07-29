@@ -18,8 +18,8 @@ class StatsFragmentViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val dateRangeProcessor = DateRange(
+        dateTimeInteractor.getYesterday(),
         dateTimeInteractor.getToday(),
-        dateTimeInteractor.getYesterday()
     ).let { range -> BehaviorProcessor.createDefault(range) }
 
     fun getViewState(): Flowable<StatsViewState> {
@@ -29,7 +29,7 @@ class StatsFragmentViewModel @Inject constructor(
     private fun getStatsStateFlow(range: DateRange): Flowable<StatsViewState> {
         return Flowable.combineLatest(
             interactor.getStatValue(StatValues.RatePerMile, range),
-            interactor.getStatValue(StatValues.RatePerMile, range),
+            interactor.getStatValue(StatValues.RatePerLiter, range),
             interactor.getTypesMap(range)
         ) { ratePerMile, ratePerLiter, typesMap ->
             StatsViewState(

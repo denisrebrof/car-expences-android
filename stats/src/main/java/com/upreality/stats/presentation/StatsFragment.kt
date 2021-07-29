@@ -14,7 +14,6 @@ import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import com.upreality.stats.databinding.FragmentStatsMainBinding as ViewBinding
 
-
 @AndroidEntryPoint
 class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
@@ -38,9 +37,10 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         val barChart = binding.statsChartCard.mainChart
         MainChartSetup.setup(barChart, arrayListOf())
 
+        val format: (Float) -> String = { value -> String.format("%.2f", value) }
         binding.statsTypesChartCard.apply {
-            viewState.ratePerLiter.toString().let(rpl::setValue)
-            viewState.ratePerMile.toString().let(rpm::setValue)
+            viewState.ratePerLiter.let(format).let(rpl::setValue)
+            viewState.ratePerMile.let(format).let(rpm::setValue)
         }
     }
 }
