@@ -1,6 +1,6 @@
 package com.upreality.stats.presentation
 
-import com.upreality.stats.domain.DateRange
+import com.upreality.car.expenses.domain.model.DateRange
 
 data class StatsViewState(
     val dateRange: DateRange,

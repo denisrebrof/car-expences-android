@@ -3,7 +3,7 @@ package com.upreality.car.expenses.data.local.room.expenses.dao
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.upreality.car.expenses.data.local.room.expenses.model.entities.ExpenseEntity
-import com.upreality.car.common.data.database.RoomBaseDao
+import data.database.RoomBaseDao
 import io.reactivex.Flowable
 
 @Dao

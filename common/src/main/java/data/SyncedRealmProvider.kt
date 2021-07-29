@@ -1,4 +1,4 @@
-package com.upreality.car.common.data
+package data
 
 import android.util.Log
 import io.realm.Realm

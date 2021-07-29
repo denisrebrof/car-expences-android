@@ -5,13 +5,13 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.github.mikephil.charting.data.PieEntry
 import com.upreality.stats.R
+import com.upreality.stats.presentation.charts.ExpenseTypeChartSetup
+import com.upreality.stats.presentation.charts.MainChartSetup
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
-import presentation.RxLifecycleExtentions.subscribeDefault
 import com.upreality.stats.databinding.FragmentStatsMainBinding as ViewBinding
 
 
@@ -34,6 +34,9 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         val pieChart = binding.statsTypesRadialDiagramCard.typesPieChart
         val pieData = viewState.typesRelationMap.map { (type, value) -> PieEntry(value, type) }
         ExpenseTypeChartSetup.setup(pieChart, ArrayList(pieData))
+
+        val barChart = binding.statsChartCard.mainChart
+        MainChartSetup.setup(barChart, arrayListOf())
 
         binding.statsTypesChartCard.apply {
             viewState.ratePerLiter.toString().let(rpl::setValue)

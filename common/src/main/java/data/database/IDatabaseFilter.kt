@@ -1,4 +1,4 @@
-package com.upreality.car.common.data.database
+package data.database
 
 interface IDatabaseFilter {
     fun getFilterExpression(): String

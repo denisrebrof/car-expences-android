@@ -9,6 +9,6 @@ class RefreshExpensesRealmEventProvider @Inject constructor(
     val repository: IExpensesRepository,
 ) : ExpensesListFragmentViewModel.IRefreshExpensesListEventProvider {
     override fun getRefreshFlow(): Flowable<Unit> {
-        return repository.get(ExpenseFilter.All).map {}
+        return repository.get(ExpenseFilter.All.let(::listOf)).map {}
     }
 }

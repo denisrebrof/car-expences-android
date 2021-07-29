@@ -1,4 +1,4 @@
-package com.upreality.stats.domain
+package com.upreality.car.expenses.domain.model
 
 import java.util.*
 

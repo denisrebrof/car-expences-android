@@ -2,7 +2,7 @@ package com.upreality.stats.presentation
 
 import androidx.lifecycle.ViewModel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.stats.domain.DateRange
+import com.upreality.car.expenses.domain.model.DateRange
 import com.upreality.stats.domain.StatValues
 import com.upreality.stats.domain.StatsInteractor
 import dagger.hilt.android.lifecycle.HiltViewModel

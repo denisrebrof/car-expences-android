@@ -1,4 +1,4 @@
-package com.upreality.car.common.data.database
+package data.database
 
 import androidx.room.Delete
 import androidx.room.Insert

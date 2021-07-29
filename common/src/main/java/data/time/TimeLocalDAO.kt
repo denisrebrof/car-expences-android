@@ -1,4 +1,4 @@
-package com.upreality.car.common.data.time
+package data.time
 
 import java.util.*
 import javax.inject.Inject
