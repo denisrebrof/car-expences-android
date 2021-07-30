@@ -21,4 +21,9 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = binding.root
+
+    override fun onStart() {
+        super.onStart()
+        view
+    }
 }

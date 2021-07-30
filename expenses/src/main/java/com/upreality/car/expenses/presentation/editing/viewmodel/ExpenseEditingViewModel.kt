@@ -95,8 +95,7 @@ class ExpenseEditingViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun getViewState() = viewStateProcessor
-
+    fun getViewState(): Flowable<ExpenseEditingViewState> = viewStateProcessor
     fun getActionState(): Flowable<ExpenseEditingAction> = actionsProcessor
 
     @RequiresApi(Build.VERSION_CODES.N)
