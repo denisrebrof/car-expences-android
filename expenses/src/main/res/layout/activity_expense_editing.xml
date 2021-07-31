@@ -15,15 +15,14 @@
         app:navigationIcon="?attr/homeAsUpIndicator">
 
         <ImageView
+            style="@style/ActionButton"
             android:id="@+id/delete_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginEnd="18dp"
-            android:background="?attr/selectableItemBackground"
+            android:layout_marginEnd="12dp"
             android:contentDescription="@null"
-            android:src="@drawable/ic_delete"
-            app:tint="@color/colorSecondary" />
+            android:src="@drawable/ic_delete"/>
     </androidx.appcompat.widget.Toolbar>
 
     <com.google.android.material.textfield.TextInputLayout

@@ -1,5 +1,9 @@
 package com.upreality.stats.presentation
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -19,6 +23,11 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
     private val viewModel: StatsFragmentViewModel by viewModels()
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+//        binding.
+    }
 
     override fun onStart() {
         super.onStart()

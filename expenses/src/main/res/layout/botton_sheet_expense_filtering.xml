@@ -5,18 +5,55 @@
     android:id="@id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:layout_gravity="bottom">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/date_range_title"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select date range"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/date_range_text"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date_range_title">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/liters_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:inputType="numberDecimal"
+            android:text="10 Dec 2020 - 15 Dec 2021"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            android:textColor="?android:textColorSecondary" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!--    <com.google.android.material.textview.MaterialTextView-->
+    <!--        android:id="@+id/date_range_text2"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="8dp"-->
+    <!--        android:visibility="gone"-->
+    <!--        android:text="10 Dec 2020\n15 Dec 2021"-->
+    <!--        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintHorizontal_bias="0.0"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/date_range_title"/>-->
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/date_selection_chips"
@@ -24,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/date_range_title"
+        app:layout_constraintTop_toBottomOf="@+id/date_range_text"
         app:selectionRequired="true">
 
         <com.google.android.material.chip.Chip
@@ -91,8 +128,8 @@
         android:id="@+id/type_filter_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select expense types"
         android:layout_marginTop="8dp"
+        android:text="Select expense types"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
