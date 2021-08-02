@@ -22,7 +22,6 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/date_range_text"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="8dp"
@@ -62,6 +61,7 @@
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/date_range_text"
+        app:singleSelection="true"
         app:selectionRequired="true">
 
         <com.google.android.material.chip.Chip

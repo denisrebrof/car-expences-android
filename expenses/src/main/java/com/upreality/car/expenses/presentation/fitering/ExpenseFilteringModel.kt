@@ -42,17 +42,25 @@ sealed class ExpenseFilteringIntent {
     ) : ExpenseFilteringIntent()
 
     object ShowDateRange : ExpenseFilteringIntent()
-    data class ApplyDateRange(val range: DateRange) : ExpenseFilteringIntent()
+    data class ApplyDateRange(val selection: DateRangeSelection) : ExpenseFilteringIntent()
     object DropFilters : ExpenseFilteringIntent()
 }
 
 sealed class ExpenseFilteringAction {
-    object CloseFilters : ExpenseFilteringAction()
     data class ApplyFilters(val filters: List<ExpenseFilter>) : ExpenseFilteringAction()
     data class ShowRangePicker(
         val fromTime: Long,
         val toTime: Long
     ) : ExpenseFilteringAction()
+}
+
+sealed class DateRangeSelection {
+    data class CustomRange(val range: DateRange) : DateRangeSelection()
+    object AllTime : DateRangeSelection()
+    object Week : DateRangeSelection()
+    object Month : DateRangeSelection()
+    object Season : DateRangeSelection()
+    object Year : DateRangeSelection()
 }
 
 

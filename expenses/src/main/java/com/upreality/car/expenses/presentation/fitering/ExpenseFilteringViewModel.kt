@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ExpenseFilteringViewModel @Inject constructor(
-    dateTimeInteractor: DateTimeInteractor,
+    private val dateTimeInteractor: DateTimeInteractor,
     factory: ExpenseFilteringFormFactory
 ) : ViewModel() {
 
@@ -44,8 +44,21 @@ class ExpenseFilteringViewModel @Inject constructor(
             ShowDateRange -> submitDateRangePicker()
             DropFilters -> dropFilters()
             is SetTypeFilter -> submitTypeFilterEntry(intent.type, intent.available)
-            is ApplyDateRange -> form.submit(ExpenseFilteringKeys.Range, intent.range)
+            is ApplyDateRange -> submitDateSelection(intent.selection)
         }
+    }
+
+    private fun submitDateSelection(selection: DateRangeSelection){
+        val dateRange = when(selection){
+            DateRangeSelection.AllTime -> TODO()
+            is DateRangeSelection.CustomRange -> TODO()
+            DateRangeSelection.Month -> TODO()
+            DateRangeSelection.Season -> TODO()
+            DateRangeSelection.Week -> TODO()
+            DateRangeSelection.Year -> dateTimeInteractor.getDaysAgo()
+        }
+
+        form.submit(ExpenseFilteringKeys.Range, dateRange)
     }
 
     private fun dropFilters() {
@@ -55,6 +68,8 @@ class ExpenseFilteringViewModel @Inject constructor(
             submit(ExpenseFilteringKeys.Range, defaultRange)
         }
     }
+
+    private fun
 
     private fun submitTypeFilterEntry(type: ExpenseType, value: Boolean) {
         form.getStateMapFlow().map { stateMap ->

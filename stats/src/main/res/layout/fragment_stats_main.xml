@@ -18,32 +18,24 @@
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.textview.MaterialTextView
-            android:layout_width="wrap_content"
             style="@style/Widget.MaterialComponents.TextView"
-            android:textAllCaps="true"
-            android:textColor="?android:textColorSecondary"
-            android:paddingStart="16dp"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            android:text="jan 1, 2021\nDec 5, 2022"
-            android:layout_height="wrap_content"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/date_range_text_button"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
-            android:gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp" />
+            android:paddingStart="16dp"
+            android:text="jan 1, 2021\nDec 5, 2022"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+            android:textColor="?android:textColorSecondary" />
 
         <ImageView
             android:id="@+id/filter_button"
             style="@style/ActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:contentDescription="@null"
             android:layout_gravity="end"
             android:layout_marginEnd="10dp"
+            android:contentDescription="@null"
+            android:gravity="center_vertical"
             android:src="@drawable/ic_filter" />
     </androidx.appcompat.widget.Toolbar>
 

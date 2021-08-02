@@ -14,13 +14,13 @@ import com.upreality.car.expenses.databinding.BottonSheetExpenseFilteringBinding
 class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
 
     private val viewModel: ExpenseFilteringViewModel by activityViewModels()
-    private val binding: ViewBinding by viewBinding(ViewBinding::bind, R.id.container)
+    private lateinit var binding: ViewBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ) = binding.root
+    ) = ViewBinding.inflate(inflater, container, false).root
 
     override fun onStart() {
         super.onStart()

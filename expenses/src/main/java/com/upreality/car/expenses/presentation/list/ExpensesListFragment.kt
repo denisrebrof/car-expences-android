@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy
 import com.upreality.car.expenses.databinding.FragmentExpensesListBinding
 import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
+import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringBottomSheet
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -68,7 +69,12 @@ class ExpensesListFragment : Fragment() {
             .subscribeWithLogError {
 //            layoutManager.scrollToPosition(0)
             }.disposeBy(lifecycle.disposers.onDestroy)
+        requireBinding.filterButton.setOnClickListener(this::showFilters)
         return requireBinding.root
+    }
+
+    private fun showFilters(source: View) {
+        ExpenseFilteringBottomSheet().show(parentFragmentManager, "")
     }
 
     private fun getItemTouchHelper(): ItemTouchHelper {

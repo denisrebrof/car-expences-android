@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.github.mikephil.charting.data.PieEntry
+import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringBottomSheet
 import com.upreality.stats.R
 import com.upreality.stats.presentation.charts.ExpenseTypeChartSetup
 import com.upreality.stats.presentation.charts.MainChartSetup
@@ -26,7 +27,9 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        binding.
+        binding.filterButton.setOnClickListener {
+            ExpenseFilteringBottomSheet().show(parentFragmentManager, "")
+        }
     }
 
     override fun onStart() {
@@ -43,8 +46,8 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         val pieData = viewState.typesRelationMap.map { (type, value) -> PieEntry(value, type) }
         ExpenseTypeChartSetup.setup(pieChart, ArrayList(pieData))
 
-        val barChart = binding.statsChartCard.mainChart
-        MainChartSetup.setup(barChart, arrayListOf())
+//        val barChart = binding.statsChartCard.mainChart
+//        MainChartSetup.setup(barChart, arrayListOf())
 
         val format: (Float) -> String = { value -> String.format("%.2f", value) }
         binding.statsTypesChartCard.apply {
