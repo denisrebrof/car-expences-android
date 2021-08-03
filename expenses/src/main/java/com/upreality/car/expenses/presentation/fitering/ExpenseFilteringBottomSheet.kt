@@ -33,7 +33,7 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ) = ViewBinding.inflate(inflater, container, false).root
+    ) = ViewBinding.inflate(inflater, container, false).also(this::binding::set).root
 
     override fun onStart() {
         super.onStart()
