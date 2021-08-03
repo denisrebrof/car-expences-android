@@ -49,15 +49,12 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
         adapter.stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         layoutManager = LinearLayoutManager(context).also(binding.list::setLayoutManager)
         binding.list.adapter = adapter
         getItemTouchHelper().attachToRecyclerView(binding.list)
         binding.filterButton.setOnClickListener(this::showFilters)
-        return binding.root
     }
 
     private fun showFilters(source: View) {
