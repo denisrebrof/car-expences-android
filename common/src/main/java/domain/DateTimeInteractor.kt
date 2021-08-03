@@ -18,5 +18,7 @@ class DateTimeInteractor @Inject constructor() {
         add(Calendar.DATE, -days)
     }.time
 
-    fun getTimeAgo()
+    fun getTimeAgo(timeIndicator: Int, amount: Int): Date = Calendar.getInstance().apply {
+        add(timeIndicator, -amount)
+    }.time
 }

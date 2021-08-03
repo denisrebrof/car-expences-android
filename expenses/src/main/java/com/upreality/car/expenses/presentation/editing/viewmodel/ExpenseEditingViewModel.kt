@@ -196,12 +196,7 @@ class ExpenseEditingViewModel @Inject constructor(
             stateMap.getFieldState(SpendDate)
         }.subscribeWithLogError { inputState ->
             val date = inputState.getOrNull()?.validValueOrNull() ?: dateTimeInteractor.getToday()
-            val startCalendar = Calendar.getInstance().apply { time = date }
-            ExpenseEditingAction.ShowDatePicker(
-                startCalendar.get(Calendar.YEAR),
-                startCalendar.get(Calendar.MONTH),
-                startCalendar.get(Calendar.DAY_OF_MONTH)
-            ).let(actionsProcessor::onNext)
+            ExpenseEditingAction.ShowDatePicker(date.time).let(actionsProcessor::onNext)
         }.let(composite::add)
     }
 

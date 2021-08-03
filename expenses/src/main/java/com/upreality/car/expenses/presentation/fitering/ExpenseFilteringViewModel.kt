@@ -17,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ExpenseFilteringViewModel @Inject constructor(
     private val dateTimeInteractor: DateTimeInteractor,
+    private val converter: ExpenseFilteringInputConverter,
     factory: ExpenseFilteringFormFactory
 ) : ViewModel() {
 
@@ -36,8 +37,18 @@ class ExpenseFilteringViewModel @Inject constructor(
         createViewStateFlow()
     }
 
-    fun getViewState(): Flowable<ExpenseFilteringViewState> = viewStateProcessor
-    fun getActionState(): Flowable<ExpenseFilteringAction> = actionsProcessor
+    private fun createViewStateFlow() {
+        form.getStateMapFlow().map { stateMap ->
+            val range = stateMap.getFieldState(ExpenseFilteringKeys.Range).getOrNull()!!
+            val type = stateMap.getFieldState(ExpenseFilteringKeys.Type).getOrNull()!!
+            return@map ExpenseFilteringViewState(dateRangeState = range, typeState = type)
+        }.distinctUntilChanged().doOnNext { viewState ->
+            converter
+                .toFiltersList(viewState.dateRangeState, viewState.typeState).getOrNull()
+                ?.let(ExpenseFilteringAction::ApplyFilters)
+                ?.let(actionsProcessor::onNext)
+        }.subscribeWithLogError(viewStateProcessor::onNext).let(composite::add)
+    }
 
     fun execute(intent: ExpenseFilteringIntent) {
         when (intent) {
@@ -48,14 +59,19 @@ class ExpenseFilteringViewModel @Inject constructor(
         }
     }
 
-    private fun submitDateSelection(selection: DateRangeSelection){
-        val dateRange = when(selection){
-            DateRangeSelection.AllTime -> TODO()
-            is DateRangeSelection.CustomRange -> TODO()
-            DateRangeSelection.Month -> TODO()
-            DateRangeSelection.Season -> TODO()
-            DateRangeSelection.Week -> TODO()
-            DateRangeSelection.Year -> dateTimeInteractor.getDaysAgo()
+    private fun submitDateSelection(selection: DateRangeSelection) {
+        val startDate = when (selection) {
+            DateRangeSelection.AllTime -> Date()
+            DateRangeSelection.Month -> dateTimeInteractor.getTimeAgo(Calendar.MONTH, 1)
+            DateRangeSelection.Season -> dateTimeInteractor.getTimeAgo(Calendar.MONTH, 3)
+            DateRangeSelection.Week -> dateTimeInteractor.getTimeAgo(Calendar.WEEK_OF_MONTH, 1)
+            DateRangeSelection.Year -> dateTimeInteractor.getTimeAgo(Calendar.YEAR, 1)
+            is DateRangeSelection.CustomRange -> null
+        }
+
+        val dateRange = when (selection) {
+            is DateRangeSelection.CustomRange -> selection.range
+            else -> DateRange(startDate!!, dateTimeInteractor.getToday())
         }
 
         form.submit(ExpenseFilteringKeys.Range, dateRange)
@@ -68,8 +84,6 @@ class ExpenseFilteringViewModel @Inject constructor(
             submit(ExpenseFilteringKeys.Range, defaultRange)
         }
     }
-
-    private fun
 
     private fun submitTypeFilterEntry(type: ExpenseType, value: Boolean) {
         form.getStateMapFlow().map { stateMap ->
@@ -93,19 +107,11 @@ class ExpenseFilteringViewModel @Inject constructor(
         }.let(composite::add)
     }
 
-    private fun createViewStateFlow() {
-        form.getStateMapFlow().map { stateMap ->
-            val range = stateMap.getFieldState(ExpenseFilteringKeys.Range).getOrNull()!!
-            val type = stateMap.getFieldState(ExpenseFilteringKeys.Type).getOrNull()!!
-            return@map ExpenseFilteringViewState(dateRangeState = range, typeState = type)
-        }.distinctUntilChanged()
-            .subscribeWithLogError(viewStateProcessor::onNext)
-            .let(composite::add)
-    }
+    fun getViewState(): Flowable<ExpenseFilteringViewState> = viewStateProcessor
+    fun getActionsFlow(): Flowable<ExpenseFilteringAction> = actionsProcessor
 
     override fun onCleared() {
         super.onCleared()
         composite.dispose()
     }
-
 }

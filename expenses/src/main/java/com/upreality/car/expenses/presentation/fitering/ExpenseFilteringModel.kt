@@ -47,7 +47,7 @@ sealed class ExpenseFilteringIntent {
 }
 
 sealed class ExpenseFilteringAction {
-    data class ApplyFilters(val filters: List<ExpenseFilter>) : ExpenseFilteringAction()
+    data class ApplyFilters(val filters: List<ExpenseFilter>): ExpenseFilteringAction()
     data class ShowRangePicker(
         val fromTime: Long,
         val toTime: Long

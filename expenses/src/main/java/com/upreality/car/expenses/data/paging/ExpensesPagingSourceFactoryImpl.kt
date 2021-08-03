@@ -10,7 +10,7 @@ class ExpensesPagingSourceFactoryImpl @Inject constructor(
     private val repository: IExpensesRepository
 ) : ExpensesListFragmentViewModel.IExpensesPagingSourceFactory {
 
-    override fun get(): PagingSource<Int, Expense> {
+    override fun get(): ExpensesPagingSource {
         return ExpensesPagingSource(repository = repository)
     }
 

@@ -1,9 +1,12 @@
 package com.upreality.car.expenses.data.local.room.expenses.converters
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.model.ExpenseFilter
+import com.upreality.car.expenses.domain.model.expence.Expense
 import data.database.IDatabaseFilter
 import domain.RequestPagingState
+import kotlin.reflect.KClass
 
 object RoomExpenseFilterConverter {
 
@@ -11,12 +14,23 @@ object RoomExpenseFilterConverter {
         val getTypeId: (ExpenseType) -> Int = { type -> ExpenseTypeConverter().toId(type) }
         return when (filter) {
             ExpenseFilter.All -> null
-            ExpenseFilter.Fines -> "type LIKE ${getTypeId(ExpenseType.Fines)}"
-            ExpenseFilter.Maintenance -> "type LIKE ${getTypeId(ExpenseType.Maintenance)}"
-            ExpenseFilter.Fuel -> "type LIKE ${getTypeId(ExpenseType.Fuel)}"
             is ExpenseFilter.Id -> "id LIKE ${filter.id}"
             is ExpenseFilter.DateRange -> "date BETWEEN ${filter.from.time} AND ${filter.to.time}"
+            is ExpenseFilter.Type -> "type IN ${getTypesRange(filter.types)}"
         }
+    }
+
+    private fun getTypesRange(types: List<KClass<out Expense>>): String {
+        val expenseTypes = types.map(ExpenseToTypeConverter::toType)
+        val builder = StringBuilder()
+        builder.append('(')
+        expenseTypes.forEachIndexed { index, expenseType ->
+            ExpenseTypeConverter().toId(expenseType).let(builder::append)
+            if (index != expenseTypes.size - 1)
+                builder.append(',')
+        }
+        builder.append(')')
+        return builder.toString()
     }
 
     fun convert(

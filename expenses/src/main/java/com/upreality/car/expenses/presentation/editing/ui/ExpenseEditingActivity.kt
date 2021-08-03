@@ -9,12 +9,14 @@ import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.util.Pair
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.button.MaterialButtonToggleGroup.OnButtonCheckedListener
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
@@ -35,7 +37,7 @@ import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingD
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel as ViewModel
 
 @AndroidEntryPoint
-class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener {
+class ExpenseEditingActivity : AppCompatActivity() {
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ViewModel by viewModels()
@@ -137,8 +139,18 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
     }
 
     private fun showDatePicker(action: ExpenseEditingAction.ShowDatePicker) {
-        val style = android.R.style.Theme_Holo_Light_Dialog_NoActionBar
-        DatePickerDialog(this, style, this, action.year, action.month, action.day).show()
+        val picker = MaterialDatePicker.Builder.datePicker().apply {
+            setSelection(action.initialTime)
+        }.build()
+        picker.addOnPositiveButtonClickListener(this::onDateSet)
+        picker.show(supportFragmentManager, "")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun onDateSet(time: Long) {
+        Date(time).let(DateInputValue::Custom).let { state ->
+            viewModel.fillForm(ExpenseEditingKeys.SpendDate, state)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -217,13 +229,4 @@ class ExpenseEditingActivity : AppCompatActivity(), DatePickerDialog.OnDateSetLi
     }
 
     override fun onBackPressed() = ExpenseEditingIntent.Close.let(viewModel::execute)
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        Calendar.getInstance()
-            .apply { set(year, month, dayOfMonth) }
-            .let(Calendar::getTime)
-            .let(DateInputValue::Custom)
-            .let { state -> viewModel.fillForm(ExpenseEditingKeys.SpendDate, state) }
-    }
 }

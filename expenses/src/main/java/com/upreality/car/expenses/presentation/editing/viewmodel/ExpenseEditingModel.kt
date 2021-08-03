@@ -21,11 +21,7 @@ sealed class ExpenseEditingKeys<in ValueType : Any, in OutType : Any> :
 
 sealed class ExpenseEditingAction {
     object Finish : ExpenseEditingAction()
-    data class ShowDatePicker(
-        val year: Int,
-        val month: Int,
-        val day: Int
-    ) : ExpenseEditingAction()
+    data class ShowDatePicker(val initialTime: Long) : ExpenseEditingAction()
 }
 
 sealed class ExpenseEditingIntent {

@@ -5,13 +5,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import androidx.paging.rxjava2.cachedIn
 import androidx.paging.rxjava2.flowable
+import com.upreality.car.expenses.data.paging.ExpensesPagingSource
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.ExpensesInteractorImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
@@ -25,16 +25,12 @@ class ExpensesListFragmentViewModel @Inject constructor(
     private val refreshEventProvider: RefreshExpensesRealmEventProvider
 ) : ViewModel() {
 
-    private var lastSource: PagingSource<Int, Expense>? = null
+    private var lastSource: ExpensesPagingSource? = null
 
     @ExperimentalCoroutinesApi
     fun getExpensesFlow(): Flowable<PagingData<Expense>> {
-        return Pager(
-            PagingConfig(
-                pageSize = 6,
-                initialLoadSize = 6
-            )
-        ) {
+        val config = PagingConfig(pageSize = 6, initialLoadSize = 6)
+        return Pager(config) {
             sourceFactory.get().also { lastSource = it }
         }.flowable.cachedIn(viewModelScope)
     }
@@ -45,16 +41,17 @@ class ExpensesListFragmentViewModel @Inject constructor(
         }
     }
 
-    fun refresh() {
+    fun setFilters(filters: List<ExpenseFilter>) {
+        lastSource?.filters = filters
         lastSource?.invalidate()
     }
 
-    fun deleteExpense(expense: Expense): Completable {
-        return interactor.deleteExpense(expense)
-    }
+    fun refresh() = lastSource?.invalidate()
+
+    fun deleteExpense(expense: Expense) = interactor.deleteExpense(expense)
 
     interface IExpensesPagingSourceFactory {
-        fun get(): PagingSource<Int, Expense>
+        fun get(): ExpensesPagingSource
     }
 
     interface IRefreshExpensesListEventProvider {

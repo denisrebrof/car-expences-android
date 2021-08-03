@@ -12,14 +12,16 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class ExpensesPagingSource @Inject constructor(
-    val repository: IExpensesRepository,
+    private val repository: IExpensesRepository,
 ) : RxPagingSource<Int, Expense>() {
+
+    var filters: List<ExpenseFilter> = listOf(ExpenseFilter.All)
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Expense>> {
         // Start refresh at page 1 if undefined.
         val key = params.key ?: 0
         val state = RequestPagingState.Paged(key.toLong(), params.loadSize)
-        val response = repository.get(ExpenseFilter.All.let(::listOf), state)
+        val response = repository.get(filters, state)
 
         return response
             .firstElement()

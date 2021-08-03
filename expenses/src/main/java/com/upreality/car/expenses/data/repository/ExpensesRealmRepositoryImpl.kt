@@ -4,8 +4,8 @@ import android.util.Log
 import com.upreality.car.expenses.data.realm.model.ExpenseRealm
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmConverter
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmFields
-import com.upreality.car.expenses.data.realm.model.ExpenseRealmTypeConverter
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
@@ -46,9 +46,10 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         val dateField = ExpenseRealmFields.DATE
         return when (filter) {
             ExpenseFilter.All -> query
-            ExpenseFilter.Fines -> filterQueryByType(query, ExpenseType.Fines)
-            ExpenseFilter.Fuel -> filterQueryByType(query, ExpenseType.Fuel)
-            ExpenseFilter.Maintenance -> filterQueryByType(query, ExpenseType.Maintenance)
+            is ExpenseFilter.Type -> filterQueryByType(
+                query,
+                filter.types.map(ExpenseToTypeConverter::toType)
+            )
             is ExpenseFilter.Id -> query.equalTo(ExpenseRealmFields._ID, filter.id)
             is ExpenseFilter.DateRange -> query.between(dateField, filter.from, filter.to)
         }
@@ -68,7 +69,10 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
             .mapList(ExpenseRealmConverter::toDomain)
     }
 
-    private fun <T> pageResults(results: RealmResults<T>, pagingState: RequestPagingState): List<T> {
+    private fun <T> pageResults(
+        results: RealmResults<T>,
+        pagingState: RequestPagingState
+    ): List<T> {
         return when (pagingState) {
             is RequestPagingState.Paged -> pageList(
                 results.toList(),
@@ -89,11 +93,11 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
 
     private fun filterQueryByType(
         query: RealmQuery<ExpenseRealm>,
-        type: ExpenseType
+        types: List<ExpenseType>
     ): RealmQuery<ExpenseRealm> {
-        return query.contains(
+        return query.`in`(
             ExpenseRealmFields.TYPE_ID,
-            ExpenseRealmTypeConverter.toId(type).toString()
+            types.map(ExpenseType::id).toTypedArray()
         )
     }
 
