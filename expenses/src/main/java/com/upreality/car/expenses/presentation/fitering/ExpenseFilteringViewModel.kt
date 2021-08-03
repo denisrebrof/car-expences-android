@@ -86,7 +86,7 @@ class ExpenseFilteringViewModel @Inject constructor(
     }
 
     private fun submitTypeFilterEntry(type: ExpenseType, value: Boolean) {
-        form.getStateMapFlow().map { stateMap ->
+        form.getStateMapFlow().firstElement().map { stateMap ->
             stateMap.getFieldState(ExpenseFilteringKeys.Type)
         }.subscribeWithLogError { inputState ->
             val types = inputState.getOrNull()?.validValueOrNull() ?: setOf()
@@ -96,7 +96,7 @@ class ExpenseFilteringViewModel @Inject constructor(
     }
 
     private fun submitDateRangePicker() {
-        form.getStateMapFlow().map { stateMap ->
+        form.getStateMapFlow().firstElement().map { stateMap ->
             stateMap.getFieldState(ExpenseFilteringKeys.Range)
         }.subscribeWithLogError { inputState ->
             val range = inputState.getOrNull()?.validValueOrNull() ?: defaultRange

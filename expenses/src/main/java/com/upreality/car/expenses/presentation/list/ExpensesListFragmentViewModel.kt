@@ -42,8 +42,8 @@ class ExpensesListFragmentViewModel @Inject constructor(
     }
 
     fun setFilters(filters: List<ExpenseFilter>) {
-        lastSource?.filters = filters
         lastSource?.invalidate()
+        lastSource?.filters = filters
     }
 
     fun refresh() = lastSource?.invalidate()
