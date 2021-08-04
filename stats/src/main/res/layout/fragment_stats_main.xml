@@ -7,6 +7,8 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
+        android:background="?colorSurface"
+        android:elevation="8dp"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize">
 
@@ -22,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
-            android:text="jan 1, 2021\nDec 5, 2022"
+            android:text="your stats"
             android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
             android:textColor="?android:textColorSecondary" />

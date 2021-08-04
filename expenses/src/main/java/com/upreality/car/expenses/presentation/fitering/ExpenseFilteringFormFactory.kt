@@ -41,7 +41,7 @@ class ExpenseFilteringFormFactory @Inject constructor(
             return ValidationResult.Empty
 
         val startDate = when (value) {
-            DateRangeSelection.AllTime -> Date()
+            DateRangeSelection.AllTime -> Date(0)
             DateRangeSelection.Month -> dateTimeInteractor.getTimeAgo(Calendar.MONTH, 1)
             DateRangeSelection.Season -> dateTimeInteractor.getTimeAgo(Calendar.MONTH, 3)
             DateRangeSelection.Week -> dateTimeInteractor.getTimeAgo(Calendar.WEEK_OF_MONTH, 1)

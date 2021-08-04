@@ -4,6 +4,5 @@
     android:id="@+id/date_range_text"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="10 Dec 2020 - 15 Dec 2021"
     android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
     android:textColor="?android:textColorSecondary" />

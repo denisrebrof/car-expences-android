@@ -61,7 +61,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         pagingState: RequestPagingState
     ): Flowable<List<Expense>> {
         val realm = realmProvider.getRealmInstance()
-        var expensesQuery = realm.where(ExpenseRealm::class.java)
+        var expensesQuery = realm.where(ExpenseRealm::class.java).sort(ExpenseRealmFields.DATE)
         filters.forEach { expensesQuery = applyFilter(expensesQuery, it) }
         return expensesQuery.findAllAsync()
             .asFlowable()

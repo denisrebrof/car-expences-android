@@ -14,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.databinding.ExpenseFilteringTextPrototypeBinding
 import com.upreality.car.expenses.domain.model.DateRange
@@ -47,8 +46,8 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding?.dateRangeTextSwitcher?.apply {
             setFactory(dateRangeTextFactory)
-            loadAnimation(context,android.R.anim.slide_in_left).let(this::setInAnimation)
-            loadAnimation(context,android.R.anim.slide_out_right).let(this::setOutAnimation)
+            loadAnimation(context, android.R.anim.slide_in_left).let(this::setInAnimation)
+            loadAnimation(context, android.R.anim.slide_out_right).let(this::setOutAnimation)
         }
     }
 
@@ -74,10 +73,22 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun applyViewState(viewState: ExpenseFilteringViewState) = binding?.apply {
-        viewState.dateRangeState.validValueOrNull()?.let { range ->
-            val rangeText = "${range.startDate.getText()} - ${range.endDate.getText()}"
-            binding?.dateRangeTextSwitcher?.setText(rangeText)
+        val getRangeText: (DateRange) -> String = { range ->
+            "${range.startDate.getText()} - ${range.endDate.getText()}"
         }
+        val rangeValue = viewState.dateRangeState.validValueOrNull()
+        val rangeText = viewState.dateRangeState.input?.let { selection ->
+            when (selection) {
+                DateRangeSelection.AllTime -> "All time"
+                DateRangeSelection.Month -> "Month"
+                DateRangeSelection.Season -> "3 month"
+                DateRangeSelection.Week -> "Week"
+                DateRangeSelection.Year -> "Year"
+                is DateRangeSelection.CustomRange -> (rangeValue ?: return@apply).let(getRangeText)
+            }
+        }
+
+        binding?.dateRangeTextSwitcher?.setText(rangeText)
 
         when (viewState.dateRangeState.input) {
             DateRangeSelection.AllTime -> chipDateAllTime
