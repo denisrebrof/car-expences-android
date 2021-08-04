@@ -33,8 +33,8 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
 
-    lateinit var adapter: ExpensesListAdapter
-    lateinit var layoutManager: LinearLayoutManager
+    private lateinit var adapter: ExpensesListAdapter
+    private lateinit var layoutManager: LinearLayoutManager
 
     @Inject
     lateinit var editingNavigator: ExpenseEditingNavigator

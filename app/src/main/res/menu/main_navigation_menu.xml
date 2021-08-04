@@ -15,9 +15,4 @@
         android:icon="@drawable/ic_area_chart"
         android:iconTint="@color/colorPrimary"
         android:title="Stats" />
-    <item
-        android:id="@+id/profile"
-        android:icon="@drawable/ic_account"
-        android:iconTint="@color/colorPrimary"
-        android:title="Profile" />
 </menu>
