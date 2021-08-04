@@ -4,6 +4,7 @@ import android.util.Log
 import com.upreality.car.expenses.data.realm.model.ExpenseRealm
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmConverter
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmFields
+import com.upreality.car.expenses.data.realm.model.ExpenseRealmTypeConverter
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.IExpensesRepository
@@ -97,7 +98,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
     ): RealmQuery<ExpenseRealm> {
         return query.`in`(
             ExpenseRealmFields.TYPE_ID,
-            types.map(ExpenseType::id).toTypedArray()
+            types.map(ExpenseRealmTypeConverter::toId).toTypedArray()
         )
     }
 

@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class ExpenseFilteringInputConverter @Inject constructor() {
     fun toFiltersList(
-        dateRangeState: ValidationResult<DateRange, DateRange>,
+        dateRangeState: ValidationResult<DateRangeSelection, DateRange>,
         typeState: ValidationResult<ExpenseFilteringTypeMask, Set<ExpenseType>>
     ): Result<List<ExpenseFilter>> = kotlin.runCatching {
         val dateRange = dateRangeState.requireValid()

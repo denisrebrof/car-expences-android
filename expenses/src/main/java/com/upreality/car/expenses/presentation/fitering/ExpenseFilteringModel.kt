@@ -8,7 +8,7 @@ import presentation.ValidationResult
 
 sealed class ExpenseFilteringKeys<in ValueType : Any, in OutType : Any> :
     InputForm.FieldKey<ValueType, OutType>() {
-    object Range : ExpenseFilteringKeys<DateRange, DateRange>()
+    object Range : ExpenseFilteringKeys<DateRangeSelection, DateRange>()
     object Type : ExpenseFilteringKeys<ExpenseFilteringTypeMask, Set<ExpenseType>>()
 }
 
@@ -31,7 +31,7 @@ class ExpenseFilteringTypeMask(
 }
 
 data class ExpenseFilteringViewState(
-    val dateRangeState: ValidationResult<DateRange, DateRange>,
+    val dateRangeState: ValidationResult<DateRangeSelection, DateRange>,
     val typeState: ValidationResult<ExpenseFilteringTypeMask, Set<ExpenseType>>,
 )
 

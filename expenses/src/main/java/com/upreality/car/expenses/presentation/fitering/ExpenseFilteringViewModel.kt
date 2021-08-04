@@ -23,12 +23,9 @@ class ExpenseFilteringViewModel @Inject constructor(
 
     private val composite = CompositeDisposable()
 
-    private val defaultRange = DateRange(
-        dateTimeInteractor.getToday(),
-        dateTimeInteractor.getDaysAgo(7)
-    )
+    private val defaultRangeSelection = DateRangeSelection.Week
 
-    private val form = factory.setDefaultRange(defaultRange).create()
+    private val form = factory.setDefaultRange(defaultRangeSelection).create()
 
     private val viewStateProcessor = BehaviorProcessor.create<ExpenseFilteringViewState>()
     private val actionsProcessor = PublishProcessor.create<ExpenseFilteringAction>()
@@ -55,33 +52,15 @@ class ExpenseFilteringViewModel @Inject constructor(
             ShowDateRange -> submitDateRangePicker()
             DropFilters -> dropFilters()
             is SetTypeFilter -> submitTypeFilterEntry(intent.type, intent.available)
-            is ApplyDateRange -> submitDateSelection(intent.selection)
+            is ApplyDateRange -> form.submit(ExpenseFilteringKeys.Range, intent.selection)
         }
-    }
-
-    private fun submitDateSelection(selection: DateRangeSelection) {
-        val startDate = when (selection) {
-            DateRangeSelection.AllTime -> Date()
-            DateRangeSelection.Month -> dateTimeInteractor.getTimeAgo(Calendar.MONTH, 1)
-            DateRangeSelection.Season -> dateTimeInteractor.getTimeAgo(Calendar.MONTH, 3)
-            DateRangeSelection.Week -> dateTimeInteractor.getTimeAgo(Calendar.WEEK_OF_MONTH, 1)
-            DateRangeSelection.Year -> dateTimeInteractor.getTimeAgo(Calendar.YEAR, 1)
-            is DateRangeSelection.CustomRange -> null
-        }
-
-        val dateRange = when (selection) {
-            is DateRangeSelection.CustomRange -> selection.range
-            else -> DateRange(startDate!!, dateTimeInteractor.getToday())
-        }
-
-        form.submit(ExpenseFilteringKeys.Range, dateRange)
     }
 
     private fun dropFilters() {
         form.apply {
             val mask = ExpenseType.values().toList().let(::ExpenseFilteringTypeMask)
             submit(ExpenseFilteringKeys.Type, mask)
-            submit(ExpenseFilteringKeys.Range, defaultRange)
+            submit(ExpenseFilteringKeys.Range, defaultRangeSelection)
         }
     }
 
@@ -91,6 +70,7 @@ class ExpenseFilteringViewModel @Inject constructor(
         }.subscribeWithLogError { inputState ->
             val types = inputState.getOrNull()?.validValueOrNull() ?: setOf()
             val mask = ExpenseFilteringTypeMask(types.toList())
+            mask.setType(type, value)
             form.submit(ExpenseFilteringKeys.Type, mask)
         }.let(composite::add)
     }
@@ -99,6 +79,10 @@ class ExpenseFilteringViewModel @Inject constructor(
         form.getStateMapFlow().firstElement().map { stateMap ->
             stateMap.getFieldState(ExpenseFilteringKeys.Range)
         }.subscribeWithLogError { inputState ->
+            val defaultRange = DateRange(
+                dateTimeInteractor.getDaysAgo(7),
+                dateTimeInteractor.getToday()
+            )
             val range = inputState.getOrNull()?.validValueOrNull() ?: defaultRange
             ExpenseFilteringAction.ShowRangePicker(
                 range.startDate.time,
