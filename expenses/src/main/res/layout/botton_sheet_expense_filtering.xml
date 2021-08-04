@@ -19,27 +19,25 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/date_range_text"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+    <FrameLayout
+        android:id="@+id/date_range_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="8dp"
+        android:background="@drawable/thin_rounded_outline"
+        android:backgroundTint="?colorControlHighlight"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/date_range_title">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/liters_et"
+        <TextSwitcher
+            android:id="@+id/date_range_text_switcher"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:inputType="numberDecimal"
-            android:text="10 Dec 2020 - 15 Dec 2021"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-            android:textColor="?android:textColorSecondary" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
     <!--    <com.google.android.material.textview.MaterialTextView-->
     <!--        android:id="@+id/date_range_text2"-->
@@ -60,9 +58,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/date_range_text"
-        app:singleSelection="true"
-        app:selectionRequired="true">
+        app:layout_constraintTop_toBottomOf="@id/date_range_root"
+        app:selectionRequired="true"
+        app:singleSelection="true">
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_date_all_time"
@@ -107,6 +105,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
+            android:elevation="1dp"
             android:text="Select custom range"
             app:chipIconTint="?colorSecondaryVariant"
             app:chipStrokeColor="?colorSecondaryVariant"

@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils.loadAnimation
 import android.widget.CompoundButton
+import android.widget.ViewSwitcher
 import androidx.annotation.RequiresApi
 import androidx.core.util.Pair
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.datepicker.MaterialDatePicker.INPUT_MODE_TEXT
+import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.databinding.ExpenseFilteringTextPrototypeBinding
 import com.upreality.car.expenses.domain.model.DateRange
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
@@ -30,11 +33,24 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
     private val viewModel: ExpenseFilteringViewModel by activityViewModels()
     private var binding: ViewBinding? = null
 
+    private val dateRangeTextFactory = ViewSwitcher.ViewFactory {
+        LayoutInflater.from(context).let(ExpenseFilteringTextPrototypeBinding::inflate).root
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = ViewBinding.inflate(inflater, container, false).also(this::binding::set).root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding?.dateRangeTextSwitcher?.apply {
+            setFactory(dateRangeTextFactory)
+            loadAnimation(context,android.R.anim.slide_in_left).let(this::setInAnimation)
+            loadAnimation(context,android.R.anim.slide_out_right).let(this::setOutAnimation)
+        }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -58,10 +74,9 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun applyViewState(viewState: ExpenseFilteringViewState) = binding?.apply {
-
         viewState.dateRangeState.validValueOrNull()?.let { range ->
             val rangeText = "${range.startDate.getText()} - ${range.endDate.getText()}"
-            dateRangeText.editText?.setText(rangeText)
+            binding?.dateRangeTextSwitcher?.setText(rangeText)
         }
 
         when (viewState.dateRangeState.input) {
@@ -148,7 +163,7 @@ class ExpenseFilteringBottomSheet : BottomSheetDialogFragment() {
         chipDateWeek.setOnClickListener(this@ExpenseFilteringBottomSheet::onDateChipSelected)
 
         chipDateCustomRange.setOnClickListener(this@ExpenseFilteringBottomSheet::setCustomRange)
-        dateRangeText.setOnClickListener(this@ExpenseFilteringBottomSheet::setCustomRange)
+        dateRangeTextSwitcher.setOnClickListener(this@ExpenseFilteringBottomSheet::setCustomRange)
 
         chipTypeFines.setOnCheckedChangeListener(this@ExpenseFilteringBottomSheet::onChipCheckedStateChanged)
         chipTypeMaintenance.setOnCheckedChangeListener(this@ExpenseFilteringBottomSheet::onChipCheckedStateChanged)
