@@ -48,7 +48,7 @@ ext {
     //Cards - UI only
     cardview = "androidx.cardview:cardview:1.0.0"
 
-    core_testing = "android.arch.core:core-testing:$room_version"
+    test_core = "androidx.test:core:1.0.0"
 
     //Navigation
     navigation_fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$nav_version"

@@ -67,7 +67,7 @@ dependencies {
     testImplementation rootProject.ext.room_testing
 
     //For test room and Rx
-    androidTestImplementation (rootProject.ext.core_testing) {
+    androidTestImplementation (rootProject.ext.test_core) {
         exclude module: 'support-compat'
         exclude module: 'support-annotations'
         exclude module: 'support-core-utils'
