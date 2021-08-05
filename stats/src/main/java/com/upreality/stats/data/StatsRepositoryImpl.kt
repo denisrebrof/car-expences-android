@@ -5,7 +5,7 @@ import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
-import com.upreality.stats.domain.DateRange
+import com.upreality.car.expenses.domain.model.DateRange
 import com.upreality.stats.domain.IStatsRepository
 import io.reactivex.Flowable
 import javax.inject.Inject
@@ -20,6 +20,7 @@ class StatsRepositoryImpl @Inject constructor(
 
     private fun getDateRangedExpensesFlow(range: DateRange): Flowable<List<Expense>> {
         return ExpenseFilter.DateRange(range.startDate, range.endDate)
+            .let(::listOf)
             .let(expensesRepository::get)
     }
 

@@ -1,4 +1,4 @@
-package com.upreality.car.common.data.time
+package data.time
 
 import io.reactivex.Maybe
 import java.util.*

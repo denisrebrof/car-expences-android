@@ -4,7 +4,7 @@ import com.upreality.car.cars.data.datasoures.CarsLocalDataSource
 import com.upreality.car.cars.data.model.entities.CarRealmConverter
 import com.upreality.car.cars.domain.ICarsRepository
 import com.upreality.car.cars.domain.model.Car
-import com.upreality.car.common.data.SyncedRealmProvider
+import data.SyncedRealmProvider
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import java.util.*

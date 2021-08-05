@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@id/container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    tools:layout_gravity="bottom">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/date_range_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select date range"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/date_range_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/thin_rounded_outline"
+        android:backgroundTint="?colorControlHighlight"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date_range_title">
+
+        <TextSwitcher
+            android:id="@+id/date_range_text_switcher"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <!--    <com.google.android.material.textview.MaterialTextView-->
+    <!--        android:id="@+id/date_range_text2"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="8dp"-->
+    <!--        android:visibility="gone"-->
+    <!--        android:text="10 Dec 2020\n15 Dec 2021"-->
+    <!--        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintHorizontal_bias="0.0"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/date_range_title"/>-->
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/date_selection_chips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/date_range_root"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_all_time"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="All time" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_week"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Week" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_month"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Month" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_3_month"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 monthes" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_year"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Year" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_custom_range"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:elevation="1dp"
+            android:text="Select custom range"
+            app:chipIconTint="?colorSecondaryVariant"
+            app:chipStrokeColor="?colorSecondaryVariant"
+            app:chipStrokeWidth="2dp" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <!--    <com.google.android.material.button.MaterialButton-->
+    <!--        style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="20dp"-->
+    <!--        android:text="20.05.2020 - 25.05.2021"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@id/text" />-->
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/type_filter_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Select expense types"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date_selection_chips" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/type_filter_title"
+        app:selectionRequired="true"
+        tools:layout_editor_absoluteX="36dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_type_fuel"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Fuel" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_type_maintenance"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Maintenance" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_type_fines"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Fines" />
+
+    </com.google.android.material.chip.ChipGroup>
+</androidx.constraintlayout.widget.ConstraintLayout>

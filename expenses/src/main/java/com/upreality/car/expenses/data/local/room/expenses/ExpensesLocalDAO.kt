@@ -2,13 +2,14 @@ package com.upreality.car.expenses.data.local.room.expenses
 
 import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
-import com.upreality.car.common.data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseEntitiesConverter
+import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
 import com.upreality.car.expenses.data.local.room.expenses.dao.ExpenseDetailsDao
 import com.upreality.car.expenses.data.local.room.expenses.dao.ExpensesDao
 import com.upreality.car.expenses.data.local.room.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.data.local.room.expenses.model.entities.ExpenseEntity
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseIdFilter
+import com.upreality.car.expenses.domain.model.ExpenseFilter
+import data.database.IDatabaseFilter
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -84,7 +85,9 @@ class ExpensesLocalDAO @Inject constructor(
     }
 
     private fun getSavedExpenseEntity(expenseId: Long): Maybe<ExpenseEntity> {
-        val idFilter = ExpenseIdFilter(expenseId).getFilterExpression()
+        val idFilter = ExpenseFilter.Id(expenseId).let(::listOf).let {
+            RoomExpenseFilterConverter.convert(it)
+        }.getFilterExpression()
         val query = SimpleSQLiteQuery(idFilter)
         return expensesDao.load(query).firstElement().map(List<ExpenseEntity>::firstOrNull)
     }

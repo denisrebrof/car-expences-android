@@ -10,6 +10,7 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.IExpensesInteractor
 import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator.Companion.EXPENSE_ID
+import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator.Companion.EXPENSE_TYPE
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue.Today
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue.Yesterday
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.*
@@ -42,7 +43,9 @@ class ExpenseEditingViewModel @Inject constructor(
     private val selectedExpenseId = handle.get<Long>(EXPENSE_ID)
     private val expenseMaybe = selectedExpenseId?.let(expensesInteractor::getExpenseMaybe)
 
-    private val defaultExpenseType = ExpenseType.Fuel
+    private val defaultExpenseType = handle.get<Int>(EXPENSE_TYPE)
+        ?.let { enumValues<ExpenseType>().first { type -> type.id == it } }
+        ?: ExpenseType.Fuel
     private val defaultFineType = FinesCategories.Other
     private val defaultDateSelectorState = Today
 
@@ -95,8 +98,7 @@ class ExpenseEditingViewModel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun getViewState() = viewStateProcessor
-
+    fun getViewState(): Flowable<ExpenseEditingViewState> = viewStateProcessor
     fun getActionState(): Flowable<ExpenseEditingAction> = actionsProcessor
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -197,12 +199,7 @@ class ExpenseEditingViewModel @Inject constructor(
             stateMap.getFieldState(SpendDate)
         }.subscribeWithLogError { inputState ->
             val date = inputState.getOrNull()?.validValueOrNull() ?: dateTimeInteractor.getToday()
-            val startCalendar = Calendar.getInstance().apply { time = date }
-            ExpenseEditingAction.ShowDatePicker(
-                startCalendar.get(Calendar.YEAR),
-                startCalendar.get(Calendar.MONTH),
-                startCalendar.get(Calendar.DAY_OF_MONTH)
-            ).let(actionsProcessor::onNext)
+            ExpenseEditingAction.ShowDatePicker(date.time).let(actionsProcessor::onNext)
         }.let(composite::add)
     }
 

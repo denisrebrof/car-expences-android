@@ -5,7 +5,7 @@ import com.upreality.car.brending.domain.ICarMarkRepository
 import com.upreality.car.cars.data.converters.CarConverter
 import com.upreality.car.cars.data.dao.CarEntitiesDao
 import com.upreality.car.cars.domain.model.Car
-import com.upreality.car.common.data.database.IDatabaseFilter
+import data.database.IDatabaseFilter
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe

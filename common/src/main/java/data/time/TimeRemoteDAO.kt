@@ -1,4 +1,4 @@
-package com.upreality.car.common.data.time
+package data.time
 
 import com.google.firebase.Timestamp
 import io.reactivex.Maybe

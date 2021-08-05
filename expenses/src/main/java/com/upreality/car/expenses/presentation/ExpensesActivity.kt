@@ -70,7 +70,7 @@ class ExpensesActivity : AppCompatActivity() {
             }.disposeBy(lifecycle.disposers.onStop)
 
         repository
-            .get(ExpenseFilter.All)
+            .get(ExpenseFilter.All.let(::listOf))
             .observeOn(mainThread())
             .doOnError {
                 Log.e("Get", "Event WTF???")
@@ -103,7 +103,7 @@ class ExpensesActivity : AppCompatActivity() {
     }
 
     private fun executeDelete() {
-        repository.get(ExpenseFilter.All)
+        repository.get(ExpenseFilter.All.let(::listOf))
             .firstElement()
             .map { list -> listOf(list.first()) }
             .flattenAsFlowable { it }
@@ -115,7 +115,7 @@ class ExpensesActivity : AppCompatActivity() {
     }
 
     private fun executeUpdate() {
-        repository.get(ExpenseFilter.All)
+        repository.get(ExpenseFilter.All.let(::listOf))
             .firstElement()
             .map { list -> listOf(list.last()) }
             .flattenAsFlowable { it }

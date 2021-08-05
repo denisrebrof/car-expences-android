@@ -5,6 +5,7 @@ import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpens
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
+import domain.RequestPagingState
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import javax.inject.Inject
@@ -20,8 +21,11 @@ class ExpensesRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun get(filter: ExpenseFilter): Flowable<List<Expense>> {
-        val localFilter = RoomExpenseFilterConverter.convert(filter)
+    override fun get(
+        filters: List<ExpenseFilter>,
+        pagingState: RequestPagingState
+    ): Flowable<List<Expense>> {
+        val localFilter = RoomExpenseFilterConverter.convert(filters, pagingState)
         return expensesLocalDataSource.get(localFilter)
     }
 

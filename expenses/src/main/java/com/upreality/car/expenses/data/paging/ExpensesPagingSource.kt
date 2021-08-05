@@ -5,19 +5,23 @@ import androidx.paging.rxjava2.RxPagingSource
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
+import domain.RequestPagingState
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class ExpensesPagingSource @Inject constructor(
-    val repository: IExpensesRepository,
+    private val repository: IExpensesRepository,
 ) : RxPagingSource<Int, Expense>() {
+
+    var filters: List<ExpenseFilter> = listOf(ExpenseFilter.All)
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Expense>> {
         // Start refresh at page 1 if undefined.
         val key = params.key ?: 0
-        val response = ExpenseFilter.Paged(key.toLong(), params.loadSize).let(repository::get)
+        val state = RequestPagingState.Paged(key.toLong(), params.loadSize)
+        val response = repository.get(filters, state)
 
         return response
             .firstElement()

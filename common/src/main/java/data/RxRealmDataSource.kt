@@ -1,4 +1,4 @@
-//package com.upreality.car.common.data
+package data//package com.upreality.car.common.data
 //
 //import android.util.Log
 //import domain.RxListExtentions.mapList

@@ -1,24 +1,54 @@
 package com.upreality.car.expenses.data.local.room.expenses.converters
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
-import com.upreality.car.common.data.database.IDatabaseFilter
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.*
+import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.model.ExpenseFilter
+import com.upreality.car.expenses.domain.model.expence.Expense
+import data.database.IDatabaseFilter
+import domain.RequestPagingState
+import kotlin.reflect.KClass
 
 object RoomExpenseFilterConverter {
 
-    fun convert(filter: ExpenseFilter): IDatabaseFilter {
+    private fun convert(filter: ExpenseFilter): String? {
+        val getTypeId: (ExpenseType) -> Int = { type -> ExpenseTypeConverter().toId(type) }
         return when (filter) {
-            ExpenseFilter.All -> ExpenseEmptyFilter
-            ExpenseFilter.Fines -> ExpenseTypeFilter(ExpenseType.Fines)
-            ExpenseFilter.Maintenance -> ExpenseTypeFilter(ExpenseType.Maintenance)
-            ExpenseFilter.Fuel -> ExpenseTypeFilter(ExpenseType.Fuel)
-            is ExpenseFilter.Paged -> ExpenseTimePaginatedFilter(
-                filter.cursor.coerceAtLeast(0),
-                filter.pageSize
-            )
-            is ExpenseFilter.Id -> ExpenseIdFilter(filter.id)
-            is ExpenseFilter.DateRange -> ExpenseDateFilter(filter.from, filter.to)
+            ExpenseFilter.All -> null
+            is ExpenseFilter.Id -> "id LIKE ${filter.id}"
+            is ExpenseFilter.DateRange -> "date BETWEEN ${filter.from.time} AND ${filter.to.time}"
+            is ExpenseFilter.Type -> "type IN ${getTypesRange(filter.types)}"
+        }
+    }
+
+    private fun getTypesRange(types: List<KClass<out Expense>>): String {
+        val expenseTypes = types.map(ExpenseToTypeConverter::toType)
+        val builder = StringBuilder()
+        builder.append('(')
+        expenseTypes.forEachIndexed { index, expenseType ->
+            ExpenseTypeConverter().toId(expenseType).let(builder::append)
+            if (index != expenseTypes.size - 1)
+                builder.append(',')
+        }
+        builder.append(')')
+        return builder.toString()
+    }
+
+    fun convert(
+        filters: List<ExpenseFilter>,
+        pagingState: RequestPagingState = RequestPagingState.Undefined
+    ): IDatabaseFilter {
+        var baseQuery = "SELECT * FROM expenses"
+
+        filters.mapNotNull(this::convert).forEach {
+            baseQuery += " WHERE ${it};"
+        }
+
+        if (pagingState is RequestPagingState.Paged) {
+            baseQuery += " LIMIT ${pagingState.pageSize}" + " OFFSET ${pagingState.cursor}"
+        }
+
+        return object : IDatabaseFilter {
+            override fun getFilterExpression() = baseQuery
         }
     }
 

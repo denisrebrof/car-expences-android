@@ -12,7 +12,13 @@ class DateTimeInteractor @Inject constructor() {
 
     fun getToday(): Date = Calendar.getInstance().time
 
-    fun getYesterday(): Date = Calendar.getInstance().apply {
-        add(Calendar.DATE, -1)
+    fun getYesterday(): Date = getDaysAgo(1)
+
+    fun getDaysAgo(days: Int): Date = Calendar.getInstance().apply {
+        add(Calendar.DATE, -days)
+    }.time
+
+    fun getTimeAgo(timeIndicator: Int, amount: Int): Date = Calendar.getInstance().apply {
+        add(timeIndicator, -amount)
     }.time
 }

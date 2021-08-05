@@ -1,15 +1,17 @@
 package com.upreality.car.expenses.data.repository
 
 import android.util.Log
-import com.upreality.car.common.data.SyncedRealmProvider
 import com.upreality.car.expenses.data.realm.model.ExpenseRealm
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmConverter
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmFields
 import com.upreality.car.expenses.data.realm.model.ExpenseRealmTypeConverter
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.ExpenseToTypeConverter
 import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
+import data.SyncedRealmProvider
+import domain.RequestPagingState
 import domain.RxListExtentions.mapList
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -38,49 +40,65 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun get(filter: ExpenseFilter): Flowable<List<Expense>> {
-        val realm = realmProvider.getRealmInstance()
-        val expensesQuery = realm.where(ExpenseRealm::class.java)
+    private fun applyFilter(
+        query: RealmQuery<ExpenseRealm>,
+        filter: ExpenseFilter
+    ): RealmQuery<ExpenseRealm> {
+        val dateField = ExpenseRealmFields.DATE
         return when (filter) {
-            ExpenseFilter.All -> expensesQuery
-            ExpenseFilter.Fines -> filterQueryByType(expensesQuery, ExpenseType.Fines)
-            ExpenseFilter.Fuel -> filterQueryByType(expensesQuery, ExpenseType.Fuel)
-            ExpenseFilter.Maintenance -> filterQueryByType(expensesQuery, ExpenseType.Maintenance)
-            is ExpenseFilter.Paged -> expensesQuery
-            is ExpenseFilter.Id -> expensesQuery.equalTo(ExpenseRealmFields._ID, filter.id)
-            is ExpenseFilter.DateRange -> expensesQuery.between(ExpenseRealmFields.DATE, filter.from, filter.to)
-        }.findAllAsync()
+            ExpenseFilter.All -> query
+            is ExpenseFilter.Type -> filterQueryByType(
+                query,
+                filter.types.map(ExpenseToTypeConverter::toType)
+            )
+            is ExpenseFilter.Id -> query.equalTo(ExpenseRealmFields._ID, filter.id)
+            is ExpenseFilter.DateRange -> query.between(dateField, filter.from, filter.to)
+        }
+    }
+
+    override fun get(
+        filters: List<ExpenseFilter>,
+        pagingState: RequestPagingState
+    ): Flowable<List<Expense>> {
+        val realm = realmProvider.getRealmInstance()
+        var expensesQuery = realm.where(ExpenseRealm::class.java).sort(ExpenseRealmFields.DATE)
+        filters.forEach { expensesQuery = applyFilter(expensesQuery, it) }
+        return expensesQuery.findAllAsync()
             .asFlowable()
             .filter(RealmResults<ExpenseRealm>::isLoaded)
-            .map { results ->
-                val resultsList = when (filter) {
-                    is ExpenseFilter.Paged -> pageList(
-                        results.toList(),
-                        filter.cursor.toInt().coerceAtLeast(0),
-                        filter.cursor.toInt() + filter.pageSize
-                    )
-                    else -> results.toList()
-                }
-                resultsList
-            }.mapList(ExpenseRealmConverter::toDomain)
+            .map { results -> pageResults(results, pagingState) }
+            .mapList(ExpenseRealmConverter::toDomain)
+    }
+
+    private fun <T> pageResults(
+        results: RealmResults<T>,
+        pagingState: RequestPagingState
+    ): List<T> {
+        return when (pagingState) {
+            is RequestPagingState.Paged -> pageList(
+                results.toList(),
+                pagingState.cursor.toInt().coerceAtLeast(0),
+                pagingState.cursor.toInt() + pagingState.pageSize
+            )
+            else -> results.toList()
+        }
     }
 
     private fun <T> pageList(list: List<T>, from: Int, to: Int): List<T> {
-        val pagedList = when {
+        return when {
             list.size >= to -> list.subList(from, to)
             list.size > from -> list.subList(from, list.size)
             else -> listOf()
         }
-        return pagedList
     }
 
     private fun filterQueryByType(
         query: RealmQuery<ExpenseRealm>,
-        type: ExpenseType
+        types: List<ExpenseType>
     ): RealmQuery<ExpenseRealm> {
-        return query.contains(
+        return query.`in`(
             ExpenseRealmFields.TYPE_ID,
-            ExpenseRealmTypeConverter.toId(type).toString()
+            types.map(ExpenseRealmTypeConverter::toId).toTypedArray()
         )
     }
 

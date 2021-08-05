@@ -2,7 +2,7 @@ package com.upreality.car.expenses.data.local
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.upreality.car.common.data.database.IDatabaseFilter
+import data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.room.expenses.ExpensesLocalDAO
 import com.upreality.car.expenses.data.local.room.expenses.dao.ExpenseDetailsDao
 import com.upreality.car.expenses.data.local.room.expenses.model.ExpenseRoom

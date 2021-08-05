@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.local.room
 
-import com.upreality.car.common.data.database.IDatabaseFilter
+import data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.room.expenses.ExpensesLocalDAO
 import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseConverter
 import com.upreality.car.expenses.data.repository.IExpensesLocalDataSource
