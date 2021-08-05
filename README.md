@@ -1,7 +1,7 @@
 # car-expenses-android
 Car expenses android app
 
-<h2>Tests Status</h2>
+<h1>Tests Status</h1>
 
 | Branch | Unit Tests | Instrumented Tests | Build Workflow |
 | :---        |    :----:   |  :----:    |    ---: |
