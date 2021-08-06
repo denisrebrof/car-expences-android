@@ -46,6 +46,7 @@ class InputForm {
         FormField(validator, defaultValue)
     ).let(fieldsSet::add)
 
+    @Suppress("UNCHECKED_CAST")
     fun getStateMapFlow(): Flowable<FormStateMap> {
         val keysToStatesFlows = fieldsSet.map { entry ->
             entry.field.getInputStateFlow().map { entry.key to it }
@@ -69,6 +70,7 @@ class InputForm {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <ValueType : Any, OutType : Any> submit(
         key: FieldKey<ValueType, OutType>,
         value: ValueType
@@ -109,6 +111,17 @@ class InputForm {
         val field: FormField<ValueType, OutType>
     ) {
         override fun hashCode() = key.hashCode()
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as FieldMapEntry<*, *>
+
+            if (key != other.key) return false
+            if (field != other.field) return false
+
+            return true
+        }
     }
 }
 
