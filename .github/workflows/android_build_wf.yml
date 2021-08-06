@@ -36,6 +36,12 @@ jobs:
           echo "test ENCODED_STRING"
           echo "${TMP_KEYSTORE_FILE_PATH}"/carExpensesKeystore.jks
           echo "test path"
+          echo "----------------------------------------"
+          cd "${RUNNER_TEMP}"
+          ls
+          cd "keystore"
+          ls
+          echo "----------------------------------------"
 
     - name: Build with Gradle
       run: ./gradlew build
