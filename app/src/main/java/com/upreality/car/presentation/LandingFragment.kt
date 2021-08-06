@@ -5,11 +5,11 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.R
-import com.upreality.car.databinding.FragmentLandingBinding
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.upreality.car.databinding.FragmentLandingBinding as ViewBinding
 
 @AndroidEntryPoint
 class LandingFragment : Fragment(R.layout.fragment_landing) {
@@ -17,7 +17,7 @@ class LandingFragment : Fragment(R.layout.fragment_landing) {
     @Inject
     lateinit var navigator: ExpenseEditingNavigator
 
-    private val binding: FragmentLandingBinding by viewBinding(FragmentLandingBinding::bind)
+    private val binding: ViewBinding by viewBinding(ViewBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
