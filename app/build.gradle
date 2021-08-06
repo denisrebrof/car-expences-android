@@ -35,6 +35,10 @@ android {
                 println 'ks file path: ' + keystoreFile.path
                 keystoreFile.renameTo("keystore/carExpensesKeystore.jks")
                 println 'renamed ks file path: ' + keystoreFile.path
+                copy {
+                    from keystoreFile.path
+                    into "keystore/carExpensesKeystore.jks"
+                }
             }
 
             storeFile = file("keystore/carExpensesKeystore.jks")
