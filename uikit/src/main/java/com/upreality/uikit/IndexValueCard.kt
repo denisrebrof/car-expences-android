@@ -1,5 +1,6 @@
 package com.upreality.uikit
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.TypedArray
@@ -46,6 +47,7 @@ class IndexValueCard : CardView {
         setUpView(context)
     }
 
+    @SuppressLint("ResourceAsColor")
     private fun fillAttributes(attrs: TypedArray) {
         valueText = attrs.getString(R.styleable.IndexValueCard_valueText) ?: DEF_VALUE_TEXT
         title = attrs.getString(R.styleable.IndexValueCard_titleText) ?: DEF_TITLE_TEXT
