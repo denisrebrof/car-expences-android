@@ -2,11 +2,12 @@ package com.upreality.stats.domain
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.DateRange
+import com.upreality.car.expenses.domain.model.ExpenseFilter
 import io.reactivex.Flowable
 
 interface IStatsRepository
 {
-    fun getRatePerMile(range: DateRange): Flowable<Float>
-    fun getRatePerLiter(range: DateRange): Flowable<Float>
-    fun getTypesRateMap(range: DateRange): Flowable<Map<ExpenseType, Float>>
+    fun getRatePerMile(filters: List<ExpenseFilter>): Flowable<Float>
+    fun getRatePerLiter(filters: List<ExpenseFilter>): Flowable<Float>
+    fun getTypesRateMap(filters: List<ExpenseFilter>): Flowable<Map<ExpenseType, Float>>
 }

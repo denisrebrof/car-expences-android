@@ -1,17 +1,17 @@
 package com.upreality.stats.presentation
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.github.mikephil.charting.data.PieEntry
+import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringAction
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringBottomSheet
+import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringViewModel
 import com.upreality.stats.R
 import com.upreality.stats.presentation.charts.ExpenseTypeChartSetup
-import com.upreality.stats.presentation.charts.MainChartSetup
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -22,6 +22,7 @@ import com.upreality.stats.databinding.FragmentStatsMainBinding as ViewBinding
 @AndroidEntryPoint
 class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
+    private val filteringViewModel: ExpenseFilteringViewModel by activityViewModels()
     private val viewModel: StatsFragmentViewModel by viewModels()
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
 
@@ -38,6 +39,15 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
             .getViewState()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWithLogError(this::render)
+            .disposeBy(lifecycle.disposers.onStop)
+
+        filteringViewModel
+            .getViewState()
+            .observeOn(AndroidSchedulers.mainThread())
+            .ofType(ExpenseFilteringAction.ApplyFilters::class.java)
+            .map(ExpenseFilteringAction.ApplyFilters::filters)
+            .map(StatsIntents::SetFilters)
+            .subscribeWithLogError(viewModel::execute)
             .disposeBy(lifecycle.disposers.onStop)
     }
 
