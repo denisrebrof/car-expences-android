@@ -22,6 +22,13 @@ android {
         config {
             def tmpFilePath = System.getProperty("user.home") + "/work/_temp/keystore/"
             def allFilesFromDir = new File(tmpFilePath).listFiles()
+            println 'Print tmp file path:'
+            println tmpFilePath
+            println 'Print files from path:'
+            for(file in allFilesFromDir){
+                println file.name
+            }
+            println 'Print files from path ends'
 
             if (allFilesFromDir != null) {
                 def keystoreFile = allFilesFromDir.first()
