@@ -3,7 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'realm-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 30
@@ -62,7 +61,7 @@ dependencies {
     implementation rootProject.ext.material
     implementation rootProject.ext.constraintlayout
     implementation rootProject.ext.legacy_support
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation rootProject.ext.recycler
     testImplementation rootProject.ext.junit_test
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core

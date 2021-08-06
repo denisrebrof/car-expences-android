@@ -20,7 +20,6 @@ import com.upreality.car.expenses.domain.model.DateRange
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
-import kotlinx.android.synthetic.main.activity_expences.view.*
 import presentation.RxLifecycleExtentions.subscribeDefault
 import java.text.SimpleDateFormat
 import java.util.*
