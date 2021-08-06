@@ -32,7 +32,9 @@ android {
 
             if (allFilesFromDir != null) {
                 def keystoreFile = allFilesFromDir.first()
+                println 'ks file path: ' + keystoreFile.path
                 keystoreFile.renameTo("keystore/carExpensesKeystore.jks")
+                println 'renamed ks file path: ' + keystoreFile.path
             }
 
             storeFile = file("keystore/carExpensesKeystore.jks")
