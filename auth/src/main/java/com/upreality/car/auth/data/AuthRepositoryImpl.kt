@@ -5,10 +5,9 @@ import com.upreality.car.auth.domain.Account
 import com.upreality.car.auth.domain.AuthState
 import com.upreality.car.auth.domain.AuthType
 import com.upreality.car.auth.domain.IAuthRepository
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
-import io.reactivex.processors.BehaviorProcessor
-import io.realm.Realm
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -16,13 +15,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val localDataSource: IAuthLocalDataSource
 ) : IAuthRepository {
 
-    private val signInState = BehaviorProcessor.createDefault<AuthState>(AuthState.Unauthorized)
-
-    override fun getSignedInState(): Flowable<AuthState> = signInState
-
-    override fun setAuthState(state: AuthState) {
-        signInState.onNext(state)
-    }
+    override fun getSignedInState(): Flowable<AuthState> = remoteDataSource.getAuthState()
 
     override fun getGoogleSignInOptions(): GoogleSignInOptions {
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -40,4 +33,6 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun getLastAuthType(): Flowable<AuthType> = localDataSource.getLastAuthType()
+
+    override fun logOut(): Completable = remoteDataSource.logOut()
 }

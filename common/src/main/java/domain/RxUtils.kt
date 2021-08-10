@@ -43,6 +43,10 @@ inline fun <reified T> Observable<T>.subscribeWithLogError(noinline consumer: (T
     }
 }
 
+fun Completable.subscribeWithLogError(consumer: () -> Unit = {}): Disposable {
+    return subscribe(consumer, ::handleThrowable)
+}
+
 fun Completable.subscribeWithLogError(): Disposable {
     return onErrorComplete {
         handleThrowable(it)
