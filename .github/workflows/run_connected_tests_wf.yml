@@ -1,6 +1,5 @@
 name: RunInstrumentationTests
 
-#Job Triggers
 on:
   push:
     branches: [ main, develop ]
@@ -10,7 +9,6 @@ on:
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   run-tests:
     runs-on: macOS-latest
@@ -27,7 +25,7 @@ jobs:
         run: |
             TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
             mkdir "${TMP_KEYSTORE_FILE_PATH}"
-            echo $ENCODED_STRING | base64 -di > "${TMP_KEYSTORE_FILE_PATH}"/carExpensesKeystore.jks
+            echo $ENCODED_STRING | base64 -d -i > "${TMP_KEYSTORE_FILE_PATH}"/carExpensesKeystore.jks
 
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v1
