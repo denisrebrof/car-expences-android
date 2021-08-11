@@ -1,0 +1,88 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs.kotlin'
+    id 'realm-android'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    realm {
+        syncEnabled = true
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    //Common
+    implementation rootProject.ext.kotlin_stdlib
+    implementation rootProject.ext.core_ktx
+    implementation rootProject.ext.appcompat
+    implementation rootProject.ext.material
+    implementation rootProject.ext.constraintlayout
+    testImplementation rootProject.ext.junit_test
+    androidTestImplementation rootProject.ext.junit_android_test
+    androidTestImplementation rootProject.ext.espresso_core
+
+    //Hilt - DI framework
+    implementation rootProject.ext.hilt_android
+    kapt rootProject.ext.hilt_android_compiler_kapt
+
+    //ViewModel
+    implementation rootProject.ext.viewmodel_ktx
+    //View Binding delegate
+    implementation rootProject.ext.view_binding_delegate
+
+    //Google OAuth
+    implementation rootProject.ext.google_auth
+
+    implementation rootProject.ext.retrofit
+    implementation rootProject.ext.retrofit_rxjava
+    implementation rootProject.ext.retrofit_converter_gson
+
+    //RxJava2ac
+    implementation rootProject.ext.rxjava
+    implementation rootProject.ext.rxandroid
+
+    //Navigation
+    implementation rootProject.ext.navigation_fragment_ktx
+    implementation rootProject.ext.navigation_ui_ktx
+
+    implementation rootProject.ext.disposer
+
+    dependencies {
+        implementation project(":uikit")
+    }
+}

@@ -1,0 +1,73 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    //Common
+    implementation rootProject.ext.kotlin_stdlib
+    implementation rootProject.ext.core_ktx
+    implementation rootProject.ext.appcompat
+    implementation rootProject.ext.material
+    implementation rootProject.ext.constraintlayout
+    implementation rootProject.ext.legacy_support
+    implementation rootProject.ext.recycler
+    testImplementation rootProject.ext.junit_test
+    androidTestImplementation rootProject.ext.junit_android_test
+    androidTestImplementation rootProject.ext.espresso_core
+
+    //Cards - UI only
+    implementation rootProject.ext.cardview
+
+    //Hilt - DI framework
+    implementation rootProject.ext.hilt_android
+    kapt rootProject.ext.hilt_android_compiler_kapt
+
+    //RxJava2
+    implementation rootProject.ext.rxjava
+    implementation rootProject.ext.rxandroid
+    implementation rootProject.ext.room_rxjava2
+    implementation rootProject.ext.disposer
+
+    //ViewModel
+    implementation rootProject.ext.viewmodel_ktx
+    //View Binding delegate
+    implementation rootProject.ext.view_binding_delegate
+
+    api project(':common')
+}

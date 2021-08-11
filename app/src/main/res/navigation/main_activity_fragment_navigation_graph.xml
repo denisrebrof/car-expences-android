@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_activity_fragment_navigation_graph"
+    app:startDestination="@id/landing">
+
+    <fragment
+        android:id="@+id/expenses_list"
+        android:name="com.upreality.car.expenses.presentation.list.ExpensesListFragment"
+        android:label="Expenses Fragment"
+        tools:layout="@layout/fragment_expenses_list" />
+
+    <fragment
+        android:id="@+id/landing"
+        android:name="com.upreality.car.presentation.LandingFragment"
+        android:label="Landing Fragment"
+        tools:layout="@layout/fragment_landing" />
+
+    <fragment
+        android:id="@+id/stats"
+        android:name="com.upreality.stats.presentation.StatsFragment"
+        android:label="Stats Fragment"
+        tools:layout="@layout/fragment_stats_main" />
+</navigation>

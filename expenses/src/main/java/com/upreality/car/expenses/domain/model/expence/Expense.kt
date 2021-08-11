@@ -4,28 +4,31 @@ import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import java.util.*
 
-sealed class Expense(val date: Date, val cost: Float) {
+sealed class Expense(open val date: Date, open val cost: Float) {
 
     companion object {
-        const val DEFAULT_ID = -1L
+        const val DEFAULT_ID = 0L
     }
 
     var id = DEFAULT_ID
 
-    class Fine(
-        date: Date, cost: Float,
+    data class Fine(
+        override val date: Date,
+        override val cost: Float,
         val type: FinesCategories
     ) : Expense(date, cost)
 
 
-    class Maintenance(
-        date: Date, cost: Float,
+    data class Maintenance(
+        override val date: Date,
+        override val cost: Float,
         val type: MaintenanceType,
         val mileage: Float
     ) : Expense(date, cost)
 
-    class Fuel(
-        date: Date, cost: Float,
+    data class Fuel(
+        override val date: Date,
+        override val cost: Float,
         val liters: Float,
         val mileage: Float
     ) : Expense(date, cost)

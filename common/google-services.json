@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "405077401282",
+    "project_id": "car-expenses-1612211970240",
+    "storage_bucket": "car-expenses-1612211970240.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405077401282:android:876836e97c4d33bf46a55b",
+        "android_client_info": {
+          "package_name": "com.upreality.car.common"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405077401282-mpit43t5vntdjphdrtjgkh4mm8svb70c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWpF99rW9TC4L7d6ba-7nv4CDeMlbpqZU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405077401282-a1hkiv1k470atvih8rha869nue8pl9ns.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
