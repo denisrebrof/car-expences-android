@@ -62,6 +62,7 @@ dependencies {
     testImplementation rootProject.ext.junit_test
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core
+    androidTestImplementation rootProject.ext.core_testing
 
     //Room - local database lib
     implementation rootProject.ext.room_runtime

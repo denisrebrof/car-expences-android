@@ -64,6 +64,7 @@ dependencies {
     implementation rootProject.ext.recycler
     testImplementation rootProject.ext.junit_test
     androidTestImplementation rootProject.ext.junit_android_test
+    androidTestImplementation rootProject.ext.core_testing
     androidTestImplementation rootProject.ext.espresso_core
 
     //Room - local database lib

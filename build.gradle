@@ -37,6 +37,7 @@ ext {
     junit_android_test = 'androidx.test.ext:junit:1.1.2'
     espresso_core = 'androidx.test.espresso:espresso-core:3.3.0'
     recycler = 'androidx.recyclerview:recyclerview:1.2.1'
+    core_testing = 'androidx.arch.core:core-testing:2.1.0'
 
     //Room - local database lib
     def room_version = "2.2.6"
