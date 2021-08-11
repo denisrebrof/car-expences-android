@@ -25,7 +25,7 @@ jobs:
         run: |
             TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
             mkdir "${TMP_KEYSTORE_FILE_PATH}"
-            echo $ENCODED_STRING | base64 --decode $ENCODED_STRING > "${TMP_KEYSTORE_FILE_PATH}"/carExpensesKeystore.jks
+            echo $ENCODED_STRING | base64 --decode > "${TMP_KEYSTORE_FILE_PATH}"/carExpensesKeystore.jks | $ENCODED_STRING | [ctrl+d]
 
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v1
