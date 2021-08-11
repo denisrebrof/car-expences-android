@@ -50,4 +50,3 @@ jobs:
         token: ${{ secrets.TELEGRAM_TOKEN }} 
         message: New Build Created! 
         document: app/build/outputs/apk/release/app-release.apk
-        document: app/build/outputs/apk/release/app-release.apk
