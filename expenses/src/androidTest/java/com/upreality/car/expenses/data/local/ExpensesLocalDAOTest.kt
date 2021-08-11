@@ -2,13 +2,12 @@ package com.upreality.car.expenses.data.local
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import data.database.IDatabaseFilter
 import com.upreality.car.expenses.data.local.room.expenses.ExpensesLocalDAO
+import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
 import com.upreality.car.expenses.data.local.room.expenses.dao.ExpenseDetailsDao
 import com.upreality.car.expenses.data.local.room.expenses.model.ExpenseRoom
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseEmptyFilter
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseTypeFilter
-import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.model.ExpenseFilter
+import domain.RequestPagingState
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,7 +45,7 @@ class ExpensesLocalDAOTest {
         val expense = ExpenseRoom.Fuel(Date(), 100F, 500F, 1000F)
         val id = localDAO.create(expense).blockingGet()
         expense.id = id
-        val requestResult = loadExpense(ExpenseEmptyFilter).firstOrNull { it.id == id }
+        val requestResult = loadExpense().firstOrNull { it.id == id }
         assert(expensesEquals(expense, requestResult!!))
     }
 
@@ -70,14 +69,16 @@ class ExpensesLocalDAOTest {
         updatedExpense.id = savedExpenseId
         localDAO.update(updatedExpense).blockingAwait()
 
-        val filter = ExpenseTypeFilter(ExpenseType.Fuel)
-        val loadedExpense = loadExpense(filter).firstOrNull { it.id == savedExpenseId }
+        val loadedExpense = loadExpense().firstOrNull { it.id == savedExpenseId }
         assert(expensesEquals(updatedExpense, loadedExpense!!))
     }
 
-    private fun loadExpense(filter: IDatabaseFilter): List<ExpenseRoom> {
+    private fun loadExpense(): List<ExpenseRoom> {
+        val filters = ExpenseFilter.All.let(::listOf)
+        val pagingState = RequestPagingState.Undefined
+        val localFilter = RoomExpenseFilterConverter.convert(filters, pagingState)
         return localDAO
-            .get(filter)
+            .get(localFilter)
             .blockingFirst()
     }
 }

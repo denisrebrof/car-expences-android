@@ -3,10 +3,12 @@ package com.upreality.car.expenses.data.local
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
 import com.upreality.car.expenses.data.local.room.expenses.dao.ExpensesDao
-import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.data.local.room.expenses.model.entities.ExpenseEntity
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseIdFilter
+import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.domain.model.ExpenseFilter
+import domain.RequestPagingState
 import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule
@@ -40,7 +42,10 @@ class ExpensesDaoTest {
             .subscribeOn(Schedulers.trampoline())
             .observeOn(Schedulers.trampoline())
             .flatMap {
-                val idFilter = ExpenseIdFilter(it).getFilterExpression()
+                val filters = ExpenseFilter.All.let(::listOf)
+                val pagingState = RequestPagingState.Undefined
+                val localFilter = RoomExpenseFilterConverter.convert(filters, pagingState)
+                val idFilter = localFilter.getFilterExpression()
                 expensesDao.load(SimpleSQLiteQuery(idFilter)).firstElement()
             }.map {
                 it.firstOrNull()
@@ -68,7 +73,10 @@ class ExpensesDaoTest {
         val id = expensesDao.insert(expense).blockingGet()
         val expenseUpdated = ExpenseEntity(id, Date(), 200F, ExpenseType.Maintenance, 300)
         expensesDao.update(expenseUpdated).blockingAwait()
-        val idFilter = ExpenseIdFilter(id).getFilterExpression()
+        val filters = ExpenseFilter.All.let(::listOf)
+        val pagingState = RequestPagingState.Undefined
+        val localFilter = RoomExpenseFilterConverter.convert(filters, pagingState)
+        val idFilter = localFilter.getFilterExpression()
         val readExpenseResult = expensesDao.load(SimpleSQLiteQuery(idFilter)).blockingFirst()
         val res = readExpenseResult.firstOrNull()
         assert(res != null)

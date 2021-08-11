@@ -7,7 +7,6 @@ import com.upreality.car.cars.data.CarsRepositoryImpl
 import com.upreality.car.cars.data.datasoures.CarsLocalDataSource
 import com.upreality.car.cars.domain.ICarsRepository
 import com.upreality.car.cars.domain.model.Car
-import com.upreality.car.expenses.data.local.room.expenses.model.filters.ExpenseIdFilter
 import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule
@@ -30,7 +29,7 @@ class CarsRepositoryTest {
     @Before
     fun setUp() {
         val carEntitiesDao = databaseRule.db.getCarsDAO()
-        marksRepository =  CarMarksRepoStub()
+        marksRepository = CarMarksRepoStub()
         val carsLocalDataSource = CarsLocalDataSource(carEntitiesDao, marksRepository)
         carsRepository = CarsRepositoryImpl(carsLocalDataSource)
     }
@@ -43,13 +42,12 @@ class CarsRepositoryTest {
         val mark = marksRepository.getMark(0)
         val car = Car(carId, carName, 100, mark)
 
-        val insertedElementMaybe = carsRepository.create(car)
+        carsRepository.create(car)
             .subscribeOn(Schedulers.trampoline())
             .observeOn(Schedulers.trampoline())
-            .flatMap {
-                val idFilter = ExpenseIdFilter(it).getFilterExpression()
-                carsRepository.getCar(carId).firstElement()
-            }
+            .test()
+
+        val insertedElementMaybe = carsRepository.getCar(carId).firstElement()
 
         val testObserver = insertedElementMaybe.test()
         testObserver.assertNoErrors()
@@ -69,8 +67,9 @@ class CarsRepositoryTest {
     @Throws(Exception::class)
     fun updateCarTest() {
         val mark = marksRepository.getMark(0)
-        val car = Car(0L, "My Awesome Car", 100, mark)
-        val id = carsRepository.create(car).blockingGet()
+        val id = 0L
+        val car = Car(id, "My Awesome Car", 100, mark)
+        carsRepository.create(car).blockingAwait()
 
         val carUpdated = Car(id, "My Awesome Car Updated", 200, mark)
 
