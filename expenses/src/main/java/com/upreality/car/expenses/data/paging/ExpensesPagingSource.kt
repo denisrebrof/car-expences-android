@@ -21,13 +21,11 @@ class ExpensesPagingSource @Inject constructor(
         // Start refresh at page 1 if undefined.
         val key = params.key ?: 0
         val state = RequestPagingState.Paged(key.toLong(), params.loadSize)
-        val response = repository.get(filters, state)
 
-        return response
+        return repository.get(filters, state)
+            .subscribeOn(Schedulers.io())
             .firstElement()
             .toSingle()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
             .map { expensesList ->
                 var prevKey = if (key == 0) null else (key - params.loadSize).coerceAtLeast(0)
                 if (prevKey == 0) {

@@ -18,6 +18,7 @@ import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringBottomSh
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
+import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,6 +66,7 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
         return ExpenseListItemSwipeCallback { position ->
             val target = adapter.getItemByPosition(position) ?: return@ExpenseListItemSwipeCallback
             target.let(viewModel::deleteExpense)
+                .observeOn(Schedulers.io())
                 .subscribeWithLogError()
                 .disposeBy(lifecycle.disposers.onDestroy)
         }.let(::ItemTouchHelper)
