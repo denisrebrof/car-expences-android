@@ -42,10 +42,7 @@ class CarsRepositoryTest {
         val mark = marksRepository.getMark(0)
         val car = Car(carId, carName, 100, mark)
 
-        carsRepository.create(car)
-            .subscribeOn(Schedulers.trampoline())
-            .observeOn(Schedulers.trampoline())
-            .test()
+        carsRepository.create(car).test()
 
         val insertedElementMaybe = carsRepository.getCar(carId).firstElement()
 
@@ -67,14 +64,14 @@ class CarsRepositoryTest {
     @Throws(Exception::class)
     fun updateCarTest() {
         val mark = marksRepository.getMark(0)
-        val id = 0L
-        val car = Car(id, "My Awesome Car", 100, mark)
-        carsRepository.create(car).blockingAwait()
+        val carId = 1L
+        val car = Car(carId, "My Awesome Car", 100, mark)
+        carsRepository.create(car).test()
 
-        val carUpdated = Car(id, "My Awesome Car Updated", 200, mark)
+        val carUpdated = Car(carId, "My Awesome Car Updated", 200, mark)
 
         carsRepository.updateCar(carUpdated).blockingAwait()
-        val readExpenseResult = carsRepository.getCar(id).blockingFirst()
+        val readExpenseResult = carsRepository.getCar(carId).blockingFirst()
         assert(readExpenseResult != null)
         assert(carsDataEquals(readExpenseResult!!, carUpdated))
     }
