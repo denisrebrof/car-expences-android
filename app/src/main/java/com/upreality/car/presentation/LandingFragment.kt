@@ -6,8 +6,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.upreality.car.R
+import com.upreality.car.auth.presentation.IAuthNavigator
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
+import com.upreality.car.presentation.LandingFragmentActions.LoggedOut
 import dagger.hilt.android.AndroidEntryPoint
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
@@ -20,6 +22,9 @@ class LandingFragment : Fragment(R.layout.fragment_landing) {
 
     @Inject
     lateinit var navigator: ExpenseEditingNavigator
+
+    @Inject
+    lateinit var authNavigator: IAuthNavigator
 
     private val viewModel: LandingFragmentViewModel by activityViewModels()
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
@@ -38,6 +43,11 @@ class LandingFragment : Fragment(R.layout.fragment_landing) {
         super.onStart()
         viewModel.getViewStateFlow().subscribeDefault { viewState ->
             binding.profileName.text = viewState.userName
+        }.disposeBy(lifecycle.disposers.onStop)
+        viewModel.getActionsFlow().subscribeDefault { action ->
+            when (action) {
+                LoggedOut -> authNavigator.goToLogin(requireContext())
+            }
         }.disposeBy(lifecycle.disposers.onStop)
     }
 

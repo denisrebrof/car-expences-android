@@ -11,7 +11,9 @@ import io.reactivex.Flowable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
+import com.upreality.car.presentation.LandingFragmentViewState as ViewState
 
 @HiltViewModel
 class LandingFragmentViewModel @Inject constructor(
@@ -20,11 +22,15 @@ class LandingFragmentViewModel @Inject constructor(
 
     private val composite = CompositeDisposable()
 
-    private val viewStateProcessor = BehaviorProcessor.create<LandingFragmentViewState>()
+    private val defaultViewState by lazy {
+        ViewState("")
+    }
+
+    private val viewStateProcessor = BehaviorProcessor.createDefault(defaultViewState)
     private val actionsProcessor = PublishProcessor.create<LandingFragmentActions>()
 
     fun getActionsFlow(): Flowable<LandingFragmentActions> = actionsProcessor
-    fun getViewStateFlow(): Flowable<LandingFragmentViewState> = viewStateProcessor
+    fun getViewStateFlow(): Flowable<ViewState> = viewStateProcessor
 
     init {
         authUseCases
@@ -40,7 +46,11 @@ class LandingFragmentViewModel @Inject constructor(
 
     fun execute(intent: LandingFragmentIntents) {
         when (intent) {
-            LandingFragmentIntents.LogOut -> logOut()
+            LandingFragmentIntents.LogOut -> authUseCases
+                .logOut()
+                .subscribeOn(Schedulers.io())
+                .subscribeWithLogError()
+                .let(composite::add)
         }
     }
 
@@ -48,12 +58,6 @@ class LandingFragmentViewModel @Inject constructor(
         viewStateProcessor.value?.copy(
             userName = account.id
         )?.let(viewStateProcessor::onNext)
-    }
-
-    private fun logOut() {
-        authUseCases.logOut().subscribeWithLogError {
-            actionsProcessor.onNext(LoggedOut)
-        }.let(composite::add)
     }
 
     override fun onCleared() {
