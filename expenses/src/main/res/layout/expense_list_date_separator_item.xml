@@ -12,11 +12,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginVertical="6dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="24dp"
         android:lines="1"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="10.10.2010" />
+        tools:text="10 Jan 2010" />
 </androidx.constraintlayout.widget.ConstraintLayout>

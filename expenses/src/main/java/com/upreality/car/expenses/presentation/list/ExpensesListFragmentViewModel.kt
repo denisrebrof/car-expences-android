@@ -2,18 +2,19 @@ package com.upreality.car.expenses.presentation.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
+import androidx.paging.*
 import androidx.paging.rxjava2.cachedIn
 import androidx.paging.rxjava2.flowable
 import com.upreality.car.expenses.data.paging.ExpensesPagingSource
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.ExpensesInteractorImpl
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.ExpenseModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,12 +28,14 @@ class ExpensesListFragmentViewModel @Inject constructor(
 
     private var lastSource: ExpensesPagingSource? = null
 
+    private val calendar = Calendar.getInstance()
+
     @ExperimentalCoroutinesApi
-    fun getExpensesFlow(): Flowable<PagingData<Expense>> {
+    fun getExpensesFlow(): Flowable<PagingData<ExpenseListModel>> {
         val config = PagingConfig(pageSize = 6, initialLoadSize = 6)
         return Pager(config) {
             sourceFactory.get().also { lastSource = it }
-        }.flowable.cachedIn(viewModelScope)
+        }.flowable.cachedIn(viewModelScope).map(this::mapPagingData)
     }
 
     fun getRefreshFlow(): Flowable<Unit> {
@@ -49,6 +52,26 @@ class ExpensesListFragmentViewModel @Inject constructor(
     fun refresh() = lastSource?.invalidate()
 
     fun deleteExpense(expense: Expense) = interactor.deleteExpense(expense)
+
+    private fun mapPagingData(data: PagingData<Expense>): PagingData<ExpenseListModel> {
+        val pagingData: PagingData<ExpenseListModel> = data.map(ExpenseListModel::ExpenseModel)
+        pagingData.insertSeparators { prev: ExpenseListModel?, next: ExpenseListModel? ->
+            val prevDate = prev.requestExpenseDate().getOrNull() ?: return@insertSeparators null
+            val nextDate = next.requestExpenseDate().getOrNull() ?: return@insertSeparators null
+            calendar.time = prevDate
+            val prevDay = calendar.apply { time = prevDate }.get(Calendar.DAY_OF_YEAR)
+            val nextDay = calendar.apply { time = nextDate }.get(Calendar.DAY_OF_YEAR)
+            return@insertSeparators when (prevDay) {
+                nextDay -> null
+                else -> ExpenseListModel.DateSeparator(prevDate)
+            }
+        }
+        return pagingData
+    }
+
+    private fun ExpenseListModel?.requestExpenseDate() = kotlin.runCatching {
+        (this as ExpenseModel).expense.date
+    }
 
     interface IExpensesPagingSourceFactory {
         fun get(): ExpensesPagingSource

@@ -8,8 +8,8 @@ import io.reactivex.schedulers.Schedulers
 
 object RxLifecycleExtentions {
     fun <ValueType : Any> Flowable<ValueType>.subscribeDefault(consumer: (ValueType) -> Unit): Disposable {
-        return this.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        return this.observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
             .subscribe(consumer) {
                 handleThrowable(it)
             }

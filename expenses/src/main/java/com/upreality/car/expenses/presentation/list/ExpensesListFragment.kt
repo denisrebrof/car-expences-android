@@ -5,8 +5,6 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.paging.insertSeparators
-import androidx.paging.map
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy
@@ -16,8 +14,6 @@ import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringAction
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringBottomSheet
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringViewModel
-import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.DateSeparator
-import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.ExpenseModel
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.schedulers.Schedulers
@@ -35,6 +31,9 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
     private val filteringViewModel: ExpenseFilteringViewModel by activityViewModels()
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
+
+    @Inject
+    lateinit var navigator: ExpenseEditingNavigator
 
     private lateinit var adapter: ExpensesListAdapter
     private lateinit var layoutManager: LinearLayoutManager
@@ -65,13 +64,21 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
     }
 
     private fun getItemTouchHelper(): ItemTouchHelper {
-        return ExpenseListItemSwipeCallback { position ->
-            val target = adapter.getItemByPosition(position) ?: return@ExpenseListItemSwipeCallback
-            target.let(viewModel::deleteExpense)
-                .observeOn(Schedulers.io())
-                .subscribeWithLogError()
-                .disposeBy(lifecycle.disposers.onDestroy)
+        return ExpenseListItemSwipeCallback(requireContext()) { position ->
+            navigator.showDeleteConfirmationDialog(
+                requireContext(),
+                { deleteExpense(position) },
+                { adapter.notifyItemChanged(position) }
+            )
         }.let(::ItemTouchHelper)
+    }
+
+    private fun deleteExpense(position: Int) {
+        val target = adapter.getItemByPosition(position) ?: return
+        target.let(viewModel::deleteExpense)
+            .observeOn(Schedulers.io())
+            .subscribeWithLogError()
+            .disposeBy(lifecycle.disposers.onDestroy)
     }
 
     @ExperimentalCoroutinesApi
@@ -79,18 +86,8 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
         super.onStart()
 
         viewModel.getExpensesFlow().subscribeDefault { data ->
-            data.map(ExpensesListAdapter.ExpenseListModel::ExpenseModel)
-                .insertSeparators { prev: ExpenseModel?, next: ExpenseModel? ->
-                    when {
-                        prev == null -> null
-                        next == null -> null
-                        else ->
-                            DateSeparator(prev.expense.date)
-                    }
-                }.let {
-                adapter.submitData(lifecycle, it)
-                binding.list.scheduleLayoutAnimation()
-            }
+            adapter.submitData(lifecycle, data)
+            binding.list.scheduleLayoutAnimation()
         }.disposeBy(lifecycle.disposers.onStop)
 
         viewModel.getRefreshFlow().subscribeDefault {

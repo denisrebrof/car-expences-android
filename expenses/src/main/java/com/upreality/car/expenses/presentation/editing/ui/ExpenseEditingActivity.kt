@@ -1,15 +1,12 @@
 package com.upreality.car.expenses.presentation.editing.ui
 
-import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.DatePicker
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.util.Pair
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -17,9 +14,9 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.button.MaterialButtonToggleGroup.OnButtonCheckedListener
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.upreality.car.expenses.R
 import com.upreality.car.expenses.data.shared.model.ExpenseType
+import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
 import com.upreality.car.expenses.presentation.editing.viewmodel.*
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel.*
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +29,7 @@ import presentation.applyWithDisabledOnButtonCheckedListener
 import presentation.applyWithDisabledTextWatcher
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 import com.upreality.car.expenses.databinding.ActivityExpenseEditingBinding as ViewBinding
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingDateInputValue as DateInputValue
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingViewModel as ViewModel
@@ -41,6 +39,10 @@ class ExpenseEditingActivity : AppCompatActivity() {
 
     private val binding: ViewBinding by viewBinding(ViewBinding::bind)
     private val viewModel: ViewModel by viewModels()
+
+    @Inject
+    lateinit var navigator: ExpenseEditingNavigator
+
     private lateinit var navController: NavController
 
     private val defaultFieldError: String = "Invalid input"
@@ -187,14 +189,9 @@ class ExpenseEditingActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmationDialog(source: View) {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Confirm deletion")
-            .setMessage("Delete expense permanently?")
-            .setNegativeButton("Cancel") { dialog, which ->
-                //do nothing
-            }.setPositiveButton("Confirm") { dialog, which ->
-                ExpenseEditingIntent.Delete.let(viewModel::execute)
-            }.show()
+        navigator.showDeleteConfirmationDialog(this) {
+            ExpenseEditingIntent.Delete.let(viewModel::execute)
+        }
     }
 
     private fun applySelectedType(type: ExpenseType) {

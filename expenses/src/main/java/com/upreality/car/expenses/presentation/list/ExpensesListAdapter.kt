@@ -56,9 +56,7 @@ class ExpensesListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         when (holder) {
             is DateSeparatorHolder -> (getItem(position) as? DateSeparator)?.date?.let {
-                holder.bindDateItem(
-                    it
-                )
+                holder.bindDateItem(it)
             }
             is ExpenseItemHolder -> holder.bindExpenseItem(position)
         }

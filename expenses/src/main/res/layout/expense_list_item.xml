@@ -8,8 +8,8 @@
 
     <View
         android:id="@+id/expense_type_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_margin="12dp"
         android:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,12 +20,12 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/expense_type_caption"
         style="@style/Widget.MaterialComponents.TextView"
-        android:lines="1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="6dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:layout_marginTop="12dp"
+        android:lines="1"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintStart_toEndOf="@id/expense_type_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Fuel" />
@@ -35,11 +35,13 @@
         style="@style/Widget.MaterialComponents.TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:layout_marginStart="12dp"
-        android:layout_marginBottom="6dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:layout_marginBottom="12dp"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/expense_type_icon"
+        app:layout_constraintTop_toBottomOf="@+id/expense_type_caption"
         tools:text="16 liters" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -48,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
