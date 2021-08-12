@@ -1,12 +1,12 @@
 package com.upreality.car.expenses.presentation.list
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.paging.insertSeparators
+import androidx.paging.map
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy
@@ -16,6 +16,8 @@ import com.upreality.car.expenses.presentation.editing.ExpenseEditingNavigator
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringAction
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringBottomSheet
 import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringViewModel
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.DateSeparator
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.ExpenseModel
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.schedulers.Schedulers
@@ -76,9 +78,19 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
     override fun onStart() {
         super.onStart()
 
-        viewModel.getExpensesFlow().subscribeDefault {
-            adapter.submitData(lifecycle, it)
-            binding.list.scheduleLayoutAnimation()
+        viewModel.getExpensesFlow().subscribeDefault { data ->
+            data.map(ExpensesListAdapter.ExpenseListModel::ExpenseModel)
+                .insertSeparators { prev: ExpenseModel?, next: ExpenseModel? ->
+                    when {
+                        prev == null -> null
+                        next == null -> null
+                        else ->
+                            DateSeparator(prev.expense.date)
+                    }
+                }.let {
+                adapter.submitData(lifecycle, it)
+                binding.list.scheduleLayoutAnimation()
+            }
         }.disposeBy(lifecycle.disposers.onStop)
 
         viewModel.getRefreshFlow().subscribeDefault {
