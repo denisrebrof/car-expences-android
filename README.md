@@ -9,6 +9,10 @@ My little pet-project - app for tracking car expenses.
 
 Kotlin-only, supports multiple data layer / backend implementations: Realm, Room and Firebase.
 
+### CI integration: GitHub Actions
+ - Unit + Integration Tests launch
+ - Signed apk builds sending to Telegram channel
+
 ### Key Features
  - Offline-First
  - Data Sync
