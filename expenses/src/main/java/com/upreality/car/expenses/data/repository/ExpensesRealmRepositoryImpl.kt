@@ -13,6 +13,7 @@ import com.upreality.car.expenses.domain.model.expence.Expense
 import data.SyncedRealmProvider
 import domain.RequestPagingState
 import domain.RxListExtentions.mapList
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.realm.RealmQuery
@@ -60,14 +61,16 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
         filters: List<ExpenseFilter>,
         pagingState: RequestPagingState
     ): Flowable<List<Expense>> {
-        val realm = realmProvider.getRealmInstance()
-        var expensesQuery = realm.where(ExpenseRealm::class.java).sort(ExpenseRealmFields.DATE)
-        filters.forEach { expensesQuery = applyFilter(expensesQuery, it) }
-        return expensesQuery.findAllAsync()
-            .asFlowable()
-            .filter(RealmResults<ExpenseRealm>::isLoaded)
-            .map { results -> pageResults(results, pagingState) }
-            .mapList(ExpenseRealmConverter::toDomain)
+        return Flowable.create( { emitter ->
+            val realm = realmProvider.getRealmInstance()
+            var expensesQuery = realm.where(ExpenseRealm::class.java).sort(ExpenseRealmFields.DATE)
+            filters.forEach { expensesQuery = applyFilter(expensesQuery, it) }
+            expensesQuery
+                .findAll()
+                .let { results -> pageResults(results, pagingState) }
+                .map(ExpenseRealmConverter::toDomain)
+                .let(emitter::onNext)
+        }, BackpressureStrategy.BUFFER)
     }
 
     private fun <T> pageResults(

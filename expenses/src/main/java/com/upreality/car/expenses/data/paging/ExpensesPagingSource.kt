@@ -7,7 +7,6 @@ import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import domain.RequestPagingState
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -23,7 +22,7 @@ class ExpensesPagingSource @Inject constructor(
         val state = RequestPagingState.Paged(key.toLong(), params.loadSize)
 
         return repository.get(filters, state)
-            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .firstElement()
             .toSingle()
             .map { expensesList ->
