@@ -55,7 +55,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
 
     private fun mapPagingData(data: PagingData<Expense>): PagingData<ExpenseListModel> {
         val pagingData: PagingData<ExpenseListModel> = data.map(ExpenseListModel::ExpenseModel)
-        pagingData.insertSeparators { prev: ExpenseListModel?, next: ExpenseListModel? ->
+        return pagingData.insertSeparators { prev: ExpenseListModel?, next: ExpenseListModel? ->
             val prevDate = prev.requestExpenseDate().getOrNull() ?: return@insertSeparators null
             val nextDate = next.requestExpenseDate().getOrNull() ?: return@insertSeparators null
             calendar.time = prevDate
@@ -66,7 +66,6 @@ class ExpensesListFragmentViewModel @Inject constructor(
                 else -> ExpenseListModel.DateSeparator(prevDate)
             }
         }
-        return pagingData
     }
 
     private fun ExpenseListModel?.requestExpenseDate() = kotlin.runCatching {
