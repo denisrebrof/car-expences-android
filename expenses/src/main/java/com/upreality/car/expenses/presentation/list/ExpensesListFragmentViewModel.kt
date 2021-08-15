@@ -56,14 +56,17 @@ class ExpensesListFragmentViewModel @Inject constructor(
     private fun mapPagingData(data: PagingData<Expense>): PagingData<ExpenseListModel> {
         val pagingData: PagingData<ExpenseListModel> = data.map(ExpenseListModel::ExpenseModel)
         return pagingData.insertSeparators { prev: ExpenseListModel?, next: ExpenseListModel? ->
-            val prevDate = prev.requestExpenseDate().getOrNull() ?: return@insertSeparators null
             val nextDate = next.requestExpenseDate().getOrNull() ?: return@insertSeparators null
-            calendar.time = prevDate
-            val prevDay = calendar.apply { time = prevDate }.get(Calendar.DAY_OF_YEAR)
             val nextDay = calendar.apply { time = nextDate }.get(Calendar.DAY_OF_YEAR)
+
+            val prevDate = prev.requestExpenseDate().getOrNull()
+            val prevDay = prevDate?.also(calendar::setTime)?.let {
+                calendar.get(Calendar.DAY_OF_YEAR)
+            }
+            
             return@insertSeparators when (prevDay) {
                 nextDay -> null
-                else -> ExpenseListModel.DateSeparator(prevDate)
+                else -> ExpenseListModel.DateSeparator(nextDate)
             }
         }
     }

@@ -18,6 +18,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.realm.RealmQuery
 import io.realm.RealmResults
+import io.realm.Sort
 import java.util.*
 import javax.inject.Inject
 
@@ -63,7 +64,7 @@ class ExpensesRealmRepositoryImpl @Inject constructor(
     ): Flowable<List<Expense>> {
         return Flowable.create( { emitter ->
             val realm = realmProvider.getRealmInstance()
-            var expensesQuery = realm.where(ExpenseRealm::class.java).sort(ExpenseRealmFields.DATE)
+            var expensesQuery = realm.where(ExpenseRealm::class.java).sort(ExpenseRealmFields.DATE, Sort.DESCENDING)
             filters.forEach { expensesQuery = applyFilter(expensesQuery, it) }
             expensesQuery
                 .findAll()
