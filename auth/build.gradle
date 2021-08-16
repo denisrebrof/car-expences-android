@@ -52,6 +52,7 @@ dependencies {
     implementation rootProject.ext.appcompat
     implementation rootProject.ext.material
     implementation rootProject.ext.constraintlayout
+    implementation project(path: ':common')
     testImplementation rootProject.ext.junit_test
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core

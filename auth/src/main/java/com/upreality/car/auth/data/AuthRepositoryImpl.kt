@@ -15,7 +15,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val localDataSource: IAuthLocalDataSource
 ) : IAuthRepository {
 
-    override fun getSignedInState(): Flowable<AuthState> = remoteDataSource.getAuthState()
+    override fun getSignedInState(): Flowable<AuthState> = localDataSource.getAuthState()
 
     override fun getGoogleSignInOptions(): GoogleSignInOptions {
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -27,8 +27,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun googleSignIn(authCode: String): Maybe<Account> {
         return remoteDataSource.googleSignIn(authCode).doOnSuccess { account ->
-            AuthState.Authorized(account).let(localDataSource::setAuthState)
             localDataSource.setLastAuthType(AuthType.GOOGLE)
+            AuthState.Authorized(account).let(localDataSource::setAuthState)
         }
     }
 
