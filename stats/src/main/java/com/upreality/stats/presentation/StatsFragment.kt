@@ -63,6 +63,8 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         binding.statsTypesChartCard.apply {
             viewState.ratePerLiter.let(format).let(rpl::setValue)
             viewState.ratePerMile.let(format).let(rpm::setValue)
+            viewState.rateLastMonth.let(format).let(rateLastMonth::setValue)
+            viewState.ratePerMonth.let(format).let(ratePerMonth::setValue)
         }
     }
 }
