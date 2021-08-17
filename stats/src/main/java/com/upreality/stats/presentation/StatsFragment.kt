@@ -35,6 +35,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
     override fun onStart() {
         super.onStart()
+
         viewModel
             .getViewState()
             .observeOn(AndroidSchedulers.mainThread())
@@ -42,7 +43,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
             .disposeBy(lifecycle.disposers.onStop)
 
         filteringViewModel
-            .getViewState()
+            .getActionsFlow()
             .observeOn(AndroidSchedulers.mainThread())
             .ofType(ExpenseFilteringAction.ApplyFilters::class.java)
             .map(ExpenseFilteringAction.ApplyFilters::filters)
@@ -63,8 +64,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         binding.statsTypesChartCard.apply {
             viewState.ratePerLiter.let(format).let(rpl::setValue)
             viewState.ratePerMile.let(format).let(rpm::setValue)
-            viewState.rateLastMonth.let(format).let(rateLastMonth::setValue)
-            viewState.ratePerMonth.let(format).let(ratePerMonth::setValue)
+            viewState.rate.let(format).let(rate::setValue)
         }
     }
 }

@@ -30,16 +30,12 @@ class StatsRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getRateLastMonth(filters: List<ExpenseFilter>): Flowable<Float> {
-        return expensesRepository.get(filters).map(this::getRatePerLiter)
+    override fun getRate(filters: List<ExpenseFilter>): Flowable<Float> {
+        return expensesRepository.get(filters).map(this::getRate)
     }
 
-    override fun getRatePerMonth(filters: List<ExpenseFilter>): Flowable<Float> {
-        return expensesRepository.get(filters).map(this::getRatePerLiter)
-    }
-
-    private fun getRatePerMonth(expenses: List<Expense>): Float{
-
+    private fun getRate(expenses: List<Expense>): Float {
+        return expenses.sumByDouble { it.cost.toDouble() }.toFloat()
     }
 
     private fun getRatePerMile(expenses: List<Expense>): Float {

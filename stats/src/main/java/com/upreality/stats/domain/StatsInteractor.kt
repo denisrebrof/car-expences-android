@@ -17,8 +17,7 @@ class StatsInteractor @Inject constructor(
         return when (value) {
             StatValues.RatePerMile -> repository.getRatePerMile(filters)
             StatValues.RatePerLiter -> repository.getRatePerLiter(filters)
-            StatValues.RateLastMonth -> repository.getRateLastMonth(filters)
-            StatValues.RatePerMonth -> repository.getRatePerMonth(filters)
+            StatValues.Rate -> repository.getRate(filters)
         }
     }
 }
