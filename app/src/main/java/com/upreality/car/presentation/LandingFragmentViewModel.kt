@@ -56,7 +56,7 @@ class LandingFragmentViewModel @Inject constructor(
 
     private fun onAccountUpdated(account: Account) {
         viewStateProcessor.value?.copy(
-            userName = account.id
+            userName = "${account.firstName} ${account.lastName}"
         )?.let(viewStateProcessor::onNext)
     }
 

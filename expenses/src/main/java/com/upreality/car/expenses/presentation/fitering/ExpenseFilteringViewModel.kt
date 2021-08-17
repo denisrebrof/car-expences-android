@@ -39,12 +39,10 @@ class ExpenseFilteringViewModel @Inject constructor(
             val range = stateMap.getFieldState(ExpenseFilteringKeys.Range).getOrNull()!!
             val type = stateMap.getFieldState(ExpenseFilteringKeys.Type).getOrNull()!!
             return@map ExpenseFilteringViewState(dateRangeState = range, typeState = type)
-        }.distinctUntilChanged().doOnNext { viewState ->
-            converter
-                .toFiltersList(viewState.dateRangeState, viewState.typeState).getOrNull()
-                ?.let(ExpenseFilteringAction::ApplyFilters)
-                ?.let(actionsProcessor::onNext)
-        }.subscribeWithLogError(viewStateProcessor::onNext).let(composite::add)
+        }.distinctUntilChanged()
+            .doOnNext(this::processViewState)
+            .subscribeWithLogError(viewStateProcessor::onNext)
+            .let(composite::add)
     }
 
     fun execute(intent: ExpenseFilteringIntent) {
@@ -91,8 +89,17 @@ class ExpenseFilteringViewModel @Inject constructor(
         }.let(composite::add)
     }
 
+    private fun processViewState(viewState: ExpenseFilteringViewState) {
+        converter
+            .toFiltersList(viewState.dateRangeState, viewState.typeState).getOrNull()
+            ?.let(ExpenseFilteringAction::ApplyFilters)
+            ?.let(actionsProcessor::onNext)
+    }
+
     fun getViewState(): Flowable<ExpenseFilteringViewState> = viewStateProcessor
-    fun getActionsFlow(): Flowable<ExpenseFilteringAction> = actionsProcessor
+    fun getActionsFlow(): Flowable<ExpenseFilteringAction> = actionsProcessor.doOnSubscribe {
+        viewStateProcessor.value?.let(this::processViewState)
+    }
 
     override fun onCleared() {
         super.onCleared()

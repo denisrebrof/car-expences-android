@@ -17,6 +17,7 @@ import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
+import presentation.RxLifecycleExtentions.subscribeDefault
 import com.upreality.stats.databinding.FragmentStatsMainBinding as ViewBinding
 
 @AndroidEntryPoint
@@ -42,12 +43,11 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
             .disposeBy(lifecycle.disposers.onStop)
 
         filteringViewModel
-            .getViewState()
-            .observeOn(AndroidSchedulers.mainThread())
+            .getActionsFlow()
             .ofType(ExpenseFilteringAction.ApplyFilters::class.java)
             .map(ExpenseFilteringAction.ApplyFilters::filters)
             .map(StatsIntents::SetFilters)
-            .subscribeWithLogError(viewModel::execute)
+            .subscribeDefault(viewModel::execute)
             .disposeBy(lifecycle.disposers.onStop)
     }
 

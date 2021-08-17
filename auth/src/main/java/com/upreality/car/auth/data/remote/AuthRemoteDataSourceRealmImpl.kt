@@ -17,17 +17,28 @@ class AuthRemoteDataSourceRealmImpl @Inject constructor(
     override fun getAuthState(): Flowable<AuthState> {
         val initialState = when (val user = app.currentUser()) {
             null -> AuthState.Unauthorized
-            else -> user.id.let(::Account).let(AuthState::Authorized)
+            else -> user.let(this::getUserAccount).let(AuthState::Authorized)
         }
         return getAuthObserverFlow().startWith(initialState)
+    }
+
+    private fun getUserAccount(user: User): Account {
+        return Account(
+            id = user.id,
+            firstName = user.profile.firstName,
+            lastName = user.profile.lastName,
+            email = user.profile.email
+        )
     }
 
     private fun getAuthObserverFlow(): Flowable<AuthState> {
         return Observable.create<AuthState> { emitter ->
             val listener = object : AuthenticationListener {
                 override fun loggedIn(user: User?) {
-                    val userId = user?.id ?: return
-                    userId.let(::Account).let(AuthState::Authorized).let(emitter::onNext)
+                    user
+                        ?.let(this@AuthRemoteDataSourceRealmImpl::getUserAccount)
+                        ?.let(AuthState::Authorized)
+                        ?.let(emitter::onNext)
                 }
 
                 override fun loggedOut(user: User?) {
