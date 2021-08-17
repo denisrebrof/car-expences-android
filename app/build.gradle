@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'realm-android'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 30
@@ -112,6 +113,9 @@ dependencies {
 
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
+
+    implementation 'com.google.firebase:firebase-messaging-ktx:22.0.0'
+
 
     dependencies {
         implementation project(":expenses")

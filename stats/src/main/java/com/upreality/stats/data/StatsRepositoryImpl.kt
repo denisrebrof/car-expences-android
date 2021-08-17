@@ -38,10 +38,6 @@ class StatsRepositoryImpl @Inject constructor(
         return expensesRepository.get(filters).map(this::getRatePerLiter)
     }
 
-    private fun getRatePerMonth(expenses: List<Expense>): Float{
-
-    }
-
     private fun getRatePerMile(expenses: List<Expense>): Float {
         val mileageExpenses = expenses.filter { expense ->
             expense is Expense.Fuel || expense is Expense.Maintenance
