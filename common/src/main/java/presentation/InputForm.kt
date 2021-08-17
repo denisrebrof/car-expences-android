@@ -26,9 +26,9 @@ sealed class ValidationResult<out INPUT_TYPE : Any?, out OUT_TYPE : Any>(val inp
 class InputForm {
 
     companion object {
-        fun <ValueType : Any> validateNotNull(
-            value: ValueType?
-        ): ValidationResult<ValueType, ValueType> {
+        fun <VALUE_TYPE : Any> validateNotNull(
+            value: VALUE_TYPE?
+        ): ValidationResult<VALUE_TYPE, VALUE_TYPE> {
             if (value == null)
                 return ValidationResult.Empty
             return ValidationResult.Valid(value, value)
@@ -37,10 +37,10 @@ class InputForm {
 
     private var fieldsSet = hashSetOf<FieldMapEntry<*, *>>()
 
-    fun <ValueType : Any, OutType : Any> createField(
-        key: FieldKey<ValueType, OutType>,
-        validator: (ValueType?) -> ValidationResult<ValueType, OutType>,
-        defaultValue: ValueType? = null
+    fun <VALUE_TYPE : Any, OUT_TYPE : Any> createField(
+        key: FieldKey<VALUE_TYPE, OUT_TYPE>,
+        validator: (VALUE_TYPE?) -> ValidationResult<VALUE_TYPE, OUT_TYPE>,
+        defaultValue: VALUE_TYPE? = null
     ) = FieldMapEntry(
         key,
         FormField(validator, defaultValue)
@@ -57,13 +57,13 @@ class InputForm {
             }.toTypedArray()
             val stateToKeysMap = mapOf(*keysToStates)
             object : FormStateMap {
-                override fun <ValueType : Any, OutType : Any> getFieldState(
-                    key: FieldKey<ValueType, OutType>
-                ): FormStateMap.FieldStateRequestResult<ValueType, OutType> {
+                override fun <VALUE_TYPE : Any, OUT_TYPE : Any> getFieldState(
+                    key: FieldKey<VALUE_TYPE, OUT_TYPE>
+                ): FormStateMap.FieldStateRequestResult<VALUE_TYPE, OUT_TYPE> {
                     if (!stateToKeysMap.containsKey(key))
                         return FormStateMap.FieldStateRequestResult.FieldNotFound()
 
-                    val inputState = stateToKeysMap[key] as ValidationResult<ValueType, OutType>
+                    val inputState = stateToKeysMap[key] as ValidationResult<VALUE_TYPE, OUT_TYPE>
                     return FormStateMap.FieldStateRequestResult.Success(inputState)
                 }
             }
@@ -71,12 +71,12 @@ class InputForm {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <ValueType : Any, OutType : Any> submit(
-        key: FieldKey<ValueType, OutType>,
-        value: ValueType
+    fun <VALUE_TYPE : Any, OUT_TYPE : Any> submit(
+        key: FieldKey<VALUE_TYPE, OUT_TYPE>,
+        value: VALUE_TYPE
     ): SubmitFieldValueResult {
         val field = fieldsSet.firstOrNull { entry -> entry.key == key }?.field
-        val typedField = (field as? FormField<ValueType, OutType>)
+        val typedField = (field as? FormField<VALUE_TYPE, OUT_TYPE>)
             ?: return SubmitFieldValueResult.FieldNotFound
         typedField.submitInput(value)
         return SubmitFieldValueResult.Success
@@ -88,27 +88,27 @@ class InputForm {
     }
 
     interface FormStateMap {
-        fun <ValueType : Any, OutType : Any> getFieldState(
-            key: FieldKey<ValueType, OutType>
-        ): FieldStateRequestResult<ValueType, OutType>
+        fun <VALUE_TYPE : Any, OUT_TYPE : Any> getFieldState(
+            key: FieldKey<VALUE_TYPE, OUT_TYPE>
+        ): FieldStateRequestResult<VALUE_TYPE, OUT_TYPE>
 
-        sealed class FieldStateRequestResult<out ValueType : Any, out OutType : Any> {
-            data class Success<out ValueType : Any, out OutType : Any>(
-                val state: ValidationResult<ValueType, OutType>
-            ) : FieldStateRequestResult<ValueType, OutType>()
+        sealed class FieldStateRequestResult<out VALUE_TYPE : Any, out OUT_TYPE : Any> {
+            data class Success<out VALUE_TYPE : Any, out OUT_TYPE : Any>(
+                val state: ValidationResult<VALUE_TYPE, OUT_TYPE>
+            ) : FieldStateRequestResult<VALUE_TYPE, OUT_TYPE>()
 
-            class FieldNotFound<out ValueType : Any, out OutType : Any> :
-                FieldStateRequestResult<ValueType, OutType>()
+            class FieldNotFound<out VALUE_TYPE : Any, out OUT_TYPE : Any> :
+                FieldStateRequestResult<VALUE_TYPE, OUT_TYPE>()
 
             fun getOrNull() = (this as? Success)?.state
         }
     }
 
-    abstract class FieldKey<in ValueType : Any, in OutType : Any>
+    abstract class FieldKey<in VALUE_TYPE : Any, in OUT_TYPE : Any>
 
-    private class FieldMapEntry<ValueType : Any, OutType : Any>(
-        val key: FieldKey<ValueType, OutType>,
-        val field: FormField<ValueType, OutType>
+    private class FieldMapEntry<VALUE_TYPE : Any, OUT_TYPE : Any>(
+        val key: FieldKey<VALUE_TYPE, OUT_TYPE>,
+        val field: FormField<VALUE_TYPE, OUT_TYPE>
     ) {
         override fun hashCode() = key.hashCode()
         override fun equals(other: Any?): Boolean {
@@ -125,21 +125,21 @@ class InputForm {
     }
 }
 
-internal class FormField<ValueType : Any?, OutType : Any>(
-    private val validator: (ValueType) -> ValidationResult<ValueType, OutType>,
-    private var value: ValueType? = null
+internal class FormField<VALUE_TYPE : Any?, OUT_TYPE : Any>(
+    private val validator: (VALUE_TYPE) -> ValidationResult<VALUE_TYPE, OUT_TYPE>,
+    private var value: VALUE_TYPE? = null
 ) {
     private val defaultInputState = value?.let(validator) ?: ValidationResult.Empty
     private val inputState = BehaviorProcessor.createDefault(defaultInputState)
 
-    fun submitInput(input: ValueType) {
+    fun submitInput(input: VALUE_TYPE) {
         if (this.value == input)
             return
         this.value = input
         validator(input).let(inputState::onNext)
     }
 
-    fun getInputStateFlow(): Flowable<ValidationResult<ValueType, OutType>> {
+    fun getInputStateFlow(): Flowable<ValidationResult<VALUE_TYPE, OUT_TYPE>> {
         return inputState
     }
 }
