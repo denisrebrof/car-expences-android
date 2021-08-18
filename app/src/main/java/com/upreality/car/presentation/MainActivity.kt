@@ -23,8 +23,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
 
-    private lateinit var analytics: FirebaseAnalytics
-
     //TODO: move to global scope
     @Inject
     lateinit var sync: IExpensesSyncService
@@ -41,7 +39,5 @@ class MainActivity : AppCompatActivity() {
         sync.createSyncLoop()
             .subscribeWithLogError()
             .disposeBy(lifecycle.disposers.onDestroy)
-
-        analytics = Firebase.analytics
     }
 }
