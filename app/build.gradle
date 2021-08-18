@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'dagger.hilt.android.plugin'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'realm-android'
 
 android {
@@ -74,6 +75,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+
     //Common
     implementation rootProject.ext.kotlin_stdlib
     implementation rootProject.ext.core_ktx
@@ -112,6 +114,15 @@ dependencies {
 
     //View Binding delegate
     implementation rootProject.ext.view_binding_delegate
+
+    //Firebase
+    //Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:28.3.1')
+
+    // Declare the dependencies for the Firebase Cloud Messaging and Analytics libraries
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-analytics'
 
     dependencies {
         implementation project(":expenses")

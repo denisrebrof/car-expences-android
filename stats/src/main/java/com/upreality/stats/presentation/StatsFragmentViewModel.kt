@@ -25,12 +25,14 @@ class StatsFragmentViewModel @Inject constructor(
         return Flowable.combineLatest(
             interactor.getStatValue(StatValues.RatePerMile, filters),
             interactor.getStatValue(StatValues.RatePerLiter, filters),
+            interactor.getStatValue(StatValues.Rate, filters),
             interactor.getTypesMap(filters)
-        ) { ratePerMile, ratePerLiter, typesMap ->
+        ) { ratePerMile, ratePerLiter, rate, typesMap ->
             StatsViewState(
                 ratePerMile = ratePerMile,
-                ratePerLiter,
-                typesMap.mapKeys { (type, percent) -> type.getTitle() }
+                ratePerLiter = ratePerLiter,
+                rate = rate,
+                typesRelationMap = typesMap.mapKeys { (type, percent) -> type.getTitle() }
             )
         }
     }

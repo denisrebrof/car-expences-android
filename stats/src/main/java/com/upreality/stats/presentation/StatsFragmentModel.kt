@@ -5,6 +5,7 @@ import com.upreality.car.expenses.domain.model.ExpenseFilter
 data class StatsViewState(
     val ratePerMile: Float = 0f,
     val ratePerLiter: Float = 0f,
+    val rate: Float = 0f,
     val typesRelationMap: Map<String, Float> = mapOf()
 )
 

@@ -30,6 +30,14 @@ class StatsRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getRate(filters: List<ExpenseFilter>): Flowable<Float> {
+        return expensesRepository.get(filters).map(this::getRate)
+    }
+
+    private fun getRate(expenses: List<Expense>): Float {
+        return expenses.sumByDouble { it.cost.toDouble() }.toFloat()
+    }
+
     private fun getRatePerMile(expenses: List<Expense>): Float {
         val mileageExpenses = expenses.filter { expense ->
             expense is Expense.Fuel || expense is Expense.Maintenance

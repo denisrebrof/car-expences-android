@@ -36,6 +36,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
     override fun onStart() {
         super.onStart()
+
         viewModel
             .getViewState()
             .observeOn(AndroidSchedulers.mainThread())
@@ -63,6 +64,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         binding.statsTypesChartCard.apply {
             viewState.ratePerLiter.let(format).let(rpl::setValue)
             viewState.ratePerMile.let(format).let(rpm::setValue)
+            viewState.rate.let(format).let(rate::setValue)
         }
     }
 }
