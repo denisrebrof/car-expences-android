@@ -1,6 +1,8 @@
 package com.upreality.car
 
 import android.app.Application
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 import io.realm.mongodb.App
 import javax.inject.Inject
@@ -9,4 +11,11 @@ import javax.inject.Inject
 class CarExpensesApplication : Application() {
     @Inject
     lateinit var realmApp: App
+
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+            Log.d("FCM", it)
+        }
+    }
 }
