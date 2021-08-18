@@ -1,10 +1,13 @@
 package com.upreality.car.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.upreality.car.R
 import com.upreality.car.databinding.ActivityMainBinding
 import com.upreality.car.expenses.domain.IExpensesSyncService
@@ -19,6 +22,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+
+    private lateinit var analytics: FirebaseAnalytics
 
     //TODO: move to global scope
     @Inject
@@ -36,5 +41,7 @@ class MainActivity : AppCompatActivity() {
         sync.createSyncLoop()
             .subscribeWithLogError()
             .disposeBy(lifecycle.disposers.onDestroy)
+
+        analytics = Firebase.analytics
     }
 }
