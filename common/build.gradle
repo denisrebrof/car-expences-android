@@ -50,7 +50,7 @@ dependencies {
     androidTestImplementation rootProject.ext.junit_android_test
     androidTestImplementation rootProject.ext.espresso_core
 
-    //Room - local database lib
+    //Room - local database
     implementation rootProject.ext.room_runtime
     kapt rootProject.ext.room_compiler_kapt
     kaptAndroidTest rootProject.ext.room_compiler_kapt_android_test
