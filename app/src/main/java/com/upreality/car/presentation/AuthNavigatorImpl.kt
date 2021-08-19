@@ -12,12 +12,10 @@ import javax.inject.Inject
 class AuthNavigatorImpl @Inject constructor(
     private val analytics: FirebaseAnalytics
 ) : IAuthNavigator {
-    override fun completeAuthorization(account: Account, context: Context) {
-//        Toast.makeText(context, "auth success", Toast.LENGTH_SHORT).show()
-        Intent(context, MainActivity::class.java).let(context::startActivity)
-        val params = bundleOf(
 
-        )
+    override fun completeAuthorization(account: Account, context: Context) {
+        Intent(context, MainActivity::class.java).let(context::startActivity)
+        val params = bundleOf()
         analytics.logEvent(FirebaseAnalytics.Event.LOGIN, params)
     }
 
