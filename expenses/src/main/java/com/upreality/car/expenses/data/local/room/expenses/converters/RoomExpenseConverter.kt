@@ -2,8 +2,12 @@ package com.upreality.car.expenses.data.local.room.expenses.converters
 
 import com.upreality.car.expenses.data.local.room.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.domain.model.expence.Expense
+import data.OptionalValueConverter
 
 object RoomExpenseConverter {
+
+    private val optionalConverter = OptionalValueConverter(-1f)
+
     fun toExpense(dataModel: ExpenseRoom): Expense {
         return when (dataModel) {
             is ExpenseRoom.Fine -> Expense.Fine(
@@ -14,14 +18,14 @@ object RoomExpenseConverter {
             is ExpenseRoom.Fuel -> Expense.Fuel(
                 dataModel.date,
                 dataModel.cost,
-                dataModel.liters,
-                dataModel.mileage,
+                optionalConverter.toOptional(dataModel.liters),
+                optionalConverter.toOptional(dataModel.mileage),
             )
             is ExpenseRoom.Maintenance -> Expense.Maintenance(
                 dataModel.date,
                 dataModel.cost,
                 dataModel.type,
-                dataModel.mileage,
+                optionalConverter.toOptional(dataModel.mileage),
             )
         }.apply { id = dataModel.id }
     }
@@ -36,14 +40,14 @@ object RoomExpenseConverter {
             is Expense.Fuel -> ExpenseRoom.Fuel(
                 domainModel.date,
                 domainModel.cost,
-                domainModel.liters,
-                domainModel.mileage,
+                optionalConverter.toValue(domainModel.fuelAmount),
+                optionalConverter.toValue(domainModel.mileage),
             )
             is Expense.Maintenance -> ExpenseRoom.Maintenance(
                 domainModel.date,
                 domainModel.cost,
                 domainModel.type,
-                domainModel.mileage,
+                optionalConverter.toValue(domainModel.mileage),
             )
         }.apply { id = domainModel.id }
     }

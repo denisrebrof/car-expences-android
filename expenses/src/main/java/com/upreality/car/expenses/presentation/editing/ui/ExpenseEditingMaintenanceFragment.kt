@@ -58,7 +58,7 @@ class ExpenseEditingMaintenanceFragment : Fragment(R.layout.fragment_expense_edi
         if (maintenanceRes is ValidationResult.Empty)
             binding.chipGroup.clearCheck()
         when (maintenanceRes.validValueOrNull()) {
-            MaintenanceType.NotDefined -> binding.chipMaintenanceNotDefined
+            MaintenanceType.Undefined -> binding.chipMaintenanceNotDefined
             MaintenanceType.Maintenance -> binding.chipMaintenanceMaintenance
             MaintenanceType.RepairService -> binding.chipMaintenanceRepair
             MaintenanceType.Other -> binding.chipMaintenanceOther
@@ -69,7 +69,7 @@ class ExpenseEditingMaintenanceFragment : Fragment(R.layout.fragment_expense_edi
     @RequiresApi(Build.VERSION_CODES.N)
     private fun onChipSelected(buttonView: View) {
         val maintenanceType = when (buttonView) {
-            binding.chipMaintenanceNotDefined -> MaintenanceType.NotDefined
+            binding.chipMaintenanceNotDefined -> MaintenanceType.Undefined
             binding.chipMaintenanceMaintenance -> MaintenanceType.Maintenance
             binding.chipMaintenanceRepair -> MaintenanceType.RepairService
             else -> MaintenanceType.Other

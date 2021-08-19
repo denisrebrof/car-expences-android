@@ -2,8 +2,12 @@ package com.upreality.car.expenses.data.remote.expenses.converters
 
 import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
 import com.upreality.car.expenses.domain.model.expence.Expense
+import data.OptionalValueConverter
 
 object RemoteExpenseConverter {
+
+    private val optionalConverter = OptionalValueConverter(-1f)
+
     fun toExpense(dataModel: ExpenseRemote): Expense {
         return when (dataModel) {
             is ExpenseRemote.Fine -> Expense.Fine(
@@ -14,14 +18,14 @@ object RemoteExpenseConverter {
             is ExpenseRemote.Fuel -> Expense.Fuel(
                 dataModel.date,
                 dataModel.cost,
-                dataModel.liters,
-                dataModel.mileage,
+                optionalConverter.toOptional(dataModel.liters),
+                optionalConverter.toOptional(dataModel.mileage),
             )
             is ExpenseRemote.Maintenance -> Expense.Maintenance(
                 dataModel.date,
                 dataModel.cost,
                 dataModel.type,
-                dataModel.mileage,
+                optionalConverter.toOptional(dataModel.mileage),
             )
         }
     }
@@ -36,14 +40,14 @@ object RemoteExpenseConverter {
             is Expense.Fuel -> ExpenseRemote.Fuel(
                 domainModel.date,
                 domainModel.cost,
-                domainModel.liters,
-                domainModel.mileage,
+                optionalConverter.toValue(domainModel.fuelAmount),
+                optionalConverter.toValue(domainModel.mileage),
             )
             is Expense.Maintenance -> ExpenseRemote.Maintenance(
                 domainModel.date,
                 domainModel.cost,
                 domainModel.type,
-                domainModel.mileage,
+                optionalConverter.toValue(domainModel.mileage),
             )
         }.also { it.id = remoteId }
     }

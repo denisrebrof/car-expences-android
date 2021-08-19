@@ -5,12 +5,13 @@ import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.FinesCategories.*
 import com.upreality.car.expenses.domain.model.MaintenanceType
-import com.upreality.car.expenses.domain.model.MaintenanceType.*
+import com.upreality.car.expenses.domain.model.MaintenanceType.Maintenance
+import com.upreality.car.expenses.domain.model.MaintenanceType.RepairService
 
 class MaintenanceTypeConverter {
     @TypeConverter
     fun toId(type: MaintenanceType) = when (type) {
-        NotDefined -> 0
+        MaintenanceType.Undefined -> 0
         MaintenanceType.Other -> 1
         Maintenance -> 2
         RepairService -> 3
@@ -21,7 +22,7 @@ class MaintenanceTypeConverter {
         1 -> MaintenanceType.Other
         2 -> Maintenance
         3 -> RepairService
-        else -> NotDefined
+        else -> MaintenanceType.Undefined
     }
 }
 
@@ -32,10 +33,12 @@ class FinesTypeConverter {
         RoadMarking -> 2
         SpeedLimit -> 3
         FinesCategories.Other -> 0
+        FinesCategories.Undefined -> -1
     }
 
     @TypeConverter
     fun fromId(id: Int) = when (id) {
+        -1 -> FinesCategories.Undefined
         1 -> Parking
         2 -> RoadMarking
         3 -> SpeedLimit

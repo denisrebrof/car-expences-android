@@ -9,9 +9,11 @@ object FineTypeConverter {
         FinesCategories.RoadMarking -> 2
         FinesCategories.SpeedLimit -> 3
         FinesCategories.Other -> 0
+        FinesCategories.Undefined -> -1
     }
 
     fun fromId(id: Int) = when (id) {
+        -1 -> FinesCategories.Undefined
         1 -> FinesCategories.Parking
         2 -> FinesCategories.RoadMarking
         3 -> FinesCategories.SpeedLimit
@@ -21,7 +23,7 @@ object FineTypeConverter {
 
 object MaintenanceTypeConverter {
     fun toId(type: MaintenanceType) = when (type) {
-        MaintenanceType.NotDefined -> 0
+        MaintenanceType.Undefined -> 0
         MaintenanceType.Other -> 1
         MaintenanceType.Maintenance -> 2
         MaintenanceType.RepairService -> 3
@@ -31,6 +33,6 @@ object MaintenanceTypeConverter {
         1 -> MaintenanceType.Other
         2 -> MaintenanceType.Maintenance
         3 -> MaintenanceType.RepairService
-        else -> MaintenanceType.NotDefined
+        else -> MaintenanceType.Undefined
     }
 }

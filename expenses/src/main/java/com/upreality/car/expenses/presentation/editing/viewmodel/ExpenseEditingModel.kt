@@ -3,6 +3,7 @@ package com.upreality.car.expenses.presentation.editing.viewmodel
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType
+import domain.OptionalValue
 import presentation.InputForm
 import presentation.ValidationResult
 import java.util.*
@@ -13,8 +14,8 @@ sealed class ExpenseEditingKeys<in ValueType : Any, in OutType : Any> :
     object Cost : ExpenseEditingKeys<String, Float>()
     object SpendDate : ExpenseEditingKeys<DateInputValue, Date>()
     object Type : ExpenseEditingKeys<ExpenseType, ExpenseType>()
-    object Liters : ExpenseEditingKeys<String, Float>()
-    object Mileage : ExpenseEditingKeys<String, Float>()
+    object Liters : ExpenseEditingKeys<String, OptionalValue<Float>>()
+    object Mileage : ExpenseEditingKeys<String, OptionalValue<Float>>()
     object FineType : ExpenseEditingKeys<FinesCategories, FinesCategories>()
     object Maintenance : ExpenseEditingKeys<MaintenanceType, MaintenanceType>()
 }
@@ -44,8 +45,8 @@ data class ExpenseEditingViewState(
     val costState: ValidationResult<String, Float>,
     val dateState: ValidationResult<DateInputValue, Date>,
     val typeState: ValidationResult<ExpenseType, ExpenseType>,
-    val litersState: ValidationResult<String, Float>,
-    val mileageState: ValidationResult<String, Float>,
+    val litersState: ValidationResult<String, OptionalValue<Float>>,
+    val mileageState: ValidationResult<String, OptionalValue<Float>>,
     val fineTypeState: ValidationResult<FinesCategories, FinesCategories>,
     val maintenanceTypeState: ValidationResult<MaintenanceType, MaintenanceType>
 )

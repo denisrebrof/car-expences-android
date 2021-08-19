@@ -16,6 +16,7 @@ import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingD
 import com.upreality.car.expenses.presentation.editing.viewmodel.ExpenseEditingKeys.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import domain.DateTimeInteractor
+import domain.OptionalValue
 import domain.subscribeWithLogError
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -158,12 +159,19 @@ class ExpenseEditingViewModel @Inject constructor(
                 form.submit(FineType, expense.type)
             }
             is Expense.Fuel -> {
-                form.submit(Liters, expense.liters.toString())
-                form.submit(Mileage, expense.mileage.toString())
+                form.submit(Liters, expense.fuelAmount.toText())
+                form.submit(Mileage, expense.mileage.toText())
             }
             is Expense.Maintenance -> {
-                form.submit(Mileage, expense.mileage.toString())
+                form.submit(Mileage, expense.mileage.toText())
             }
+        }
+    }
+
+    private fun OptionalValue<Float>.toText(): String {
+        return when (this) {
+            is OptionalValue.Defined -> this.value.toString()
+            OptionalValue.Undefined -> String()
         }
     }
 

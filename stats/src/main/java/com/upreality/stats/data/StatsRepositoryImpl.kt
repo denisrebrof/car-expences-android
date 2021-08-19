@@ -6,6 +6,7 @@ import com.upreality.car.expenses.domain.IExpensesRepository
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.stats.domain.IStatsRepository
+import domain.OptionalValue
 import io.reactivex.Flowable
 import javax.inject.Inject
 
@@ -44,15 +45,9 @@ class StatsRepositoryImpl @Inject constructor(
         }
         val averageCost = mileageExpenses.sumOf { it.cost.toDouble() }.toFloat()
 
-        val earliestMileage = mileageExpenses
-            .minByOrNull(Expense::date)
-            ?.let(this::getMileageOrNull)
-            ?: 0f
-        val oldestMileage = mileageExpenses
-            .maxByOrNull(Expense::date)
-            ?.let(this::getMileageOrNull)
-            ?: 0f
-        val mileageRange = (oldestMileage - earliestMileage)
+        val minMileage = mileageExpenses.minOfOrNull { getMileageOrNull(it) ?: 0f } ?: 0f
+        val maxMileage = mileageExpenses.maxOfOrNull { getMileageOrNull(it) ?: 0f } ?: 0f
+        val mileageRange = (maxMileage - minMileage)
         if (mileageRange <= 0f)
             return 0f
         return averageCost / mileageRange
@@ -60,8 +55,8 @@ class StatsRepositoryImpl @Inject constructor(
 
     private fun getMileageOrNull(expense: Expense): Float? {
         return when (expense) {
-            is Expense.Fuel -> expense.mileage
-            is Expense.Maintenance -> expense.mileage
+            is Expense.Fuel -> (expense.fuelAmount as? OptionalValue.Defined<Float>)?.value
+            is Expense.Maintenance -> (expense.mileage as? OptionalValue.Defined<Float>)?.value
             else -> null
         }
     }
@@ -71,10 +66,20 @@ class StatsRepositoryImpl @Inject constructor(
         return map.mapValues { (key, value) -> if (average > 0) value / average else 0f }
     }
 
+    private fun OptionalValue<Float>.getValueOrNull() : Float? {
+        return when(this){
+            is OptionalValue.Defined -> this.value
+            OptionalValue.Undefined -> null
+        }
+    }
+
     private fun getRatePerLiter(expenses: List<Expense>): Float {
         val fuelExpenses = expenses.filterIsInstance(Expense.Fuel::class.java)
-        val averageRate = fuelExpenses.sumByDouble { it.cost.toDouble() }.toFloat()
-        val averageLiters = fuelExpenses.sumByDouble { it.liters.toDouble() }.toFloat()
+        val fuelMeasurableExpenses = fuelExpenses.filter { it.fuelAmount is OptionalValue.Defined }
+        val averageRate = fuelMeasurableExpenses.sumByDouble { it.cost.toDouble() }.toFloat()
+        val averageLiters = fuelMeasurableExpenses.sumByDouble {
+            (it.fuelAmount as OptionalValue.Defined<Float>).value.toDouble()
+        }.toFloat()
         if (averageLiters <= 0f)
             return 0f
         return averageRate / averageLiters

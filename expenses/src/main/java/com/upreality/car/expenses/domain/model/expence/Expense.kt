@@ -2,6 +2,7 @@ package com.upreality.car.expenses.domain.model.expence
 
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType
+import domain.OptionalValue
 import java.util.*
 
 sealed class Expense(open val date: Date, open val cost: Float) {
@@ -15,21 +16,21 @@ sealed class Expense(open val date: Date, open val cost: Float) {
     data class Fine(
         override val date: Date,
         override val cost: Float,
-        val type: FinesCategories
+        val type: FinesCategories = FinesCategories.Undefined
     ) : Expense(date, cost)
 
 
     data class Maintenance(
         override val date: Date,
         override val cost: Float,
-        val type: MaintenanceType,
-        val mileage: Float
+        val type: MaintenanceType = MaintenanceType.Undefined,
+        val mileage: OptionalValue<Float> = OptionalValue.Undefined
     ) : Expense(date, cost)
 
     data class Fuel(
         override val date: Date,
         override val cost: Float,
-        val liters: Float,
-        val mileage: Float
+        val fuelAmount: OptionalValue<Float> = OptionalValue.Undefined,
+        val mileage: OptionalValue<Float> = OptionalValue.Undefined
     ) : Expense(date, cost)
 }

@@ -6,6 +6,7 @@ object RemoteFinesCategoriesConverter {
 
     fun toFinesCategories(typeId: Int): FinesCategories {
         return when (typeId) {
+            -1 -> FinesCategories.Undefined
             1 -> FinesCategories.SpeedLimit
             2 -> FinesCategories.Parking
             3 -> FinesCategories.RoadMarking
@@ -15,6 +16,7 @@ object RemoteFinesCategoriesConverter {
 
     fun toFinesCategoriesId(type: FinesCategories): Int {
         return when (type) {
+            FinesCategories.Undefined -> -1
             FinesCategories.Other -> 0
             FinesCategories.SpeedLimit -> 1
             FinesCategories.Parking -> 2

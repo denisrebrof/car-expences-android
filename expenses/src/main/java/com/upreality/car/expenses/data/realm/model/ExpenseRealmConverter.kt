@@ -2,8 +2,12 @@ package com.upreality.car.expenses.data.realm.model
 
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.expence.Expense
+import data.OptionalValueConverter
 
 object ExpenseRealmConverter {
+
+    private val optionalConverter = OptionalValueConverter(-1f)
+
     fun fromDomain(expense: Expense): ExpenseRealm {
         val dataModel = ExpenseRealm().apply {
             _id = expense.id
@@ -17,12 +21,12 @@ object ExpenseRealmConverter {
             }
             is Expense.Fuel -> {
                 dataModel.type = ExpenseType.Fuel
-                dataModel.fuelLiters = expense.liters
-                dataModel.mileage = expense.mileage
+                dataModel.fuelAmount = optionalConverter.toValue(expense.fuelAmount)
+                dataModel.mileage = optionalConverter.toValue(expense.mileage)
             }
             is Expense.Maintenance -> {
                 dataModel.type = ExpenseType.Maintenance
-                dataModel.mileage = expense.mileage
+                dataModel.mileage = optionalConverter.toValue(expense.mileage)
                 dataModel.maintenanceType = expense.type
             }
         }
@@ -39,14 +43,14 @@ object ExpenseRealmConverter {
             ExpenseType.Fuel -> Expense.Fuel(
                 dataModel.date,
                 dataModel.cost,
-                dataModel.fuelLiters,
-                dataModel.mileage,
+                optionalConverter.toOptional(dataModel.fuelAmount),
+                optionalConverter.toOptional(dataModel.mileage),
             )
             ExpenseType.Maintenance -> Expense.Maintenance(
                 dataModel.date,
                 dataModel.cost,
                 dataModel.maintenanceType,
-                dataModel.mileage,
+                optionalConverter.toOptional(dataModel.mileage),
             )
         }.apply { id = dataModel._id }
     }

@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:hint="Liters"
+        android:hint="Liters (optional)"
         app:startIconDrawable="@drawable/ic_fuel_half_filled">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
-        android:hint="Mileage"
+        android:hint="Mileage (optional)"
         app:startIconDrawable="@drawable/ic_hundred">
 
         <com.google.android.material.textfield.TextInputEditText

@@ -9,13 +9,13 @@ object RemoteMaintenanceTypeConverter {
             1 -> MaintenanceType.Maintenance
             2 -> MaintenanceType.RepairService
             3 -> MaintenanceType.Other
-            else -> MaintenanceType.NotDefined
+            else -> MaintenanceType.Undefined
         }
     }
 
     fun toMaintenanceId(type: MaintenanceType): Int {
         return when (type) {
-            MaintenanceType.NotDefined -> 0
+            MaintenanceType.Undefined -> 0
             MaintenanceType.Maintenance -> 1
             MaintenanceType.RepairService -> 2
             MaintenanceType.Other -> 3

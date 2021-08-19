@@ -34,7 +34,7 @@ class ExpensesListAdapterExpenseTypeDataProviderImpl @Inject constructor(
         return when (expense) {
             is Expense.Fine -> expense.type.toString()
             //TODO: rewrite with custom val and text
-            is Expense.Fuel -> expense.liters.toString() + " Liters"
+            is Expense.Fuel -> expense.fuelAmount.toString() + " Liters"
             is Expense.Maintenance -> expense.type.toString()
         }
     }

@@ -4,6 +4,7 @@ import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType
 import com.upreality.car.expenses.domain.model.expence.Expense
+import domain.OptionalValue
 import presentation.ValidationResult
 import java.util.*
 import javax.inject.Inject
@@ -13,8 +14,8 @@ class ExpenseEditingInputConverter @Inject constructor() {
         costState: ValidationResult<*, Float>,
         dateState: ValidationResult<*, Date>,
         typeState: ValidationResult<*, ExpenseType>,
-        litersState: ValidationResult<*, Float>,
-        mileageState: ValidationResult<*, Float>,
+        litersState: ValidationResult<*, OptionalValue<Float>>,
+        mileageState: ValidationResult<*, OptionalValue<Float>>,
         fineTypeState: ValidationResult<*, FinesCategories>,
         maintenanceTypeState: ValidationResult<*, MaintenanceType>
     ): Result<Expense> = kotlin.runCatching {
@@ -27,7 +28,7 @@ class ExpenseEditingInputConverter @Inject constructor() {
             ExpenseType.Fuel -> Expense.Fuel(
                 date = dateState.requireValid(),
                 cost = costState.requireValid(),
-                liters = litersState.requireValid(),
+                fuelAmount = litersState.requireValid(),
                 mileage = mileageState.requireValid(),
             )
             ExpenseType.Maintenance -> Expense.Maintenance(

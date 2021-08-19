@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.domain.model
 
 enum class MaintenanceType {
-    NotDefined,
+    Undefined,
     Maintenance,
     RepairService,
     Other,

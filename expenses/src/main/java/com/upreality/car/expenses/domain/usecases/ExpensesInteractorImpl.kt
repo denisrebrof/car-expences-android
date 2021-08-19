@@ -42,7 +42,7 @@ class ExpensesInteractorImpl @Inject constructor(
     }
 
     override fun deleteExpense(id: Long): Completable {
-        val stubExpense = Expense.Fuel(Date(), 0f, 0f, 0f).also { it.id = id }
+        val stubExpense = Expense.Fuel(Date(), 0f).also { it.id = id }
         return repository.delete(stubExpense)
     }
 }

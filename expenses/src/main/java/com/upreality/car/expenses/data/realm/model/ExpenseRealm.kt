@@ -27,7 +27,7 @@ open class ExpenseRealm : RealmObject() {
     var mileage: Float = 0f //Fuel + Mileage
 
     //Fuel
-    var fuelLiters: Float = 0f
+    var fuelAmount: Float = 0f
 
     //Maintenance
     private var maintenanceTypeId = MaintenanceType.Other.let(MaintenanceTypeConverter::toId)
