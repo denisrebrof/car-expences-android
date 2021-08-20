@@ -9,13 +9,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.upreality.car.expenses.databinding.ExpenseListDateSeparatorItemBinding
 import com.upreality.car.expenses.databinding.ExpenseListItemBinding
+import com.upreality.car.expenses.databinding.ExpenseListSyncIndicatorItemBinding
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel
-import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.DateSeparator
-import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.ExpenseModel
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.*
 import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ViewHolder
-import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ViewHolder.DateSeparatorHolder
-import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ViewHolder.ExpenseItemHolder
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ViewHolder.*
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Singleton
@@ -29,6 +28,7 @@ class ExpensesListAdapter(
     companion object {
         private const val EXPENSE = 1
         private const val SEPARATOR = 2
+        private const val SYNC_INDICATOR = 3
     }
 
     //    private val differ = AsyncPagingDataDiffer(DiffCallback)
@@ -39,6 +39,9 @@ class ExpensesListAdapter(
             EXPENSE -> ExpenseListItemBinding
                 .inflate(inflater, parent, false)
                 .let(::ExpenseItemHolder)
+            SYNC_INDICATOR -> ExpenseListSyncIndicatorItemBinding
+                .inflate(inflater, parent, false)
+                .let(::SyncItemHolder)
             else -> ExpenseListDateSeparatorItemBinding
                 .inflate(inflater, parent, false)
                 .let(::DateSeparatorHolder)
@@ -47,6 +50,7 @@ class ExpensesListAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
+            is SyncIndicator -> SYNC_INDICATOR
             is DateSeparator -> SEPARATOR
             is ExpenseModel -> EXPENSE
             null -> -1
@@ -90,6 +94,11 @@ class ExpensesListAdapter(
 
     sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         class ExpenseItemHolder(val binding: ExpenseListItemBinding) : ViewHolder(binding.root)
+
+        class SyncItemHolder(
+            val binding: ExpenseListSyncIndicatorItemBinding
+        ) : ViewHolder(binding.root)
+
         class DateSeparatorHolder(
             val binding: ExpenseListDateSeparatorItemBinding
         ) : ViewHolder(binding.root)
@@ -97,6 +106,7 @@ class ExpensesListAdapter(
 
     sealed class ExpenseListModel {
         data class DateSeparator(val date: Date) : ExpenseListModel()
+        data class SyncIndicator(val progress: Int) : ExpenseListModel()
         data class ExpenseModel(val expense: Expense) : ExpenseListModel()
     }
 

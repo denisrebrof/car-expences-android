@@ -11,7 +11,10 @@ import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.ExpensesInteractorImpl
 import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel
 import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.ExpenseModel
+import com.upreality.car.expenses.presentation.list.ExpensesListAdapter.ExpenseListModel.SyncIndicator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import domain.SyncInteractor
+import domain.SyncState
 import io.reactivex.Flowable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
@@ -21,6 +24,7 @@ import javax.inject.Inject
 class ExpensesListFragmentViewModel @Inject constructor(
     //TODO fix injection
     private val interactor: ExpensesInteractorImpl,
+    private val syncInteractor: SyncInteractor,
     private val sourceFactory: IExpensesPagingSourceFactory,
     //TODO fix injection
     private val refreshEventProvider: RefreshExpensesRealmEventProvider
@@ -33,9 +37,20 @@ class ExpensesListFragmentViewModel @Inject constructor(
     @ExperimentalCoroutinesApi
     fun getExpensesFlow(): Flowable<PagingData<ExpenseListModel>> {
         val config = PagingConfig(pageSize = 6, initialLoadSize = 6)
-        return Pager(config) {
+        val pagingDataFlow = Pager(config) {
             sourceFactory.get().also { lastSource = it }
         }.flowable.cachedIn(viewModelScope).map(this::mapPagingData)
+        return syncInteractor.getSyncState().flatMap { syncState ->
+            val getSyncPagingData: (Int) -> Flowable<PagingData<ExpenseListModel>> = { percent ->
+                val models = (SyncIndicator(percent) as ExpenseListModel).let(::listOf)
+                models.let(PagingData.Companion::from).let { Flowable.just(it) }
+            }
+            when (syncState) {
+                SyncState.Completed -> pagingDataFlow
+                is SyncState.InProgress -> getSyncPagingData(syncState.percent)
+                SyncState.PendingSync -> getSyncPagingData(0)
+            }
+        }
     }
 
     fun getRefreshFlow(): Flowable<Unit> {
@@ -63,7 +78,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
             val prevDay = prevDate?.also(calendar::setTime)?.let {
                 calendar.get(Calendar.DAY_OF_YEAR)
             }
-            
+
             return@insertSeparators when (prevDay) {
                 nextDay -> null
                 else -> ExpenseListModel.DateSeparator(nextDate)
