@@ -76,6 +76,7 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
     private fun deleteExpense(position: Int) {
         val target = adapter.getItemByPosition(position) ?: return
         target.let(viewModel::deleteExpense)
+            .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribeWithLogError()
             .disposeBy(lifecycle.disposers.onDestroy)

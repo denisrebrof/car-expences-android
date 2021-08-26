@@ -48,27 +48,27 @@ object ExpenseBackendConverter {
                 mileage = model.mileage?.let(optionalConverter::toOptional)
                     ?: OptionalValue.Undefined,
             )
-        }.apply { id = model.id ?: 0L }
+        }.apply { id = model._id ?: 0L }
     }
 
     fun fromExpense(expense: Expense): ExpenseBackendModel {
         val typeId = ExpenseToTypeConverter.toType(expense).let(ExpenseTypeConverter::toId)
         val time = DateConverter.toTimestamp(expense.date)
 
-        val mileage = Expense.Fuel::class.java.cast(expense)?.mileage
-            ?: Expense.Maintenance::class.java.cast(expense)?.mileage
+        val mileage = (expense as? Expense.Fuel)?.mileage
+            ?: (expense as? Expense.Maintenance)?.mileage
         val mileageValue = mileage?.let(optionalConverter::toValue)
             ?: optionalConverter.defaultValue
 
-        val fuelAmount = Expense.Fuel::class.java.cast(expense)?.fuelAmount
+        val fuelAmount = (expense as? Expense.Fuel)?.fuelAmount
         val fuelAmountValue = fuelAmount?.let(optionalConverter::toValue)
             ?: optionalConverter.defaultValue
 
-        val maintenanceType = Expense.Maintenance::class.java.cast(expense)?.type
+        val maintenanceType = (expense as? Expense.Maintenance)?.type
         val maintenanceTypeIdValue = maintenanceType?.let(MaintenanceTypeConverter::toId)
             ?: defaultMaintenanceTypeId
 
-        val fineType = Expense.Fine::class.java.cast(expense)?.type
+        val fineType = (expense as? Expense.Fine)?.type
         val fineTypeId = fineType?.let(FinesCategoriesConverter::toId) ?: defaultFineCategoryId
 
         return ExpenseBackendModel(

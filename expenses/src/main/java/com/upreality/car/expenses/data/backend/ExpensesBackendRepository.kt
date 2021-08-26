@@ -22,8 +22,8 @@ class ExpensesBackendRepository @Inject constructor(
         pagingState: RequestPagingState
     ) = ExpensesBackendRequest(
         pagingState is RequestPagingState.Paged,
-        pagingState.let(RequestPagingState.Paged::class.java::cast)?.cursor ?: 0L,
-        pagingState.let(RequestPagingState.Paged::class.java::cast)?.pageSize?.toLong() ?: 0L,
+        (pagingState as? RequestPagingState.Paged)?.cursor ?: 0L,
+        (pagingState as? RequestPagingState.Paged)?.pageSize?.toLong() ?: 0L,
         filters.map(ExpenseFilterBackendConverter::toId)
     ).let(api::get).mapList(ExpenseBackendConverter::toExpense)
 

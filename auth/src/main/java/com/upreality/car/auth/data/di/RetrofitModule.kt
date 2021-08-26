@@ -18,7 +18,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
 
-    private const val baseUrl = "http://car-expenses-dev.herokuapp.com"
+    private const val baseUrl = "https://car-expenses-dev.herokuapp.com"
+    private const val localBaseUrl = "http://10.0.2.2:4000"
 
     @Singleton
     @Provides
@@ -34,7 +35,7 @@ object RetrofitModule {
             .build()
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(localBaseUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

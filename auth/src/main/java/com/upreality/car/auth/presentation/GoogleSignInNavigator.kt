@@ -29,7 +29,7 @@ class GoogleSignInNavigator @Inject constructor(
         viewModel: AuthViewModel
     ) {
         if (result.resultCode == GoogleSignInActivity.ResolveResult.SUCCESS.resultCode) {
-            val authCode = result.data?.getStringExtra(GoogleSignInActivity.AUTH_CODE_EXTRA_KEY)
+            val authCode = result.data?.getStringExtra(GoogleSignInActivity.ID_TOKEN_EXTRA_KEY)
             authCode?.let(viewModel::googleSignIn)
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
@@ -37,6 +37,7 @@ class GoogleSignInNavigator @Inject constructor(
                     authNavigator.completeAuthorization(account, source)
                 }) { _ ->
                     Toast.makeText(source, "auth failure", Toast.LENGTH_SHORT).show()
+                    authNavigator.goToLogin(source)
                 }?.disposeBy(source.lifecycle.disposers.onStop)
         }
     }

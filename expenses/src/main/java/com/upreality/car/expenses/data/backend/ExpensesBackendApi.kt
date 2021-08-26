@@ -7,19 +7,16 @@ import io.reactivex.Flowable
 import retrofit2.http.*
 
 interface ExpensesBackendApi {
-    @FormUrlEncoded
     @POST("/expenses")
-    fun create(@Field("expense") expense: ExpenseBackendModel): Completable
+    fun create(@Body expense: ExpenseBackendModel): Completable
 
-    @FormUrlEncoded
     @PUT("/expenses")
-    fun update(@Field("expense") expense: ExpenseBackendModel): Completable
+    fun update(@Body expense: ExpenseBackendModel): Completable
 
     @FormUrlEncoded
-    @DELETE
+    @HTTP(method = "DELETE", path = "expenses",hasBody = true)
     fun delete(@Field("id") id: Long): Completable
 
-    @FormUrlEncoded
-    @GET
-    fun get(@Field("params") params: ExpensesBackendRequest): Flowable<List<ExpenseBackendModel>>
+    @POST("/expenses/get")
+    fun get(@Body params: ExpensesBackendRequest): Flowable<List<ExpenseBackendModel>>
 }

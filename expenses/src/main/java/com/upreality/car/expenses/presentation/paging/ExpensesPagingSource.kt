@@ -22,6 +22,7 @@ class ExpensesPagingSource @Inject constructor(
         val state = RequestPagingState.Paged(key.toLong(), params.loadSize)
 
         return repository.get(filters, state)
+            .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .firstElement()
             .toSingle()
