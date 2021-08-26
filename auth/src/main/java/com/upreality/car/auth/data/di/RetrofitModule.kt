@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RetrofitModule {
 
-    private const val baseUrl = "http://10.0.2.2:4000"
+    private const val baseUrl = "http://car-expenses-dev.herokuapp.com"
 
     @Singleton
     @Provides
