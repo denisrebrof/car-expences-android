@@ -3,9 +3,9 @@ package com.upreality.car.expenses.data.local
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
-import com.upreality.car.expenses.data.local.room.expenses.dao.ExpensesDao
-import com.upreality.car.expenses.data.local.room.expenses.model.entities.ExpenseEntity
+import com.upreality.car.expenses.data.sync.room.expenses.converters.RoomExpenseFilterConverter
+import com.upreality.car.expenses.data.sync.room.expenses.dao.ExpensesDao
+import com.upreality.car.expenses.data.sync.room.expenses.model.entities.ExpenseEntity
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import domain.RequestPagingState

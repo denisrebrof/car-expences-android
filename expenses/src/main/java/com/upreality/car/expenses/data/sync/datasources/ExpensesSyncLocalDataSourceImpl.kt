@@ -1,14 +1,14 @@
 package com.upreality.car.expenses.data.sync.datasources
 
 import android.util.Log
-import com.upreality.car.expenses.data.local.room.expenses.ExpensesLocalDAO
-import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseConverter
-import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
-import com.upreality.car.expenses.data.local.room.expenses.model.ExpenseRoom
-import com.upreality.car.expenses.data.local.room.expensesinfo.ExpensesInfoLocalDataSource
-import com.upreality.car.expenses.data.local.room.expensesinfo.model.entities.ExpenseInfo
-import com.upreality.car.expenses.data.local.room.expensesinfo.model.entities.ExpenseInfoSyncState.*
-import com.upreality.car.expenses.data.local.room.expensesinfo.model.queries.*
+import com.upreality.car.expenses.data.sync.room.expenses.ExpensesLocalDAO
+import com.upreality.car.expenses.data.sync.room.expenses.converters.RoomExpenseConverter
+import com.upreality.car.expenses.data.sync.room.expenses.converters.RoomExpenseFilterConverter
+import com.upreality.car.expenses.data.sync.room.expenses.model.ExpenseRoom
+import com.upreality.car.expenses.data.sync.room.expensesinfo.ExpensesInfoLocalDataSource
+import com.upreality.car.expenses.data.sync.room.expensesinfo.model.entities.ExpenseInfo
+import com.upreality.car.expenses.data.sync.room.expensesinfo.model.entities.ExpenseInfoSyncState.*
+import com.upreality.car.expenses.data.sync.room.expensesinfo.model.queries.*
 import com.upreality.car.expenses.data.sync.IExpensesSyncLocalDataSource
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense

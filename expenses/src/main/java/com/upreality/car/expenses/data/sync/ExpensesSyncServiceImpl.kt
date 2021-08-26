@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.data.sync
 
 import android.util.Log
-import com.upreality.car.expenses.data.remote.expenses.converters.RemoteExpenseConverter
+import com.upreality.car.expenses.data.sync.remote.expenses.converters.RemoteExpenseConverter
 import com.upreality.car.expenses.data.sync.model.ExpenseSyncRemoteModel
 import com.upreality.car.expenses.domain.IExpensesSyncService
 import io.reactivex.Completable

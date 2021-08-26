@@ -2,10 +2,10 @@ package com.upreality.car.expenses.data.local
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.upreality.car.expenses.data.local.room.expenses.ExpensesLocalDAO
-import com.upreality.car.expenses.data.local.room.expenses.converters.RoomExpenseFilterConverter
-import com.upreality.car.expenses.data.local.room.expenses.dao.ExpenseDetailsDao
-import com.upreality.car.expenses.data.local.room.expenses.model.ExpenseRoom
+import com.upreality.car.expenses.data.sync.room.expenses.ExpensesLocalDAO
+import com.upreality.car.expenses.data.sync.room.expenses.converters.RoomExpenseFilterConverter
+import com.upreality.car.expenses.data.sync.room.expenses.dao.ExpenseDetailsDao
+import com.upreality.car.expenses.data.sync.room.expenses.model.ExpenseRoom
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import domain.RequestPagingState
 import org.junit.Before

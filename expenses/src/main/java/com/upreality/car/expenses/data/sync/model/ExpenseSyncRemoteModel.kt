@@ -1,6 +1,6 @@
 package com.upreality.car.expenses.data.sync.model
 
-import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
+import com.upreality.car.expenses.data.sync.remote.expenses.model.ExpenseRemote
 
 sealed class ExpenseSyncRemoteModel(open val timestamp: Long = 0L) {
     data class Persisted(

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.*
 import androidx.paging.rxjava2.cachedIn
 import androidx.paging.rxjava2.flowable
-import com.upreality.car.expenses.data.paging.ExpensesPagingSource
+import com.upreality.car.expenses.presentation.paging.ExpensesPagingSource
 import com.upreality.car.expenses.domain.model.ExpenseFilter
 import com.upreality.car.expenses.domain.model.expence.Expense
 import com.upreality.car.expenses.domain.usecases.ExpensesInteractorImpl

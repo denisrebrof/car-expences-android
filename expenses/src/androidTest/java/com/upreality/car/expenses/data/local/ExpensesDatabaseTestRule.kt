@@ -3,7 +3,7 @@ package com.upreality.car.expenses.data.local
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import com.upreality.car.expenses.data.local.room.database.ExpensesDB
+import com.upreality.car.expenses.data.sync.room.database.ExpensesDB
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement

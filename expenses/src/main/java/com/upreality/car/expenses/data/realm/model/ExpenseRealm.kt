@@ -1,5 +1,8 @@
 package com.upreality.car.expenses.data.realm.model
 
+import com.upreality.car.expenses.data.shared.converters.ExpenseTypeConverter
+import com.upreality.car.expenses.data.shared.converters.FinesCategoriesConverter
+import com.upreality.car.expenses.data.shared.converters.MaintenanceTypeConverter
 import com.upreality.car.expenses.data.shared.model.ExpenseType
 import com.upreality.car.expenses.domain.model.FinesCategories
 import com.upreality.car.expenses.domain.model.MaintenanceType
@@ -11,6 +14,7 @@ import java.util.*
 open class ExpenseRealm : RealmObject() {
     @PrimaryKey
     var _id: Long = 0L
+
     @Required
     var date: Date = Date()
     var cost: Float = 0f
@@ -18,9 +22,9 @@ open class ExpenseRealm : RealmObject() {
     //Type
     var typeId = ExpenseType.Fuel.id
     var type: ExpenseType
-        get() = ExpenseRealmTypeConverter.fromId(typeId)
+        get() = ExpenseTypeConverter.fromId(typeId)
         set(value) {
-            typeId = ExpenseRealmTypeConverter.toId(value)
+            typeId = ExpenseTypeConverter.toId(value)
         }
 
     //Shared
@@ -38,10 +42,10 @@ open class ExpenseRealm : RealmObject() {
         }
 
     //Fines
-    private var fineTypeId = FinesCategories.Other.let(FineTypeConverter::toId)
+    private var fineTypeId = FinesCategories.Other.let(FinesCategoriesConverter::toId)
     var fineType: FinesCategories
-        get() = FineTypeConverter.fromId(fineTypeId)
+        get() = FinesCategoriesConverter.fromId(fineTypeId)
         set(value) {
-            fineTypeId = FineTypeConverter.toId(value)
+            fineTypeId = FinesCategoriesConverter.toId(value)
         }
 }

@@ -1,19 +1,12 @@
 package com.upreality.car.auth.data.di
 
-import android.content.Context
 import com.google.gson.Gson
 import com.upreality.car.auth.data.AccessTokenInterceptor
-import com.upreality.car.auth.data.local.ILastAuthStateDAO
-import com.upreality.car.auth.data.local.LastAuthStateDAOImpl
-import com.upreality.car.auth.data.local.TokenDAO
 import com.upreality.car.auth.data.TokenAuthenticator
-import com.upreality.car.auth.data.remote.api.AuthAPI
-import com.upreality.car.auth.data.remote.api.TestGetIdApi
 import com.upreality.car.auth.data.remote.api.TokenRefreshApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -50,29 +43,5 @@ object RetrofitModule {
         retrofit.create(TokenRefreshApi::class.java).let(authenticator::setTokenApi)
 
         return retrofit
-    }
-
-    @Singleton
-    @Provides
-    fun provideApi(retrofit: Retrofit): AuthAPI {
-        return retrofit.create(AuthAPI::class.java)
-    }
-
-    @Singleton
-    @Provides
-    fun provideTestApi(retrofit: Retrofit): TestGetIdApi {
-        return retrofit.create(TestGetIdApi::class.java)
-    }
-
-    @Singleton
-    @Provides
-    fun provideTokenDAO(@ApplicationContext context: Context): TokenDAO {
-        return TokenDAO(context)
-    }
-
-    @Singleton
-    @Provides
-    fun provideLastAuthStateDAO(@ApplicationContext context: Context): ILastAuthStateDAO {
-        return LastAuthStateDAOImpl(context)
     }
 }

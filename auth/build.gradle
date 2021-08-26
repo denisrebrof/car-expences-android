@@ -68,6 +68,7 @@ dependencies {
     //Google OAuth
     implementation rootProject.ext.google_auth
 
+    //Retrofit
     implementation rootProject.ext.retrofit
     implementation rootProject.ext.retrofit_rxjava
     implementation rootProject.ext.retrofit_converter_gson

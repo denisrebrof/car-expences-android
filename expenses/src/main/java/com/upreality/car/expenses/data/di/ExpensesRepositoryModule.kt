@@ -1,8 +1,6 @@
 package com.upreality.car.expenses.data.di
 
-import com.upreality.car.expenses.data.local.room.ExpensesLocalDataSourceImpl
-import com.upreality.car.expenses.data.remote.ExpensesRemoteDataSourceImpl
-import com.upreality.car.expenses.data.repository.*
+import com.upreality.car.expenses.data.backend.ExpensesBackendRepository
 import com.upreality.car.expenses.domain.IExpensesRepository
 import dagger.Binds
 import dagger.Module
@@ -17,15 +15,19 @@ abstract class ExpensesRepositoryModule {
 //    @Singleton
 //    abstract fun provideRepository(repoImpl: ExpensesRepositoryImpl): IExpensesRepository
 
-    @Binds
-    @Singleton
-    abstract fun provideRepository(repoImpl: ExpensesRealmRepositoryImpl): IExpensesRepository
+//    @Binds
+//    @Singleton
+//    abstract fun provideLocalDS(ds: ExpensesLocalDataSourceImpl): IExpensesSyncLocalDataSource
+//
+//    @Binds
+//    @Singleton
+//    abstract fun provideRemoteDS(ds: ExpensesRemoteDataSourceImpl): IExpensesSyncRemoteDataSource
+
+//    @Binds
+//    @Singleton
+//    abstract fun provideRepository(repoImpl: ExpensesRealmRepositoryImpl): IExpensesRepository
 
     @Binds
     @Singleton
-    abstract fun provideLocalDS(ds: ExpensesLocalDataSourceImpl): IExpensesLocalDataSource
-
-    @Binds
-    @Singleton
-    abstract fun provideRemoteDS(ds: ExpensesRemoteDataSourceImpl): IExpensesRemoteDataSource
+    abstract fun provideRepository(repoImpl: ExpensesBackendRepository): IExpensesRepository
 }

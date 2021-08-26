@@ -16,18 +16,22 @@ class AuthRemoteDataSourceImpl @Inject constructor(
 ) : IAuthRemoteDataSource {
 
     override fun googleSignIn(googleToken: String): Maybe<Account> {
-        return api.googleSignIn(googleToken).map {
-            tokenDAO.set(it.jwtToken!!, TokenDAO.TokenType.ACCESS)
-            tokenDAO.set(it.refreshToken!!, TokenDAO.TokenType.REFRESH)
-            Account(id = it.id!!)
+        return api.googleSignIn(googleToken).map { response ->
+            tokenDAO.set(response.jwtToken!!, TokenDAO.TokenType.ACCESS)
+            tokenDAO.set(response.refreshToken!!, TokenDAO.TokenType.REFRESH)
+            Account(id = response.id!!)
         }
     }
 
     override fun logOut(): Completable {
-        TODO("Not yet implemented")
+        return api.logOut()
     }
 
     override fun getAuthState(): Flowable<AuthState> {
-        TODO("Not yet implemented")
+        return api.getAccount().map { response ->
+            Account(id = response.id!!).let(AuthState::Authorized).let(AuthState::class.java::cast)
+        }.onErrorReturn {
+            AuthState.Unauthorized
+        }
     }
 }

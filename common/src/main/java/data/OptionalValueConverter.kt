@@ -2,7 +2,7 @@ package data
 
 import domain.OptionalValue
 
-class OptionalValueConverter<T> (private val defaultValue: T) {
+class OptionalValueConverter<T> (val defaultValue: T) {
 
     fun toValue(optional: OptionalValue<T>): T {
         return when (optional) {

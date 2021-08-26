@@ -1,12 +1,12 @@
 package com.upreality.car.expenses.data.sync.datasources
 
-import com.upreality.car.expenses.data.remote.ExpensesRemoteDAO
-import com.upreality.car.expenses.data.remote.expenses.model.ExpenseRemote
-import com.upreality.car.expenses.data.remote.expenses.model.filters.ExpenseRemoteFilter
-import com.upreality.car.expenses.data.remote.expensestate.dao.ExpenseStateRemoteDAO
-import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteState
-import com.upreality.car.expenses.data.remote.expensestate.model.ExpenseRemoteStateFilter
-import com.upreality.car.expenses.data.shared.model.DateConverter
+import com.upreality.car.expenses.data.sync.remote.ExpensesRemoteDAO
+import com.upreality.car.expenses.data.sync.remote.expenses.model.ExpenseRemote
+import com.upreality.car.expenses.data.sync.remote.expenses.model.filters.ExpenseRemoteFilter
+import com.upreality.car.expenses.data.sync.remote.expensestate.dao.ExpenseStateRemoteDAO
+import com.upreality.car.expenses.data.sync.remote.expensestate.model.ExpenseRemoteState
+import com.upreality.car.expenses.data.sync.remote.expensestate.model.ExpenseRemoteStateFilter
+import com.upreality.car.expenses.data.sync.room.expenses.converters.RoomDateConverter
 import com.upreality.car.expenses.data.sync.IExpensesSyncRemoteDataSource
 import com.upreality.car.expenses.data.sync.model.ExpenseSyncRemoteModel
 import io.reactivex.Flowable
@@ -19,7 +19,7 @@ class ExpensesSyncRemoteDataSourceImpl @Inject constructor(
     private val statesDAO: ExpenseStateRemoteDAO
 ) : IExpensesSyncRemoteDataSource {
 
-    private val dateConverter = DateConverter()
+    private val dateConverter = RoomDateConverter()
 
     override fun getModified(fromTime: Long): Flowable<List<ExpenseSyncRemoteModel>> {
         val filter = ExpenseRemoteStateFilter.FromTime(fromTime)

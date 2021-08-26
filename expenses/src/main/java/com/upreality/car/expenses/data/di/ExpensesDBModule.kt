@@ -2,7 +2,7 @@ package com.upreality.car.expenses.data.di
 
 import android.content.Context
 import androidx.room.Room
-import com.upreality.car.expenses.data.local.room.database.ExpensesDB
+import com.upreality.car.expenses.data.sync.room.database.ExpensesDB
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
