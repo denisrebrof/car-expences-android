@@ -1,6 +1,7 @@
 package com.upreality.car.auth.data
 
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.upreality.car.auth.BuildConfig
 import com.upreality.car.auth.domain.Account
 import com.upreality.car.auth.domain.AuthState
 import com.upreality.car.auth.domain.AuthType
@@ -19,8 +20,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getGoogleSignInOptions(): GoogleSignInOptions {
         return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("405077401282-a1hkiv1k470atvih8rha869nue8pl9ns.apps.googleusercontent.com")
-//            .requestServerAuthCode("405077401282-a1hkiv1k470atvih8rha869nue8pl9ns.apps.googleusercontent.com")
+            .requestIdToken(BuildConfig.GOOGLE_SIGN_IN_SECRET)
+//            .requestServerAuthCode(BuildConfig.GOOGLE_SIGN_IN_SECRET)
             .requestEmail()
             .build()
     }

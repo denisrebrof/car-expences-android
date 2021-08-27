@@ -19,6 +19,9 @@ android {
         versionCode 1
         versionName "1.0"
 
+        def googleSignInSecret = System.getenv("GOOGLE_SIGN_IN_SECRET")
+        buildConfigField("String", "GOOGLE_SIGN_IN_SECRET", googleSignInSecret)
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
