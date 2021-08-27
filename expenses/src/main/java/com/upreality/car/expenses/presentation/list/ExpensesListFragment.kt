@@ -67,7 +67,10 @@ class ExpensesListFragment : Fragment(R.layout.fragment_expenses_list) {
         return ExpenseListItemSwipeCallback(requireContext()) { position ->
             navigator.showDeleteConfirmationDialog(
                 requireContext(),
-                { deleteExpense(position) },
+                {
+                    deleteExpense(position)
+                    adapter.refresh()
+                },
                 { adapter.notifyItemChanged(position) }
             )
         }.let(::ItemTouchHelper)

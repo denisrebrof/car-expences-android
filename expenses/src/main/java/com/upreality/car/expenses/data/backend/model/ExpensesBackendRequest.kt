@@ -4,5 +4,8 @@ data class ExpensesBackendRequest(
     val paged: Boolean,
     val cursor: Long = 0L,
     val pageSize: Long = 0L,
-    val filterIds: List<Long> = listOf()
+    val id: Long? = null,
+    val types: List<Long>? = null,
+    val startTime: Long? = null,
+    val endTime: Long? = null,
 )

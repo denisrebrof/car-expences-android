@@ -1,7 +1,7 @@
 package com.upreality.car.expenses.data.backend.model
 
 data class ExpenseBackendModel(
-    var _id: Long? = null,
+    var id: Long? = null,
     var time: Long? = null,
     var cost: Float? = null,
     var typeId: Int? = null,

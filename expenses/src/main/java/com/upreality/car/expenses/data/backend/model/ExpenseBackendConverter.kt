@@ -48,7 +48,7 @@ object ExpenseBackendConverter {
                 mileage = model.mileage?.let(optionalConverter::toOptional)
                     ?: OptionalValue.Undefined,
             )
-        }.apply { id = model._id ?: 0L }
+        }.apply { id = model.id ?: 0L }
     }
 
     fun fromExpense(expense: Expense): ExpenseBackendModel {

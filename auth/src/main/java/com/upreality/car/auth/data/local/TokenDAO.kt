@@ -3,9 +3,7 @@ package com.upreality.car.auth.data.local
 import android.content.Context
 import javax.inject.Inject
 
-class TokenDAO @Inject constructor(
-    prefsContext: Context
-) {
+class TokenDAO @Inject constructor(prefsContext: Context) {
 
     companion object {
         const val PREFS_KEY = "AuthToken"

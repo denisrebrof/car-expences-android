@@ -93,6 +93,7 @@ class ExpenseEditingViewModel @Inject constructor(
 
         initFieldsCompletable
             .andThen(viewStateFlow)
+            .subscribeOn(Schedulers.io())
             .distinctUntilChanged()
             .subscribeWithLogError(viewStateProcessor::onNext)
             .let(composite::add)

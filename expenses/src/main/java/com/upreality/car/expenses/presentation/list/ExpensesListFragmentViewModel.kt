@@ -24,7 +24,7 @@ import javax.inject.Inject
 class ExpensesListFragmentViewModel @Inject constructor(
     //TODO fix injection
     private val interactor: ExpensesInteractorImpl,
-    private val syncInteractor: SyncInteractor,
+//    private val syncInteractor: SyncInteractor,
     private val sourceFactory: IExpensesPagingSourceFactory,
     //TODO fix injection
     private val refreshEventProvider: RefreshExpensesRealmEventProvider
@@ -40,17 +40,18 @@ class ExpensesListFragmentViewModel @Inject constructor(
         val pagingDataFlow = Pager(config) {
             sourceFactory.get().also { lastSource = it }
         }.flowable.cachedIn(viewModelScope).map(this::mapPagingData)
-        return syncInteractor.getSyncState().flatMap { syncState ->
-            val getSyncPagingData: (Int) -> Flowable<PagingData<ExpenseListModel>> = { percent ->
-                val models = (SyncIndicator(percent) as ExpenseListModel).let(::listOf)
-                models.let(PagingData.Companion::from).let { Flowable.just(it) }
-            }
-            when (syncState) {
-                SyncState.Completed -> pagingDataFlow
-                is SyncState.InProgress -> getSyncPagingData(syncState.percent)
-                SyncState.PendingSync -> getSyncPagingData(0)
-            }
-        }
+//        return syncInteractor.getSyncState().flatMap { syncState ->
+//            val getSyncPagingData: (Int) -> Flowable<PagingData<ExpenseListModel>> = { percent ->
+//                val models = (SyncIndicator(percent) as ExpenseListModel).let(::listOf)
+//                models.let(PagingData.Companion::from).let { Flowable.just(it) }
+//            }
+//            when (syncState) {
+//                SyncState.Completed -> pagingDataFlow
+//                is SyncState.InProgress -> getSyncPagingData(syncState.percent)
+//                SyncState.PendingSync -> getSyncPagingData(0)
+//            }
+//        }
+        return pagingDataFlow
     }
 
     fun getRefreshFlow(): Flowable<Unit> {
