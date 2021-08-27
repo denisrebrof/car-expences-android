@@ -68,6 +68,11 @@ dependencies {
     implementation rootProject.ext.navigation_fragment_ktx
     implementation rootProject.ext.navigation_ui_ktx
 
+    //Retrofit
+    implementation rootProject.ext.retrofit
+    implementation rootProject.ext.retrofit_rxjava
+    implementation rootProject.ext.retrofit_converter_gson
+
     implementation rootProject.ext.mpandroidchart
 
     api project(":uikit")

@@ -1,5 +1,6 @@
 package com.upreality.stats.data.di
 
+import com.upreality.stats.data.StatsBackendRepositoryImpl
 import com.upreality.stats.data.StatsRepositoryImpl
 import com.upreality.stats.domain.IStatsRepository
 import dagger.Binds
@@ -13,5 +14,6 @@ import javax.inject.Singleton
 abstract class StatsRepositoryModule {
     @Binds
     @Singleton
-    abstract fun provideRepository(repoImpl: StatsRepositoryImpl): IStatsRepository
+    abstract fun provideRepository(repoImpl: StatsBackendRepositoryImpl): IStatsRepository
+//    abstract fun provideRepository(repoImpl: StatsRepositoryImpl): IStatsRepository
 }
