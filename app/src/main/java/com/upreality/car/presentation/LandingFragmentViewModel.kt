@@ -36,6 +36,7 @@ class LandingFragmentViewModel @Inject constructor(
         authUseCases
             .getAuthState()
             .distinctUntilChanged()
+            .subscribeOn(Schedulers.io())
             .subscribeWithLogError { state ->
                 when (state) {
                     is AuthState.Authorized -> onAccountUpdated(state.account)
