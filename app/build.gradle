@@ -5,8 +5,10 @@ apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'realm-android'
 apply plugin: 'com.google.gms.google-services'
+apply from: "${rootProject.projectDir}/flavors.gradle"
 
 android {
+    with allFlavorConfig
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 

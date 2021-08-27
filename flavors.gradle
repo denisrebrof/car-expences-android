@@ -1,0 +1,15 @@
+ext.allFlavorConfig = {
+    def localhostBackendUrl = "http://10.0.2.2:4000"
+    def backendUrl = System.getenv("CAR_EXPENSES_BACKEND_URL")
+    flavorDimensions "backendType"
+    productFlavors {
+        local {
+            dimension "backendType"
+            buildConfigField("String", "BACKEND_URL", localhostBackendUrl)
+        }
+        production {
+            dimension "backendType"
+            buildConfigField("String", "BACKEND_URL", backendUrl)
+        }
+    }
+}

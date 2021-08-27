@@ -6,8 +6,10 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
     id 'realm-android'
 }
+apply from: "${rootProject.projectDir}/flavors.gradle"
 
 android {
+    with allFlavorConfig
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
