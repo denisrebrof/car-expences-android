@@ -15,6 +15,7 @@ import com.upreality.stats.presentation.charts.ExpenseTypeChartSetup
 import dagger.hilt.android.AndroidEntryPoint
 import domain.subscribeWithLogError
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import presentation.RxLifecycleExtentions.subscribeDefault
@@ -39,8 +40,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
 
         viewModel
             .getViewState()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWithLogError(this::render)
+            .subscribeDefault(this::render)
             .disposeBy(lifecycle.disposers.onStop)
 
         filteringViewModel
