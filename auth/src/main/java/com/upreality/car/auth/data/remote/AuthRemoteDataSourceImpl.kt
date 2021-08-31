@@ -24,7 +24,10 @@ class AuthRemoteDataSourceImpl @Inject constructor(
     }
 
     override fun logOut(): Completable {
-        return api.logOut()
+        return tokenDAO
+            .get(TokenDAO.TokenType.REFRESH)
+            ?.let(api::revokeToken)
+            ?: Completable.complete()
     }
 
     override fun getAuthState(): Flowable<AuthState> {

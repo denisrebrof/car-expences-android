@@ -35,5 +35,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getLastAuthType(): Flowable<AuthType> = localDataSource.getLastAuthType()
 
-    override fun logOut(): Completable = remoteDataSource.logOut()
+    override fun logOut(): Completable {
+        val dropAuthType = localDataSource.setLastAuthType(AuthType.UNDEFINED)
+        return remoteDataSource.logOut().andThen(dropAuthType).doOnComplete {
+            localDataSource.setAuthState(AuthState.Unauthorized)
+        }
+    }
 }

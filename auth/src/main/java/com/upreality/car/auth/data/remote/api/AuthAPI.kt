@@ -14,8 +14,9 @@ interface AuthAPI {
     @POST("/accounts/google-sign-in")
     fun googleSignIn(@Field("token") token: String): Maybe<AccountResponse>
 
-    @POST("/accounts/log-out")
-    fun logOut(): Completable
+    @FormUrlEncoded
+    @POST("/accounts/revoke-token")
+    fun revokeToken(@Field("token") token: String): Completable
 
     @GET("/accounts/my-account")
     fun getAccount(): Flowable<AccountResponse>

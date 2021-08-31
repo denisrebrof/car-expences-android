@@ -24,7 +24,7 @@ class ExpensesListFragmentViewModel @Inject constructor(
     //TODO fix injection
     private val interactor: ExpensesInteractorImpl,
     private val sourceFactory: IExpensesPagingSourceFactory,
-    //TODO fix injection
+    //TODO fix injectione
     private val refreshEventProvider: RefreshExpensesRealmEventProvider
 ) : ViewModel() {
 
