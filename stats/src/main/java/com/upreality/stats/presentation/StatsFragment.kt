@@ -2,6 +2,7 @@ package com.upreality.stats.presentation
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -13,9 +14,6 @@ import com.upreality.car.expenses.presentation.fitering.ExpenseFilteringViewMode
 import com.upreality.stats.R
 import com.upreality.stats.presentation.charts.ExpenseTypeChartSetup
 import dagger.hilt.android.AndroidEntryPoint
-import domain.subscribeWithLogError
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import io.sellmair.disposer.disposeBy
 import io.sellmair.disposer.disposers
 import presentation.RxLifecycleExtentions.subscribeDefault
@@ -33,6 +31,7 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
         binding.filterButton.setOnClickListener {
             ExpenseFilteringBottomSheet().show(parentFragmentManager, "")
         }
+        setContentVisibility(false)
     }
 
     override fun onStart() {
@@ -53,6 +52,8 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
     }
 
     private fun render(viewState: StatsViewState) {
+        setContentVisibility(true)
+
         val pieChart = binding.statsTypesRadialDiagramCard.typesPieChart
         val pieData = viewState.typesRelationMap.map { (type, value) -> PieEntry(value, type) }
         ExpenseTypeChartSetup.setup(pieChart, ArrayList(pieData))
@@ -66,5 +67,12 @@ class StatsFragment : Fragment(R.layout.fragment_stats_main) {
             viewState.ratePerMile.let(format).let(rpm::setValue)
             viewState.rate.let(format).let(rate::setValue)
         }
+    }
+
+    private fun setContentVisibility(visible: Boolean){
+//        binding.statsChartCard.root.isVisible = visible
+        binding.statsTypesChartCard.root.isVisible = visible
+        binding.statsTypesRadialDiagramCard.root.isVisible = visible
+        binding.container.scheduleLayoutAnimation()
     }
 }

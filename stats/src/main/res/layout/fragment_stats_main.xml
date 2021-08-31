@@ -51,9 +51,11 @@
         tools:context=".presentation.StatsFragment">
 
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipChildren="false"
+            android:animateLayoutChanges="true"
             android:clipToPadding="false"
             android:orientation="vertical">
 

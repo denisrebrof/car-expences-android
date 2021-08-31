@@ -1,6 +1,7 @@
 package com.upreality.stats.presentation.charts
 
 import android.graphics.Color
+import android.util.TypedValue
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
@@ -9,17 +10,22 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
+import com.upreality.stats.R
 
 object ExpenseTypeChartSetup {
 
     fun setup(chart: PieChart, data: ArrayList<PieEntry>, then: (PieChart) -> Unit = { }) {
+
+        val backgroundColor = TypedValue()
+        chart.context.theme.resolveAttribute(R.attr.colorBackgroundFloating, backgroundColor, true)
+        val backgroundColorValue = backgroundColor.data
         chart.apply {
-            setBackgroundColor(Color.WHITE)
+            setBackgroundColor(backgroundColorValue)
             setUsePercentValues(true)
             description.isEnabled = false
             isDrawHoleEnabled = true
-            setHoleColor(Color.WHITE)
-            setTransparentCircleColor(Color.WHITE)
+            setHoleColor(backgroundColorValue)
+            setTransparentCircleColor(backgroundColorValue)
             setTransparentCircleAlpha(110)
             holeRadius = 24f
             transparentCircleRadius = 28f
