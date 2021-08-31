@@ -45,8 +45,8 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v2
       with:
-        name: app-release.apk
-        path: app/build/outputs/apk/release/app-release.apk
+        name: app-production-debug.apk
+        path: app/build/outputs/apk/production/debug/app-production-debug.apk
 
     - name: send build message 
       uses: appleboy/telegram-action@master 
