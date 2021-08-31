@@ -40,6 +40,7 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           CAR_EXPENSES_BACKEND_URL: ${{ secrets.CAR_EXPENSES_BACKEND_URL }}
+          GOOGLE_SIGN_IN_SECRET: ${{ secrets.GOOGLE_SIGN_IN_SECRET }}
 
     - name: Upload APK
       uses: actions/upload-artifact@v2
