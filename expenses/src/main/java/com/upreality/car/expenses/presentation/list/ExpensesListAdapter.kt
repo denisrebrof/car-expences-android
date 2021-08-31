@@ -133,6 +133,7 @@ class ExpensesListAdapter(
                     oldItem.expense.date == newItem.expense.date
                             && oldItem.expense::class == newItem.expense::class
                 }
+                oldItem is SyncIndicator && newItem is SyncIndicator -> true
                 else -> false
             }
         }

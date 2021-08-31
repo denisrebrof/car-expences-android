@@ -7,6 +7,7 @@ import com.upreality.car.expenses.R
 import com.upreality.car.expenses.domain.model.expence.Expense
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
+import domain.OptionalValue
 import javax.inject.Inject
 
 @ActivityScoped
@@ -34,8 +35,17 @@ class ExpensesListAdapterExpenseTypeDataProviderImpl @Inject constructor(
         return when (expense) {
             is Expense.Fine -> expense.type.toString()
             //TODO: rewrite with custom val and text
-            is Expense.Fuel -> expense.fuelAmount.toString() + " Liters"
+            is Expense.Fuel -> expense.fuelAmount
+                .getValueText("Undefined") { value -> "$value Liters" }
             is Expense.Maintenance -> expense.type.toString()
         }
+    }
+
+    private fun <T> OptionalValue<T>.getValueText(
+        undefinedText: String,
+        template: (String) -> String
+    ) = when (this) {
+        is OptionalValue.Defined -> template(value.toString())
+        OptionalValue.Undefined -> undefinedText
     }
 }
